@@ -223,7 +223,7 @@ Format: ${format || "evergreen"}`;
     return NextResponse.json({
       script: result.text,
       provider: process.env.AI_PROVIDER || "anthropic",
-      model: process.env.AI_MODEL || "claude-sonnet-4-20250514",
+      model: process.env.AI_MODEL || "claude-sonnet-4-6",
     });
   } catch (error) {
     console.error("Script generation error:", error);

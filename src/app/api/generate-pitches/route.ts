@@ -91,7 +91,7 @@ Return ONLY the JSON object, no other text.`;
 
     // Store pitches in database
     const provider = process.env.AI_PROVIDER || "anthropic";
-    const model = process.env.AI_MODEL || "claude-sonnet-4-20250514";
+    const model = process.env.AI_MODEL || "claude-sonnet-4-6";
 
     const created = await Promise.all(
       pitches.map(
