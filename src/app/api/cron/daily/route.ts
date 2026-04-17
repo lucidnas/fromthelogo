@@ -95,7 +95,13 @@ ${coveredTopics}
       )
     );
 
-    return NextResponse.json({ success: true, pitchesCreated: created.length, newsFound: !freshNews.includes("No fresh news"), timestamp: new Date().toISOString() });
+    // Channel stats refresh note:
+    // yt-dlp with --cookies-from-browser chrome won't work on Railway (no browser).
+    // Channel stats must be refreshed manually from the dashboard or via POST to /api/channel/refresh
+    // with video data in the request body. Consider using YouTube Data API for automated refresh.
+    console.log("[cron/daily] Channel stats refresh requires manual trigger or YouTube Data API integration");
+
+    return NextResponse.json({ success: true, pitchesCreated: created.length, newsFound: !freshNews.includes("No fresh news"), channelStatsNote: "Manual refresh required - use dashboard button or POST to /api/channel/refresh", timestamp: new Date().toISOString() });
   } catch (error) {
     console.error("Cron daily error:", error);
     return NextResponse.json({ error: error instanceof Error ? error.message : "Cron job failed" }, { status: 500 });
