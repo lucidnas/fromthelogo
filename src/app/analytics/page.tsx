@@ -1,9 +1,38 @@
 "use client";
 
-import { channelVideos, type ChannelVideo } from "@/lib/data";
-import { BarChart3, Clock, TrendingUp, Lightbulb, Trophy, Eye } from "lucide-react";
+import { useEffect, useState } from "react";
+import { BarChart3, Clock, TrendingUp, Lightbulb, Trophy, Eye, Loader2 } from "lucide-react";
 
-type FormatKey = ChannelVideo["format"];
+type FormatKey = "the-day" | "increasingly" | "backfired" | "highlight" | "other";
+
+interface VideoRecord {
+  id: number;
+  youtubeId: string;
+  title: string;
+  views: number;
+  duration: number;
+  format: string;
+  tags: string[];
+  publishedAt: string;
+  lastChecked: string;
+}
+
+interface FormatStat {
+  format: string;
+  count: number;
+  totalViews: number;
+  avgViews: number;
+  bestVideo: VideoRecord | null;
+}
+
+interface StatsData {
+  videos: VideoRecord[];
+  totalViews: number;
+  totalVideos: number;
+  formatStats: FormatStat[];
+  durationAnalysis: { sweetSpot: number; avgDuration: number };
+  performanceTiers: { tier1M: number; tier500K: number; tier200K: number; tier100K: number; under100K: number };
+}
 
 const formatLabels: Record<FormatKey, string> = {
   "the-day": "The Day",
@@ -20,17 +49,6 @@ const formatColors: Record<FormatKey, string> = {
   highlight: "#3B82F6",
   other: "#6B7280",
 };
-
-function getFormatStats() {
-  const formats: FormatKey[] = ["the-day", "increasingly", "backfired", "highlight", "other"];
-  return formats.map((format) => {
-    const vids = channelVideos.filter((v) => v.format === format);
-    const totalViews = vids.reduce((s, v) => s + v.views, 0);
-    const avgViews = vids.length > 0 ? Math.round(totalViews / vids.length) : 0;
-    const best = vids.sort((a, b) => b.views - a.views)[0] || null;
-    return { format, count: vids.length, totalViews, avgViews, best };
-  });
-}
 
 function getTierColor(views: number) {
   if (views >= 1_000_000) return "text-yellow-400 bg-yellow-500/10 border-yellow-500/30";
@@ -60,77 +78,82 @@ function formatDuration(s: number) {
   return `${m}:${sec.toString().padStart(2, "0")}`;
 }
 
-function getPatternStats() {
-  const patterns = [
-    {
-      name: '"The Day [PERSON] [DRAMATIC VERB] [TARGET]"',
-      filter: (v: ChannelVideo) => v.format === "the-day",
-    },
-    {
-      name: '"[THING].. but they get increasingly [ADJECTIVE]"',
-      filter: (v: ChannelVideo) => v.format === "increasingly",
-    },
-    {
-      name: '"The [ENTITY] [ACTION].. But it Backfired"',
-      filter: (v: ChannelVideo) => v.format === "backfired",
-    },
-    {
-      name: '"This Caitlin Clark [THING] is [SUPERLATIVE]"',
-      filter: (v: ChannelVideo) => v.format === "highlight",
-    },
-    {
-      name: "Other / Unique Formats",
-      filter: (v: ChannelVideo) => v.format === "other",
-    },
-  ];
+export default function AnalyticsPage() {
+  const [data, setData] = useState<StatsData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  return patterns
+  useEffect(() => {
+    fetch("/api/channel/stats")
+      .then((r) => r.json())
+      .then((d) => setData(d))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-7xl mx-auto px-6 py-10 flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!data || !data.videos) {
+    return (
+      <div className="w-full max-w-7xl mx-auto px-6 py-10 text-center text-gray-400">
+        No channel data found. Run the seed script or refresh stats first.
+      </div>
+    );
+  }
+
+  const { videos, totalViews, totalVideos, formatStats, durationAnalysis } = data;
+  const sortedFormatStats = [...formatStats].sort((a, b) => b.avgViews - a.avgViews);
+  const maxAvg = Math.max(...sortedFormatStats.map((f) => f.avgViews));
+  const topVideo = videos[0];
+
+  // Pattern stats
+  const patterns = [
+    { name: '"The Day [PERSON] [DRAMATIC VERB] [TARGET]"', format: "the-day" },
+    { name: '"[THING].. but they get increasingly [ADJECTIVE]"', format: "increasingly" },
+    { name: '"The [ENTITY] [ACTION].. But it Backfired"', format: "backfired" },
+    { name: '"This Caitlin Clark [THING] is [SUPERLATIVE]"', format: "highlight" },
+    { name: "Other / Unique Formats", format: "other" },
+  ];
+  const patternStats = patterns
     .map((p) => {
-      const vids = channelVideos.filter(p.filter);
-      const avg = vids.length > 0 ? Math.round(vids.reduce((s, v) => s + v.views, 0) / vids.length) : 0;
-      return { name: p.name, avgViews: avg, count: vids.length };
+      const fs = formatStats.find((f) => f.format === p.format);
+      return { name: p.name, avgViews: fs?.avgViews || 0, count: fs?.count || 0 };
     })
     .sort((a, b) => b.avgViews - a.avgViews);
-}
 
-function generateInsights() {
-  const formatStats = getFormatStats();
-  const bestFormat = formatStats.sort((a, b) => b.avgViews - a.avgViews)[0];
-  const totalViews = channelVideos.reduce((s, v) => s + v.views, 0);
+  // Duration sorted
+  const sortedByDuration = [...videos].sort((a, b) => a.duration - b.duration);
 
-  // Duration analysis
-  const sweetSpot = channelVideos.filter((v) => v.duration >= 450 && v.duration <= 520);
-  const outside = channelVideos.filter((v) => v.duration < 450 || v.duration > 520);
-  const sweetSpotAvg = sweetSpot.length > 0 ? Math.round(sweetSpot.reduce((s, v) => s + v.views, 0) / sweetSpot.length) : 0;
-  const outsideAvg = outside.length > 0 ? Math.round(outside.reduce((s, v) => s + v.views, 0) / outside.length) : 0;
+  // Insights
+  const bestFormat = sortedFormatStats[0];
+  const sweetSpotVids = videos.filter((v) => v.duration >= 450 && v.duration <= 520);
+  const outsideVids = videos.filter((v) => v.duration < 450 || v.duration > 520);
+  const sweetSpotAvg = sweetSpotVids.length > 0 ? Math.round(sweetSpotVids.reduce((s, v) => s + v.views, 0) / sweetSpotVids.length) : 0;
+  const outsideAvg = outsideVids.length > 0 ? Math.round(outsideVids.reduce((s, v) => s + v.views, 0) / outsideVids.length) : 0;
   const durationDiff = outsideAvg > 0 ? Math.round(((sweetSpotAvg - outsideAvg) / outsideAvg) * 100) : 0;
 
-  // Backfired consistency
-  const backfiredVids = channelVideos.filter((v) => v.format === "backfired");
+  const backfiredStat = formatStats.find((f) => f.format === "backfired");
+  const backfiredVids = videos.filter((v) => v.format === "backfired");
   const allAbove100K = backfiredVids.every((v) => v.views >= 100_000);
   const backfiredMin = backfiredVids.length > 0 ? Math.min(...backfiredVids.map((v) => v.views)) : 0;
 
+  const theDayStat = formatStats.find((f) => f.format === "the-day");
+  const increasinglyStat = formatStats.find((f) => f.format === "increasingly");
+
   const insights = [
-    `Your best format is "${formatLabels[bestFormat.format]}" narratives averaging ${formatNumber(bestFormat.avgViews)} views across ${bestFormat.count} videos.`,
-    `Videos in the 7:30-8:40 sweet spot average ${formatNumber(sweetSpotAvg)} views, outperforming other durations by ${durationDiff}%.`,
-    allAbove100K
+    `Your best format is "${formatLabels[bestFormat.format as FormatKey]}" narratives averaging ${formatNumber(bestFormat.avgViews)} views across ${bestFormat.count} videos.`,
+    `Videos in the 7:30-8:40 sweet spot average ${formatNumber(sweetSpotAvg)} views${durationDiff !== 0 ? `, outperforming other durations by ${durationDiff}%` : ""}.`,
+    allAbove100K && backfiredVids.length > 0
       ? `"Backfired" titles generate consistent ${formatNumber(backfiredMin)}+ views with a reliable floor.`
       : `"Backfired" titles are a consistent performer across your catalog.`,
-    `Total channel views from top 20 videos: ${formatNumber(totalViews)}. "The Day" format accounts for ${Math.round((formatStats.find((f) => f.format === "the-day")!.totalViews / totalViews) * 100)}% of all views.`,
-    `"Increasingly" compilations are your second-best format, averaging ${formatNumber(formatStats.find((f) => f.format === "increasingly")!.avgViews)} views with strong engagement.`,
-  ];
-
-  return insights;
-}
-
-export default function AnalyticsPage() {
-  const formatStats = getFormatStats().sort((a, b) => b.avgViews - a.avgViews);
-  const maxAvg = Math.max(...formatStats.map((f) => f.avgViews));
-  const patternStats = getPatternStats();
-  const insights = generateInsights();
-
-  // Sort videos by duration for duration analysis
-  const sortedByDuration = [...channelVideos].sort((a, b) => a.duration - b.duration);
+    `Total channel views: ${formatNumber(totalViews)} across ${totalVideos} videos.${theDayStat ? ` "The Day" format accounts for ${Math.round((theDayStat.totalViews / totalViews) * 100)}% of all views.` : ""}`,
+    increasinglyStat ? `"Increasingly" compilations average ${formatNumber(increasinglyStat.avgViews)} views with strong engagement.` : "",
+  ].filter(Boolean);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-6 py-10">
@@ -140,7 +163,7 @@ export default function AnalyticsPage() {
           <BarChart3 className="w-7 h-7 text-purple-400" />
           <h1 className="text-3xl font-bold text-white">Channel Analytics</h1>
         </div>
-        <p className="text-gray-400 text-sm">Performance data from the top 20 From The Logo videos</p>
+        <p className="text-gray-400 text-sm">Live performance data from all {totalVideos} From The Logo videos</p>
       </div>
 
       {/* Quick Stats */}
@@ -150,9 +173,7 @@ export default function AnalyticsPage() {
             <Eye className="w-4 h-4 text-purple-400" />
             <span className="text-xs text-gray-400">Total Views</span>
           </div>
-          <span className="text-2xl font-bold text-white">
-            {formatNumber(channelVideos.reduce((s, v) => s + v.views, 0))}
-          </span>
+          <span className="text-2xl font-bold text-white">{formatNumber(totalViews)}</span>
         </div>
         <div className="p-5 rounded-xl bg-[#121217] border border-[#22222b]">
           <div className="flex items-center gap-2 mb-2">
@@ -160,7 +181,7 @@ export default function AnalyticsPage() {
             <span className="text-xs text-gray-400">Avg Views</span>
           </div>
           <span className="text-2xl font-bold text-white">
-            {formatNumber(Math.round(channelVideos.reduce((s, v) => s + v.views, 0) / channelVideos.length))}
+            {formatNumber(Math.round(totalViews / totalVideos))}
           </span>
         </div>
         <div className="p-5 rounded-xl bg-[#121217] border border-[#22222b]">
@@ -169,7 +190,7 @@ export default function AnalyticsPage() {
             <span className="text-xs text-gray-400">Top Video</span>
           </div>
           <span className="text-2xl font-bold text-white">
-            {formatNumber(Math.max(...channelVideos.map((v) => v.views)))}
+            {topVideo ? formatNumber(topVideo.views) : "N/A"}
           </span>
         </div>
         <div className="p-5 rounded-xl bg-[#121217] border border-[#22222b]">
@@ -177,7 +198,7 @@ export default function AnalyticsPage() {
             <BarChart3 className="w-4 h-4 text-blue-400" />
             <span className="text-xs text-gray-400">Videos</span>
           </div>
-          <span className="text-2xl font-bold text-white">{channelVideos.length}</span>
+          <span className="text-2xl font-bold text-white">{totalVideos}</span>
         </div>
       </div>
 
@@ -188,68 +209,70 @@ export default function AnalyticsPage() {
           Format Performance
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {formatStats.map((fs) => (
-            <div
-              key={fs.format}
-              className="p-5 rounded-xl bg-[#121217] border border-[#22222b] overflow-hidden"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span
-                  className="px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider"
-                  style={{ backgroundColor: formatColors[fs.format] + "20", color: formatColors[fs.format] }}
-                >
-                  {formatLabels[fs.format]}
-                </span>
-                <span className="text-xs text-gray-500">{fs.count} videos</span>
-              </div>
-              <div className="mb-3">
-                <span className="text-2xl font-bold text-white">{formatNumber(fs.avgViews)}</span>
-                <span className="text-xs text-gray-400 ml-2">avg views</span>
-              </div>
-              {/* Bar */}
-              <div className="w-full h-3 bg-[#1a1a24] rounded-full overflow-hidden mb-3">
-                <div
-                  className="h-full rounded-full transition-all duration-700"
-                  style={{
-                    width: `${(fs.avgViews / maxAvg) * 100}%`,
-                    backgroundColor: formatColors[fs.format],
-                  }}
-                />
-              </div>
-              {fs.best && (
-                <div className="text-xs text-gray-500 truncate">
-                  Best: <span className="text-gray-300">{fs.best.title}</span>{" "}
-                  <span className="text-gray-400">({formatNumber(fs.best.views)})</span>
+          {sortedFormatStats.map((fs) => {
+            const fk = fs.format as FormatKey;
+            return (
+              <div key={fs.format} className="p-5 rounded-xl bg-[#121217] border border-[#22222b] overflow-hidden">
+                <div className="flex items-center justify-between mb-3">
+                  <span
+                    className="px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider"
+                    style={{ backgroundColor: (formatColors[fk] || "#6B7280") + "20", color: formatColors[fk] || "#6B7280" }}
+                  >
+                    {formatLabels[fk] || fs.format}
+                  </span>
+                  <span className="text-xs text-gray-500">{fs.count} videos</span>
                 </div>
-              )}
-            </div>
-          ))}
+                <div className="mb-3">
+                  <span className="text-2xl font-bold text-white">{formatNumber(fs.avgViews)}</span>
+                  <span className="text-xs text-gray-400 ml-2">avg views</span>
+                </div>
+                <div className="w-full h-3 bg-[#1a1a24] rounded-full overflow-hidden mb-3">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${maxAvg > 0 ? (fs.avgViews / maxAvg) * 100 : 0}%`,
+                      backgroundColor: formatColors[fk] || "#6B7280",
+                    }}
+                  />
+                </div>
+                {fs.bestVideo && (
+                  <div className="text-xs text-gray-500 truncate">
+                    Best: <span className="text-gray-300">{fs.bestVideo.title}</span>{" "}
+                    <span className="text-gray-400">({formatNumber(fs.bestVideo.views)})</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Bar chart comparison */}
         <div className="p-6 rounded-xl bg-[#121217] border border-[#22222b] overflow-hidden">
           <h3 className="text-sm font-semibold text-gray-300 mb-6">Average Views by Format</h3>
           <div className="space-y-4">
-            {formatStats.map((fs) => (
-              <div key={fs.format} className="flex items-center gap-4">
-                <span className="text-xs text-gray-400 w-24 text-right shrink-0">
-                  {formatLabels[fs.format]}
-                </span>
-                <div className="flex-1 h-8 bg-[#1a1a24] rounded-lg overflow-hidden relative">
-                  <div
-                    className="h-full rounded-lg flex items-center transition-all duration-700"
-                    style={{
-                      width: `${(fs.avgViews / maxAvg) * 100}%`,
-                      backgroundColor: formatColors[fs.format],
-                    }}
-                  >
-                    <span className="text-xs font-semibold text-white ml-3 whitespace-nowrap">
-                      {formatNumber(fs.avgViews)}
-                    </span>
+            {sortedFormatStats.map((fs) => {
+              const fk = fs.format as FormatKey;
+              return (
+                <div key={fs.format} className="flex items-center gap-4">
+                  <span className="text-xs text-gray-400 w-24 text-right shrink-0">
+                    {formatLabels[fk] || fs.format}
+                  </span>
+                  <div className="flex-1 h-8 bg-[#1a1a24] rounded-lg overflow-hidden relative">
+                    <div
+                      className="h-full rounded-lg flex items-center transition-all duration-700"
+                      style={{
+                        width: `${maxAvg > 0 ? (fs.avgViews / maxAvg) * 100 : 0}%`,
+                        backgroundColor: formatColors[fk] || "#6B7280",
+                      }}
+                    >
+                      <span className="text-xs font-semibold text-white ml-3 whitespace-nowrap">
+                        {formatNumber(fs.avgViews)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -265,13 +288,16 @@ export default function AnalyticsPage() {
             <span className="px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-300 text-xs font-semibold border border-purple-500/20">
               Sweet Spot: 7:30 - 8:40
             </span>
+            <span className="px-3 py-1.5 rounded-lg bg-[#1a1a24] text-gray-400 text-xs font-semibold">
+              Avg Duration: {formatDuration(durationAnalysis.avgDuration)}
+            </span>
           </div>
           <div className="space-y-2">
             {sortedByDuration.map((v) => {
               const inSweet = v.duration >= 450 && v.duration <= 520;
               return (
                 <div
-                  key={v.id}
+                  key={v.youtubeId}
                   className={`flex items-center gap-4 p-3 rounded-lg ${
                     inSweet ? "bg-purple-500/5 border border-purple-500/10" : "bg-[#0d0d12]"
                   }`}
@@ -279,9 +305,7 @@ export default function AnalyticsPage() {
                   <span className="text-xs text-gray-500 w-12 text-right shrink-0 font-mono">
                     {formatDuration(v.duration)}
                   </span>
-                  <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${getTierColor(v.views)}`}
-                  >
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${getTierColor(v.views)}`}>
                     {getTierLabel(v.views)}
                   </span>
                   <span className="text-sm text-gray-300 truncate flex-1">{v.title}</span>
@@ -305,9 +329,7 @@ export default function AnalyticsPage() {
               key={p.name}
               className="flex items-center gap-4 p-5 rounded-xl bg-[#121217] border border-[#22222b] overflow-hidden"
             >
-              <span className="text-2xl font-bold text-gray-600 w-8 text-center shrink-0">
-                {i + 1}
-              </span>
+              <span className="text-2xl font-bold text-gray-600 w-8 text-center shrink-0">{i + 1}</span>
               <div className="flex-1 min-w-0">
                 <span className="text-sm text-gray-200 font-medium">{p.name}</span>
                 <div className="text-xs text-gray-500 mt-1">{p.count} videos</div>
