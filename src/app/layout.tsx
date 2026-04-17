@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="flex items-center gap-4">
               <Link href="/" className="text-sm text-gray-400 hover:text-white transition-colors">Dashboard</Link>
               <Link href="/analytics" className="text-sm text-gray-400 hover:text-white transition-colors">Analytics</Link>
+              <Link href="/calendar" className="text-sm text-gray-400 hover:text-white transition-colors">Calendar</Link>
               <Link href="/pitches" className="text-sm text-gray-400 hover:text-white transition-colors">Daily Pitches</Link>
               <LogoutButton />
             </div>

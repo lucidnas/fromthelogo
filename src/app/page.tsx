@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { videos, type Video } from "@/lib/data";
-import { Clock, FileText, Zap } from "lucide-react";
+import { Clock, FileText, Zap, Calendar, Target } from "lucide-react";
 
 const categories = ["all", "game-breakdown", "analysis", "rivalry", "controversy", "highlights", "career-story"];
 const statuses = ["all", "idea", "scripted", "filmed", "published"];
@@ -23,9 +23,63 @@ const categoryColors: Record<string, string> = {
   "career-story": "bg-violet-500/10 text-violet-400",
 };
 
+interface CalendarSlotData {
+  id: number;
+  dayOfWeek: string;
+  slotType: string;
+  date: string;
+  status: string;
+  pitch: { title: string; hookLine: string } | null;
+}
+
+const calendarStatusColors: Record<string, string> = {
+  open: "bg-gray-500/10 text-gray-400 border-gray-500/20",
+  planned: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  scripted: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  filmed: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  published: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+};
+
 export default function Home() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [weekSlots, setWeekSlots] = useState<CalendarSlotData[]>([]);
+  const [monthlyPublished, setMonthlyPublished] = useState(0);
+
+  useEffect(() => {
+    async function fetchCalendar() {
+      try {
+        const now = new Date();
+        // Get this week's slots
+        const day = now.getDay();
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - day + (day === 0 ? -6 : 1));
+        monday.setHours(0, 0, 0, 0);
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+
+        const res = await fetch(
+          `/api/calendar?startDate=${monday.toISOString()}&endDate=${sunday.toISOString()}`
+        );
+        const data = await res.json();
+        setWeekSlots(data.slots || []);
+
+        // Monthly count
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const monthRes = await fetch(
+          `/api/calendar?startDate=${monthStart.toISOString()}&endDate=${monthEnd.toISOString()}`
+        );
+        const monthData = await monthRes.json();
+        setMonthlyPublished(
+          (monthData.slots || []).filter((s: CalendarSlotData) => s.status === "published").length
+        );
+      } catch {
+        // Calendar data not critical for dashboard
+      }
+    }
+    fetchCalendar();
+  }, []);
 
   const filtered = videos.filter((v) => {
     if (categoryFilter !== "all" && v.category !== categoryFilter) return false;
@@ -36,8 +90,86 @@ export default function Home() {
   const scripted = videos.filter((v) => v.script).length;
   const ideas = videos.filter((v) => !v.script).length;
 
+  const mondaySlot = weekSlots.find((s) => s.dayOfWeek === "monday");
+  const thursdaySlot = weekSlots.find((s) => s.dayOfWeek === "thursday");
+
   return (
     <div className="w-full max-w-7xl mx-auto px-6 py-10">
+      {/* This Week Section */}
+      <div className="mb-10">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Calendar className="w-5 h-5 text-purple-400" />
+            <h2 className="text-lg font-semibold text-white">This Week</h2>
+          </div>
+          <Link
+            href="/calendar"
+            className="text-xs text-purple-400 hover:text-purple-300 font-medium"
+          >
+            View Calendar &rarr;
+          </Link>
+        </div>
+        <div className="grid md:grid-cols-3 gap-4">
+          {/* Monday Slot */}
+          <div className={`p-4 rounded-xl bg-[#121217] border ${mondaySlot ? "border-orange-500/20" : "border-[#22222b]"}`}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-orange-400">
+                Monday
+              </span>
+              {mondaySlot && (
+                <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase border ${calendarStatusColors[mondaySlot.status]}`}>
+                  {mondaySlot.status}
+                </span>
+              )}
+            </div>
+            {mondaySlot?.pitch ? (
+              <p className="text-sm text-white font-medium truncate">{mondaySlot.pitch.title}</p>
+            ) : (
+              <p className="text-sm text-gray-600">{mondaySlot ? "No pitch assigned" : "No slot"}</p>
+            )}
+          </div>
+
+          {/* Thursday Slot */}
+          <div className={`p-4 rounded-xl bg-[#121217] border ${thursdaySlot ? "border-emerald-500/20" : "border-[#22222b]"}`}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
+                Thursday
+              </span>
+              {thursdaySlot && (
+                <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase border ${calendarStatusColors[thursdaySlot.status]}`}>
+                  {thursdaySlot.status}
+                </span>
+              )}
+            </div>
+            {thursdaySlot?.pitch ? (
+              <p className="text-sm text-white font-medium truncate">{thursdaySlot.pitch.title}</p>
+            ) : (
+              <p className="text-sm text-gray-600">{thursdaySlot ? "No pitch assigned" : "No slot"}</p>
+            )}
+          </div>
+
+          {/* Monthly Progress */}
+          <div className="p-4 rounded-xl bg-[#121217] border border-[#22222b]">
+            <div className="flex items-center gap-2 mb-2">
+              <Target className="w-4 h-4 text-purple-400" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                This Month
+              </span>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold text-white">{monthlyPublished}</span>
+              <span className="text-sm text-gray-500">/ 8 videos</span>
+            </div>
+            <div className="w-full h-1.5 rounded-full bg-[#22222b] mt-2">
+              <div
+                className="h-1.5 rounded-full bg-purple-500 transition-all"
+                style={{ width: `${Math.min((monthlyPublished / 8) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-10">
         <div className="p-5 rounded-xl bg-[#121217] border border-[#22222b]">
