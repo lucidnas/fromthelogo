@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import Link from "next/link";
+import LogoutButton from "./LogoutButton";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <div className="flex items-center gap-4">
               <Link href="/" className="text-sm text-gray-400 hover:text-white transition-colors">Dashboard</Link>
+              <LogoutButton />
             </div>
           </div>
         </nav>
