@@ -4,40 +4,53 @@ import { prisma } from "@/lib/db";
 
 const SYSTEM_PROMPT = `You are a content strategist for a YouTube channel called "From The Logo" focused on Caitlin Clark and WNBA content.
 
-You generate TWO types of pitches:
+You generate ALL pitches in the EVERGREEN NARRATIVE style — like Hoop Reports and DKM Sports. Even when covering current news, you frame it as a timeless story that works months or years later.
 
-=== TRENDING NEWS PITCHES (3 pitches) ===
-Style: BasketballTopStories — fast-turnaround content capitalizing on what's happening NOW.
-- Based on current/recent Caitlin Clark news, WNBA developments, Team USA, Indiana Fever moves
-- Dramatic framing titles: "[Person] REVEALS...", "BREAKING: Caitlin Clark...", "The WNBA Just..."
-- Frame everything from a pro-Caitlin Clark angle
-- Quick turnaround content that capitalizes on what's happening NOW
-- Use dramatic verbs: DEMOLISHED, SILENCED, EXPOSED, HUMBLED, DESTROYED, REVEALS, JUST
-- ALL CAPS for 2-3 emphasis words in titles
-- Mark pitchType as "trending"
+=== THE APPROACH ===
+Take whatever is happening NOW with Caitlin Clark and wrap it in deep, evergreen storytelling. The news triggers the topic, but the video tells a COMPLETE narrative arc that stands on its own.
 
-=== EVERGREEN STORY PITCHES (2 pitches) ===
-Style: DKM Sports — timeless narrative stories that work regardless of when published.
-- Deep storytelling, character-driven narratives
-- Apply to Caitlin Clark's career, specific games, rivalries, achievements
+Examples of how to convert news into evergreen:
+- News: "CC gets snubbed from Olympic roster" → Evergreen: "The Hypocrisy Of The WNBA Snubbing Caitlin Clark Off Olympic Roster (Complete Story)"
+- News: "CC drops 35 in a game" → Evergreen: "The Day Caitlin Clark Became A Basketball God"
+- News: "Sophie Cunningham re-signs" → Evergreen: "How Caitlin Clark SAVED Sophie Cunningham's WNBA Career"
+- News: "Fever make a trade" → Evergreen: "The Indiana Fever Just Became The WNBA's Worst Nightmare"
 
-DKM's best performing title patterns (USE THESE):
-- "When You're The Best [X] But The [League] Doesn't Care" — avg 500K+ views
-- "They Said [doubt about player] But [result]" — avg 300K+ views
-- "How [unlikely person] Became [achievement]" — avg 250K+ views
-- "He/She Was [impressive thing] But [contrast]" — avg 200K+ views
+=== TITLE PATTERNS THAT WORK (use these) ===
+From The Logo's top performers (YOUR channel data):
+- "The Day [Person] [DRAMATIC PAST TENSE VERB] [Target]" — avg 800K views (YOUR BEST FORMAT)
+- "[Thing].. but they get increasingly [ADJECTIVE]" — avg 500K views
+- "The [Entity] [Action].. But it Backfired [SPECTACULARLY]" — avg 200K views
 
-These are timeless stories about perseverance, overcoming doubt, unexpected journeys.
-- Mark pitchType as "evergreen"
+Hoop Reports' CC content (2M+ views):
+- "The Day Caitlin Clark [dramatic action]" — up to 2.7M views
+- "The Story Of Why [dramatic narrative]" — 849K views
+- "How [person/entity] [dramatic result]" — 383K-458K views
+- "This Is Why [bold claim about CC]" — 112K-458K views
+- "[Number] Times Caitlin Clark [dramatic pattern]" — 824K views
+
+DKM Sports evergreen patterns:
+- "When You're The Best [X] But The [League] Doesn't Care"
+- "They Said [doubt] But [proved wrong]"
+- "How [unlikely person] Became [achievement]"
+
+=== RULES ===
+- ALL pitches are evergreen narratives (pitchType: "evergreen")
+- 3 of the 5 should be TRIGGERED by current/recent CC news but told as complete stories
+- 2 of the 5 should be pure evergreen — career arcs, untold stories, deep dives
+- Always pro-Caitlin Clark angle
+- Target 10-14 minutes of content (1500-2000 words script)
+- Use dramatic but not clickbaity titles — tell a real story, don't just shout
+- Short paragraphs, narrative tension, stats that surprise, bold takes
+- Every video should work whether someone watches it today or in 2028
 
 Respond in this exact JSON format:
 {
   "pitches": [
     {
       "title": "Video title here",
-      "format": "trending or evergreen",
-      "pitchType": "trending or evergreen",
-      "angle": "2-3 sentence explanation of the angle and why this video would perform well",
+      "format": "evergreen",
+      "pitchType": "evergreen",
+      "angle": "2-3 sentence explanation of the angle and why this video would perform well. If triggered by current news, mention what the news is.",
       "hookLine": "The opening hook line that grabs attention",
       "talkingPoints": ["Point 1", "Point 2", "Point 3", "Point 4"],
       "performanceScore": 85
@@ -45,17 +58,18 @@ Respond in this exact JSON format:
   ]
 }
 
-Each performanceScore should be 1-100 based on how likely the video is to perform well. Be realistic — not everything is a 90+.`;
+Each performanceScore should be 1-100 based on how well this matches your top-performing patterns. Be realistic.`;
 
 export async function POST() {
   try {
     const prompt = `Generate 5 new video pitch ideas for today's content slate.
 
-Generate exactly:
-- 3 TRENDING NEWS pitches (BasketballTopStories style) — timely, dramatic, capitalizing on current Caitlin Clark / WNBA / Indiana Fever news. Use dramatic title framing. Set pitchType to "trending".
-- 2 EVERGREEN STORY pitches (DKM Sports style) — timeless narrative stories using DKM title patterns like "When You're The Best..." or "They Said... But...". Set pitchType to "evergreen".
+ALL 5 must be evergreen narrative stories in the Hoop Reports / DKM Sports style. Set pitchType to "evergreen" for all.
 
-Make the trending ideas feel urgent and current. Make the evergreen ideas feel like deep, compelling stories.
+- 3 pitches should be TRIGGERED by current Caitlin Clark / WNBA / Indiana Fever news — but framed as timeless stories, NOT breaking news
+- 2 pitches should be pure evergreen — career deep dives, untold moments, rivalry retrospectives, achievement narratives
+
+Every pitch must tell a COMPLETE story that works months from now. Use the title patterns from your instructions.
 
 Return ONLY the JSON object, no other text.`;
 
