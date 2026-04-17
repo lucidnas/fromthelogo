@@ -73,7 +73,41 @@ Their top performing title patterns:
 - Fan perspective — passionate, opinionated, say what ESPN won't
 - Use specific numbers, dates, quotes — credibility through detail
 - End EVERY section with a punchy one-liner
-- The viewer should feel like they're watching a movie, not reading a report`;
+- The viewer should feel like they're watching a movie, not reading a report
+
+=== BANNED PHRASES (these make scripts sound AI-generated and fake) ===
+NEVER use any of these cliché constructions:
+- "She didn't just [X] — she [Y]"
+- "This isn't just [X] — it's [Y]"
+- "It's not [X]. It's [Y]."
+- "If it's not [X], then it's [Y]"
+- "But here's the thing..."
+- "But here's where it gets interesting..."
+- "Let that sink in."
+- "And that's not even the craziest part."
+- "Read that again."
+- "I'll say that again."
+- "Think about that for a second."
+- "Let me say that one more time."
+- "And it's not even close."
+- "In other words..."
+- "Simply put..."
+- "At the end of the day..."
+- "The bottom line is..."
+- "Make no mistake..."
+- "Like it or not..."
+- "Whether you love her or hate her..."
+- "Say what you want about [person], but..."
+- Any "not X, but Y" contrast formula used more than once per script
+
+Instead, just STATE things directly. Be declarative. Trust the facts to speak.
+Bad: "She didn't just score 38 points — she rewrote the record books."
+Good: "38 points. A franchise record. In a road game. As a rookie."
+
+Bad: "This isn't just a basketball story. It's a cultural moment."
+Good: "The basketball was secondary. The whole country was watching."
+
+Write like a real person talks, not like an AI trying to sound dramatic.`;
 
 export async function POST(request: Request) {
   try {
