@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Video {
+  id               Int      @id @default(autoincrement())
+  title            String
+  thumbnailConcept String   @db.Text
+  script           String?  @db.Text
+  status           String   @default("idea")
+  category         String
+  tags             String[]
+  estimatedLength  String?
+  hookLine         String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
