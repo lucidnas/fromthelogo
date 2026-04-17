@@ -4,21 +4,29 @@ import { prisma } from "@/lib/db";
 
 const SYSTEM_PROMPT = `You are a content strategist for a YouTube channel called "From The Logo" focused on Caitlin Clark and WNBA content.
 
-You know the channel's top-performing title patterns and their average views:
-- "The Day [Subject] [DRAMATIC VERB] [Object]" format — avg 800K views (best performer)
-- "[Subject].. but they get increasingly [ADJECTIVE]" format — avg 500K views
-- "[Entity] [Action]... But It Backfired SPECTACULARLY" format — avg 200K views
+You generate TWO types of pitches:
 
-Content pillars: Caitlin Clark game breakdowns, WNBA controversies, player rivalries, skill highlights, career stories.
+=== TRENDING NEWS PITCHES (3 pitches) ===
+Style: BasketballTopStories — fast-turnaround content capitalizing on what's happening NOW.
+- Based on current/recent Caitlin Clark news, WNBA developments, Team USA, Indiana Fever moves
+- Dramatic framing titles: "[Person] REVEALS...", "BREAKING: Caitlin Clark...", "The WNBA Just..."
+- Frame everything from a pro-Caitlin Clark angle
+- ALL CAPS for 2-3 emphasis words in titles
+- Mark pitchType as "trending"
 
-Generate exactly 3 pitch ideas, each in a DIFFERENT format (one the-day, one increasingly, one backfired).
+=== EVERGREEN STORY PITCHES (2 pitches) ===
+Style: DKM Sports — timeless narrative stories that work regardless of when published.
+- DKM title patterns: "When You're The Best [X] But [contrast]", "They Said [doubt] But [result]", "How [person] Became [achievement]", "She Was [impressive thing] But [contrast]"
+- Deep storytelling, character-driven narratives about Caitlin Clark
+- Mark pitchType as "evergreen"
 
 Respond in this exact JSON format:
 {
   "pitches": [
     {
       "title": "Video title here",
-      "format": "the-day",
+      "format": "trending or evergreen",
+      "pitchType": "trending or evergreen",
       "angle": "2-3 sentence explanation of the angle",
       "hookLine": "The opening hook line",
       "talkingPoints": ["Point 1", "Point 2", "Point 3", "Point 4"],
@@ -29,12 +37,11 @@ Respond in this exact JSON format:
 
 export async function POST() {
   try {
-    const prompt = `Generate 3 new video pitch ideas for today. Consider current WNBA storylines and trending topics around Caitlin Clark.
+    const prompt = `Generate 5 new video pitch ideas for today. Consider current WNBA storylines and trending topics around Caitlin Clark.
 
-Each pitch should be for a different format:
-1. One "The Day..." format
-2. One "...but they get increasingly..." format
-3. One "...But It Backfired" format
+Generate exactly:
+- 3 TRENDING NEWS pitches (timely, dramatic, current events). Set pitchType to "trending".
+- 2 EVERGREEN STORY pitches (timeless narratives using DKM title patterns). Set pitchType to "evergreen".
 
 Make the ideas timely, specific, and compelling. Return ONLY the JSON object.`;
 
@@ -53,7 +60,6 @@ Make the ideas timely, specific, and compelling. Return ONLY the JSON object.`;
       );
     }
 
-    // Store pitches in database
     const provider = process.env.AI_PROVIDER || "anthropic";
     const model = process.env.AI_MODEL || "claude-sonnet-4-20250514";
 
@@ -62,6 +68,7 @@ Make the ideas timely, specific, and compelling. Return ONLY the JSON object.`;
         (p: {
           title: string;
           format: string;
+          pitchType?: string;
           angle: string;
           hookLine: string;
           talkingPoints: string[];
@@ -70,7 +77,8 @@ Make the ideas timely, specific, and compelling. Return ONLY the JSON object.`;
           prisma.pitch.create({
             data: {
               title: p.title,
-              format: p.format,
+              format: p.format || p.pitchType || "trending",
+              pitchType: p.pitchType || p.format || "trending",
               angle: p.angle,
               hookLine: p.hookLine,
               talkingPoints: p.talkingPoints,

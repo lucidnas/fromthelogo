@@ -26,6 +26,7 @@ model Pitch {
   id               Int      @id @default(autoincrement())
   title            String
   format           String
+  pitchType        String   @default("trending")
   angle            String   @db.Text
   hookLine         String   @db.Text
   talkingPoints    String[]
