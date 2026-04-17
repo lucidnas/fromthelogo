@@ -44,6 +44,8 @@ export default function VideoDetail({ video }: { video: Video }) {
   const [testingAudio, setTestingAudio] = useState(false);
   const [audioHistory, setAudioHistory] = useState<AudioEntry[]>([]);
   const [currentAudio, setCurrentAudio] = useState<string | null>(null);
+  const [generatingScript, setGeneratingScript] = useState(false);
+  const [generatedScript, setGeneratedScript] = useState<string | null>(null);
 
   // Load voices on mount
   useEffect(() => {
@@ -107,6 +109,32 @@ export default function VideoDetail({ video }: { video: Video }) {
     } finally {
       setGenerating(false);
       setTestingAudio(false);
+    }
+  }
+
+  async function handleGenerateScript() {
+    setGeneratingScript(true);
+    try {
+      const res = await fetch("/api/generate-script", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: video.title,
+          hookLine: video.hookLine,
+          format: video.category,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "Failed to generate script");
+        return;
+      }
+      const data = await res.json();
+      setGeneratedScript(data.script);
+    } catch {
+      alert("Failed to generate script. Check that an AI API key is configured.");
+    } finally {
+      setGeneratingScript(false);
     }
   }
 
@@ -203,9 +231,60 @@ export default function VideoDetail({ video }: { video: Video }) {
           </div>
         </div>
       ) : (
-        <div className="p-12 rounded-xl bg-[#121217] border border-[#22222b] text-center mb-6">
-          <p className="text-gray-500 text-lg">No script written yet.</p>
-          <p className="text-gray-600 text-sm mt-2">This video is still in the idea phase.</p>
+        <div className="rounded-xl bg-[#121217] border border-[#22222b] mb-6 overflow-hidden">
+          {!generatedScript ? (
+            <div className="p-12 text-center">
+              <p className="text-gray-500 text-lg">No script written yet.</p>
+              <p className="text-gray-600 text-sm mt-2 mb-6">This video is still in the idea phase.</p>
+              <button
+                onClick={handleGenerateScript}
+                disabled={generatingScript}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-violet-600 text-white text-sm font-semibold hover:from-purple-500 hover:to-violet-500 transition-all disabled:opacity-50"
+              >
+                {generatingScript ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+                {generatingScript ? "Generating Script..." : "Generate Script with AI"}
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between px-6 py-4 border-b border-[#22222b]">
+                <h2 className="text-sm font-semibold text-purple-400 uppercase tracking-wider">AI Generated Script</h2>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setViewMode("formatted")}
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${viewMode === "formatted" ? "bg-purple-500/20 text-purple-300" : "text-gray-400 hover:text-white"}`}>
+                    <Eye className="w-3.5 h-3.5" /> Formatted
+                  </button>
+                  <button onClick={() => setViewMode("raw")}
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${viewMode === "raw" ? "bg-purple-500/20 text-purple-300" : "text-gray-400 hover:text-white"}`}>
+                    <FileText className="w-3.5 h-3.5" /> Raw
+                  </button>
+                  <button
+                    onClick={handleGenerateScript}
+                    disabled={generatingScript}
+                    className="px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                  >
+                    {generatingScript ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                    Regenerate
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 md:p-8 max-h-[600px] overflow-y-auto">
+                {viewMode === "formatted" ? (
+                  <div>
+                    {generatedScript.split("\n").map((line, i) => {
+                      if (line.startsWith("[") && line.includes("]")) {
+                        return <h3 key={i} className="text-purple-300 font-bold text-lg mt-8 mb-3 first:mt-0">{line}</h3>;
+                      }
+                      if (line.trim() === "") return <div key={i} className="h-3" />;
+                      return <p key={i} className="text-gray-300 leading-relaxed mb-2 text-[15px]">{line}</p>;
+                    })}
+                  </div>
+                ) : (
+                  <pre className="text-gray-300 text-sm font-mono whitespace-pre-wrap leading-relaxed">{generatedScript}</pre>
+                )}
+              </div>
+            </>
+          )}
         </div>
       )}
 

@@ -1,17 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Zap, Target, TrendingUp, Check, X, Archive, Sparkles } from "lucide-react";
+import { Zap, Target, Check, X, Archive, Sparkles, Loader2, RefreshCw, FileText, Eye } from "lucide-react";
 
 type Pitch = {
-  id: string;
+  id: string | number;
   title: string;
   format: "the-day" | "increasingly" | "backfired";
   angle: string;
   hookLine: string;
   talkingPoints: string[];
-  estimatedScore: number;
-  date: string;
+  estimatedScore?: number;
+  performanceScore?: number;
+  date?: string;
+  generatedScript?: string | null;
 };
 
 type PitchHistory = {
@@ -34,7 +36,7 @@ const formatLabels: Record<string, string> = {
   backfired: "Backfired",
 };
 
-const todayPitches: Pitch[] = [
+const defaultPitches: Pitch[] = [
   {
     id: "pitch-1",
     title: "The Day Caitlin Clark DESTROYED A'ja Wilson's PERFECT Record",
@@ -103,7 +105,12 @@ function getScoreBg(score: number) {
 }
 
 export default function PitchesPage() {
+  const [pitches, setPitches] = useState<Pitch[]>(defaultPitches);
   const [history, setHistory] = useState<PitchHistory[]>([]);
+  const [generatingScript, setGeneratingScript] = useState<string | number | null>(null);
+  const [expandedScript, setExpandedScript] = useState<string | number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [scriptViewMode, setScriptViewMode] = useState<"formatted" | "raw">("formatted");
 
   useEffect(() => {
     const stored = localStorage.getItem("ftl-pitch-history");
@@ -143,8 +150,70 @@ export default function PitchesPage() {
     saveHistory([entry, ...history]);
   }
 
-  function handleGenerateScript() {
-    alert("Script generation coming soon. This will connect to the AI writing pipeline.");
+  async function handleGenerateScript(pitch: Pitch) {
+    setGeneratingScript(pitch.id);
+    try {
+      const res = await fetch("/api/generate-script", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: pitch.title,
+          hookLine: pitch.hookLine,
+          format: pitch.format,
+          angle: pitch.angle,
+          talkingPoints: pitch.talkingPoints,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "Failed to generate script");
+        return;
+      }
+
+      const data = await res.json();
+      setPitches((prev) =>
+        prev.map((p) =>
+          p.id === pitch.id ? { ...p, generatedScript: data.script } : p
+        )
+      );
+      setExpandedScript(pitch.id);
+    } catch (e) {
+      alert("Failed to generate script. Check that an AI API key is configured.");
+    } finally {
+      setGeneratingScript(null);
+    }
+  }
+
+  async function handleRefreshPitches() {
+    setRefreshing(true);
+    try {
+      const res = await fetch("/api/generate-pitches", {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "Failed to generate pitches");
+        return;
+      }
+
+      const data = await res.json();
+      if (data.pitches && data.pitches.length > 0) {
+        setPitches(
+          data.pitches.map((p: Pitch, i: number) => ({
+            ...p,
+            id: `ai-pitch-${Date.now()}-${i}`,
+            estimatedScore: p.performanceScore || p.estimatedScore || 75,
+            date: new Date().toISOString().split("T")[0],
+          }))
+        );
+      }
+    } catch {
+      alert("Failed to refresh pitches. Check that an AI API key is configured.");
+    } finally {
+      setRefreshing(false);
+    }
   }
 
   return (
@@ -162,15 +231,32 @@ export default function PitchesPage() {
 
       {/* Today's Pitches */}
       <section className="mb-12">
-        <div className="flex items-center gap-2 mb-6">
-          <Sparkles className="w-5 h-5 text-purple-400" />
-          <h2 className="text-xl font-semibold text-white">Today&apos;s Pitches</h2>
-          <span className="text-xs text-gray-500 ml-2">April 16, 2026</span>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-purple-400" />
+            <h2 className="text-xl font-semibold text-white">Today&apos;s Pitches</h2>
+            <span className="text-xs text-gray-500 ml-2">
+              {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+            </span>
+          </div>
+          <button
+            onClick={handleRefreshPitches}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 text-sm font-medium hover:bg-purple-500/20 transition-colors disabled:opacity-50"
+          >
+            {refreshing ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4" />
+            )}
+            {refreshing ? "Generating..." : "Refresh with AI"}
+          </button>
         </div>
 
         <div className="space-y-6">
-          {todayPitches.map((pitch) => {
-            const fc = formatColors[pitch.format];
+          {pitches.map((pitch) => {
+            const fc = formatColors[pitch.format] || formatColors["the-day"];
+            const score = pitch.estimatedScore || pitch.performanceScore || 0;
             return (
               <div
                 key={pitch.id}
@@ -182,12 +268,12 @@ export default function PitchesPage() {
                     <span
                       className={`px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider ${fc.bg} ${fc.text} border ${fc.border}`}
                     >
-                      {formatLabels[pitch.format]}
+                      {formatLabels[pitch.format] || pitch.format}
                     </span>
-                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border ${getScoreBg(pitch.estimatedScore)}`}>
-                      <Target className={`w-3.5 h-3.5 ${getScoreColor(pitch.estimatedScore)}`} />
-                      <span className={`text-xs font-bold ${getScoreColor(pitch.estimatedScore)}`}>
-                        {pitch.estimatedScore}
+                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border ${getScoreBg(score)}`}>
+                      <Target className={`w-3.5 h-3.5 ${getScoreColor(score)}`} />
+                      <span className={`text-xs font-bold ${getScoreColor(score)}`}>
+                        {score}
                       </span>
                     </div>
                   </div>
@@ -233,6 +319,64 @@ export default function PitchesPage() {
                   </ul>
                 </div>
 
+                {/* Generated Script */}
+                {pitch.generatedScript && expandedScript === pitch.id && (
+                  <div className="mb-6 rounded-xl bg-[#0d0d12] border border-purple-500/20 overflow-hidden">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-[#1a1a24]">
+                      <h4 className="text-sm font-semibold text-purple-400 uppercase tracking-wider flex items-center gap-2">
+                        <FileText className="w-4 h-4" /> Generated Script
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setScriptViewMode("formatted")}
+                          className={`px-2 py-1 rounded text-xs font-medium ${scriptViewMode === "formatted" ? "bg-purple-500/20 text-purple-300" : "text-gray-500 hover:text-white"}`}
+                        >
+                          <Eye className="w-3 h-3 inline mr-1" />Formatted
+                        </button>
+                        <button
+                          onClick={() => setScriptViewMode("raw")}
+                          className={`px-2 py-1 rounded text-xs font-medium ${scriptViewMode === "raw" ? "bg-purple-500/20 text-purple-300" : "text-gray-500 hover:text-white"}`}
+                        >
+                          <FileText className="w-3 h-3 inline mr-1" />Raw
+                        </button>
+                        <button
+                          onClick={() => setExpandedScript(null)}
+                          className="text-gray-500 hover:text-white text-xs px-2 py-1"
+                        >
+                          Collapse
+                        </button>
+                      </div>
+                    </div>
+                    <div className="p-6 max-h-[500px] overflow-y-auto">
+                      {scriptViewMode === "formatted" ? (
+                        <div>
+                          {pitch.generatedScript.split("\n").map((line, i) => {
+                            if (line.startsWith("[") && line.includes("]")) {
+                              return <h3 key={i} className="text-purple-300 font-bold text-lg mt-6 mb-2 first:mt-0">{line}</h3>;
+                            }
+                            if (line.trim() === "") return <div key={i} className="h-2" />;
+                            return <p key={i} className="text-gray-300 leading-relaxed mb-1.5 text-sm">{line}</p>;
+                          })}
+                        </div>
+                      ) : (
+                        <pre className="text-gray-300 text-sm font-mono whitespace-pre-wrap leading-relaxed">
+                          {pitch.generatedScript}
+                        </pre>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {pitch.generatedScript && expandedScript !== pitch.id && (
+                  <button
+                    onClick={() => setExpandedScript(pitch.id)}
+                    className="mb-6 flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                  >
+                    <FileText className="w-4 h-4" />
+                    View Generated Script
+                  </button>
+                )}
+
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t border-[#22222b]">
                   <button
@@ -250,11 +394,20 @@ export default function PitchesPage() {
                     Reject
                   </button>
                   <button
-                    onClick={handleGenerateScript}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 text-sm font-medium hover:bg-purple-500/20 transition-colors ml-auto"
+                    onClick={() => handleGenerateScript(pitch)}
+                    disabled={generatingScript === pitch.id}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 text-sm font-medium hover:bg-purple-500/20 transition-colors ml-auto disabled:opacity-50"
                   >
-                    <Sparkles className="w-4 h-4" />
-                    Generate Script
+                    {generatingScript === pitch.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4" />
+                    )}
+                    {generatingScript === pitch.id
+                      ? "Generating..."
+                      : pitch.generatedScript
+                        ? "Regenerate Script"
+                        : "Generate Script"}
                   </button>
                 </div>
               </div>
