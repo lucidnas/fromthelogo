@@ -65,7 +65,7 @@ Their top performing title patterns:
 - "Subscribe for more From The Logo. Until next time."
 
 === WRITING RULES ===
-- Target 1500-2000 words (10-14 minutes of speaking)
+- Target 1000-1200 words (7-8 minutes of speaking)
 - Short paragraphs. Many are one sentence. For rhythm.
 - Strategic ALL CAPS for 2-3 emphasis words (not whole sentences)
 - Stats then BOLD TAKE — "She shot 62% from three. That's not basketball. That's an algorithm."
@@ -100,7 +100,7 @@ Format: ${format || "evergreen"}`;
       prompt += `\n\nKey talking points to cover:\n${talkingPoints.map((tp: string, i: number) => `${i + 1}. ${tp}`).join("\n")}`;
     }
 
-    prompt += `\n\nWrite the complete script now. Follow the Hoop Reports blueprint and script structure EXACTLY. Target 1500-2000 words (10-14 minutes). Make it feel like a mini-documentary, not a news report. The viewer should feel like they're watching a movie about Caitlin Clark.`;
+    prompt += `\n\nWrite the complete script now. Follow the Hoop Reports blueprint and script structure EXACTLY. Target 1000-1200 words (7-8 minutes). Keep it tight and punchy — no filler. Every sentence earns its place. The viewer should feel like they're watching a movie about Caitlin Clark.`;
 
     const result = await generateText(prompt, SYSTEM_PROMPT);
 
