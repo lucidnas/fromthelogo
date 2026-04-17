@@ -222,32 +222,34 @@ export default function VideoDetail({ video }: { video: Video }) {
               <div className="flex items-center gap-2 text-gray-500 text-sm"><Loader2 className="w-4 h-4 animate-spin" /> Loading voices...</div>
             ) : (
               <>
-                <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                <div className="space-y-3 mb-4">
                   <select
                     value={selectedVoice}
                     onChange={(e) => setSelectedVoice(e.target.value)}
-                    className="flex-1 px-4 py-2.5 rounded-lg bg-[#0b0b0f] border border-[#22222b] text-white text-sm focus:outline-none focus:border-purple-500/50"
+                    className="w-full px-4 py-2.5 rounded-lg bg-[#0b0b0f] border border-[#22222b] text-white text-sm focus:outline-none focus:border-purple-500/50"
                   >
                     {voices.map((v) => (
                       <option key={v.id} value={v.id}>{v.name} ({v.category})</option>
                     ))}
                   </select>
-                  <button
-                    onClick={() => generateAudio(true)}
-                    disabled={testingAudio || generating}
-                    className="px-4 py-2.5 rounded-lg bg-[#22222b] text-gray-300 text-sm font-medium hover:bg-[#2a2a35] transition-colors disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
-                  >
-                    {testingAudio ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-                    Test Voice
-                  </button>
-                  <button
-                    onClick={() => generateAudio(false)}
-                    disabled={generating || testingAudio}
-                    className="px-4 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 to-violet-600 text-white text-sm font-semibold hover:from-purple-500 hover:to-violet-500 transition-all disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
-                  >
-                    {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
-                    Generate Full Audio
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => generateAudio(true)}
+                      disabled={testingAudio || generating}
+                      className="flex-1 py-2.5 rounded-lg bg-[#22222b] text-gray-300 text-sm font-medium hover:bg-[#2a2a35] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {testingAudio ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                      Test Voice
+                    </button>
+                    <button
+                      onClick={() => generateAudio(false)}
+                      disabled={generating || testingAudio}
+                      className="flex-1 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 to-violet-600 text-white text-sm font-semibold hover:from-purple-500 hover:to-violet-500 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
+                      Generate Full Audio
+                    </button>
+                  </div>
                 </div>
 
                 {/* Preview voice */}
