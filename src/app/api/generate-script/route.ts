@@ -29,39 +29,83 @@ Their top performing title patterns:
 - "[Thing].. but they get increasingly [ADJECTIVE]" — avg 500K views
 - "The [Entity] [Action].. But it Backfired [SPECTACULARLY]" — avg 200K views
 
-=== SCRIPT STRUCTURE ===
+=== SCRIPT STRUCTURE (extracted from top-performing Hoop Reports + From The Logo videos) ===
 
-[HOOK]
-- ONE surprising stat or statement that stops the scroll
-- "22,000 people came to boo her. By the fourth quarter, you could hear a pin drop."
-- "Before this game, ZERO rookies in WNBA history had ever..."
-- Make it visceral. Make the viewer NEED to know what happens next.
+[COLD OPEN]
+NO intro. NO "what's up everyone." Start DIRECTLY in the action or with a vivid scene-setting moment. This is like the opening scene of a movie before the title card.
 
-[INTRO]
-- "What's up everyone, welcome back to From The Logo."
-- 2-3 sentences setting up WHY this story matters
-- "If you're new here, hit subscribe. Let's get into it."
+Hoop Reports example (3.9M views): "Did you all catch that? If not don't worry, let me just rewind that for you. Yeah that's right. That was after the Memphis Grizzlies won game two against the Warriors and apparently Ja Morant was saying to Curry 'we're gonna have some fun.'"
 
-[BODY - ACT 1: THE SETUP / THE DISRESPECT]
-- Set the scene. Who doubted her? What was the context?
-- Build the obstacle/villain. Quote the haters. Show the disrespect.
-- Use specific details: dates, scores, what people said
-- Short paragraphs. Some one sentence. For impact.
+Hoop Reports CC example (2.7M views): "At just 22 years old, Caitlin Clark has already redefined the landscape of women's basketball. First in the league in fast break points. During her college career, she shattered numerous records, including becoming the all-time leading scorer in both men's and women's basketball."
 
-[BODY - ACT 2: THE RESPONSE / THE TAKEOVER]
-- This is where Clark responds ON THE COURT
-- Play-by-play storytelling of the key moments
-- Stats woven into narrative: "14.2% from three. That's not shooting. That's a cheat code."
-- Build tension. The crowd goes quiet. The momentum shifts.
+Pattern: Drop the viewer INTO the story. Use a specific moment, a quote, a visual. Make them feel like they walked into the middle of something happening.
 
-[BODY - ACT 3: THE VINDICATION / THE PAYOFF]
-- The climactic moment. The dagger shot. The final stat line.
-- Put the numbers in CONTEXT — compare to historical records
-- Show the aftermath: what the haters said AFTER, how the narrative shifted
-- This is the emotional payoff the viewer has been waiting for
+MORE COLD OPEN EXAMPLES (from Hoop Reports' top Curry videos):
+
+969K views: "Mr. Carl Anthony Towns, welcome to your Kodak moment. [describes a highlight] Personally I think Wiggins put a little more sauce on this statement dunk because back then everybody just treated him as a second fiddle — no wait, let me correct that, a THIRD fiddle behind KAT and Zach LaVine back in Minnesota. But when he got traded to the Warriors this dude just became unhinged."
+
+440K views: "Here's a box score of a recent warriors game that the dubs won. Somebody in the starting five got 32 points on 50% shooting from three-point range. And someone else dropped 27 points and got to the line 11 times. My question for you is — in these two box scores, which one was Curry? Yeah. None of them."
+
+312K views: "This is Klay Thompson. He's about to do something ridiculous. Check this out. [describes the play] The degree of difficulty of that shot is absolutely insane. Let's watch that just one more time guys. This is when I realized..."
+
+179K views: "Adversity. It's just a nine-letter word that probably gets used too casually these days. Though the truth is, without it, victories aren't as sweet. But with it, legends are made."
+
+[TITLE CARD MOMENT]
+After the cold open (30-60 seconds), THEN do a brief channel transition:
+- "Ladies and gentlemen, the [event] happened but along the way some serious shenanigans happened and today let's travel back in time and collect some of these receipts."
+- Or: "With this in mind, I began to wonder [question]. Well I believe there are many answers to this question..."
+- Or: "Going into [timeframe] however, things are going to be different. Trust me when I say that..."
+- Keep it to 2-3 sentences MAX. Then right back into the story.
+
+[BODY - CHAPTER-BASED STRUCTURE]
+Organize the story into 3-5 named chapters/segments. Each chapter covers one opponent, one moment, or one phase of the story.
+
+Hoop Reports does this brilliantly:
+- "First off let's start with [chapter]..."
+- "Next off imagine scenario number two..."
+- "Memphis on the other hand... sheesh guys where do I even begin"
+
+Each chapter follows its own mini-arc:
+1. Setup (who is the opponent/challenge)
+2. The confrontation/moment
+3. The result/payoff
+
+Transitions between chapters should be conversational: "but uh", "anyway", "sheesh guys", "but here's the thing" — sounds like a friend telling a story at a bar, not a news anchor reading a teleprompter.
+
+[PLAY-BY-PLAY MOMENTS]
+When describing on-court action, use present tense to create immediacy:
+- "She pulls up. Releases. The ball hangs in the air..."
+- "Clark brings it up, waves off the screen, steps back..."
+- Weave in crowd reaction, bench reaction, commentator quotes
+- Use replay language: "let me just rewind that for you"
+
+[CONVERSATIONAL VOICE]
+The script should sound like a friend telling you a story, not a narrator reading. Use these Hoop Reports patterns:
+- "sheesh guys" / "my goodness guys"
+- "I mean look" / "I mean come on"
+- "I gotta be honest" / "if I were a betting man"
+- "but anyway" / "in any case" / "but here's the kicker"
+- "no wait let me correct that" — self-corrections feel natural
+- "let me show you what I mean" — invitation to watch
+- "check this out" / "let's watch that one more time"
+- "that's absolutely insane" / "truly unbelievable"
+- "trust me when I say that"
+- Address the audience: "my question for you is..." / "personally I think..."
+- React to your own story: "sheesh", "dang", "phew"
+- Use casual grammar sometimes: "gonna", "gotta", "dude"
+
+The goal is to sound like you're genuinely excited telling this story to a friend who loves basketball, NOT like you're performing a scripted narration.
+
+[STATS IN CONTEXT]
+When using stats, always contextualize with comparison or reaction:
+- "Standing at just 6'3 with a 190lb frame... she doesn't exactly look too frightening"
+- "17,000 fans made their way to the arena, drawn by the promise of seeing a superstar"
+- Frame numbers as story beats, not data dumps
 
 [OUTRO]
-- ONE sharp closing sentence that echoes the theme
+End with a definitive closing statement that lands like a final punch:
+- Circle back to the opening moment or theme
+- Leave the viewer with ONE image or thought
 - "Subscribe for more From The Logo. Until next time."
 
 === WRITING RULES ===
