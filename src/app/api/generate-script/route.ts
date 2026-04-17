@@ -40,6 +40,18 @@ Hoop Reports CC example (2.7M views): "At just 22 years old, Caitlin Clark has a
 
 Pattern: Drop the viewer INTO the story. Use a specific moment, a quote, a visual. Make them feel like they walked into the middle of something happening.
 
+FROM THE LOGO COLD OPEN EXAMPLES (from YOUR top videos — this is YOUR voice):
+
+2.05M views: "So here's Aaliyah Boston stealing the ball and finding Caitlin Clark on the break. But as soon as she's about to build up a head of steam, Diamond DeShields just bulldozed her out of nowhere and even laughed it off afterward, as if she had done nothing. Meanwhile Caitlin, seems already used to this kind of treatment as she just stands up and walks away."
+
+1.07M views: "'As a coach of the home team, I mean, there's going to be a lot of people cheering for that other side. I mean, I get it.' Two shits. Not how about one. Not even one. That's how Cheryl Reeve welcomed Caitlin Clark and the Indiana Fever in Minnesota."
+
+1.05M views: "'If you want to talk about bullies we can talk about it. Every time Caitlin has the ball she pushes off. If you're going to break a record, to me, if it's legitimate, you have to break that record in the same amount of time.' That was Cheryl Swoopes taking a hard swipe at Caitlin Clark. On the surface you'd think the WNBA legend was spitting facts. However it only takes 3 seconds and a quick Google search to conclude that this woman is a flat-out liar."
+
+343K views: "Sophie Cunningham just got fined. And what happened next? She went viral like never before. The WNBA hit her with a $400 slap on the wrist. But the internet turned her into an icon."
+
+220K views: "Y'all, I still can't believe this happened. Caitlin Clark got hit with the softest, most ridiculous technical foul I've ever seen in my life. No yelling, no cussing, no flexing on anybody. She bounced the ball off the base of the hoop. That's it. And boom, teed up like she threw a chair at the ref. Are you serious?"
+
 MORE COLD OPEN EXAMPLES (from Hoop Reports' top Curry videos):
 
 969K views: "Mr. Carl Anthony Towns, welcome to your Kodak moment. [describes a highlight] Personally I think Wiggins put a little more sauce on this statement dunk because back then everybody just treated him as a second fiddle — no wait, let me correct that, a THIRD fiddle behind KAT and Zach LaVine back in Minnesota. But when he got traded to the Warriors this dude just became unhinged."
@@ -79,22 +91,48 @@ When describing on-court action, use present tense to create immediacy:
 - Weave in crowd reaction, bench reaction, commentator quotes
 - Use replay language: "let me just rewind that for you"
 
-[CONVERSATIONAL VOICE]
-The script should sound like a friend telling you a story, not a narrator reading. Use these Hoop Reports patterns:
-- "sheesh guys" / "my goodness guys"
-- "I mean look" / "I mean come on"
-- "I gotta be honest" / "if I were a betting man"
-- "but anyway" / "in any case" / "but here's the kicker"
-- "no wait let me correct that" — self-corrections feel natural
-- "let me show you what I mean" — invitation to watch
-- "check this out" / "let's watch that one more time"
-- "that's absolutely insane" / "truly unbelievable"
-- "trust me when I say that"
-- Address the audience: "my question for you is..." / "personally I think..."
-- React to your own story: "sheesh", "dang", "phew"
-- Use casual grammar sometimes: "gonna", "gotta", "dude"
+[CONVERSATIONAL VOICE — FROM THE LOGO'S ACTUAL VOICE]
+The script must sound like From The Logo's narrator. Here are the REAL speech patterns from the channel's top videos:
 
-The goal is to sound like you're genuinely excited telling this story to a friend who loves basketball, NOT like you're performing a scripted narration.
+TRANSITIONS & CONNECTORS:
+- "now to add more fuel to the fire..."
+- "and see, not only [X] because..."
+- "I mean if we just connect the dots here..."
+- "but hey, despite the hell storm of hate..."
+- "at the back of my head I knew..."
+- "anyway, with that being said, let's quickly jump right into the action"
+- "but as soon as she's about to [X], [sudden disruption]"
+- "meanwhile [person], seems already used to this kind of treatment"
+- "and if that wasn't enough..."
+- "so let's cut the noise"
+
+REACTIONS & COMMENTARY:
+- "are you serious?"
+- "y'all, I still can't believe this happened"
+- "what are we doing here?"
+- "bro, what are you talking about man"
+- "and she's not wrong"
+- "it's pretty clear that..."
+- "which is why there's no doubt in anyone's mind that..."
+- "I mean heading into this..."
+
+PLAY-BY-PLAY LANGUAGE:
+- "starts things off by showcasing her vision as she locates [player]"
+- "forces her way inside for the tough bucket"
+- "things quickly shifted gears in [team]'s favor"
+- "she was held down to just [X] points on [shooting]"
+- "even though they handcuffed her offensively, [team] was still unable to prevent..."
+- "rained down a couple of threes to keep [team] at bay"
+- "she lit the damn place on fire"
+
+FACT-CHECKING / RECEIPTS STYLE:
+- "on the surface you'd think [person] was spitting facts"
+- "however it only takes 3 seconds and a quick Google search to conclude..."
+- "I mean you can clearly see here that..."
+- "as far as [claim] is concerned, this graph right here indicates..."
+- "again, it only takes a quick search to dispute what [person] said"
+
+This voice is: passionate but informed, casual but credible, opinionated but backed by receipts. It calls out BS directly. It celebrates Clark genuinely. It sounds like a real fan who did their homework.
 
 [STATS IN CONTEXT]
 When using stats, always contextualize with comparison or reaction:
