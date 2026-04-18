@@ -1,28 +1,246 @@
 // Multi-source news aggregator for Caitlin Clark / WNBA stories.
-// Pulls from Google News, Reddit, competitor YouTube channels, and RSS feeds
-// to find both mainstream coverage AND fan-community storylines.
+// Sources (priority order):
+// 1. Mick Talks Hoops + Rachel DeMita — WNBA journalism YouTube channels
+// 2. Twitter: @CClarkReport, @kenswift via Nitter RSS
+// 3. SI, ClutchPoints, Athlon Sports via Google News site search
+// 4. Google News (general CC search)
+// 5. Competitor narrative channels (Hoop Reports, BTS, From The Logo)
 
 export type NewsItem = {
   title: string;
   source: string;
-  type: "news" | "reddit" | "youtube" | "rss";
+  type: "news" | "twitter" | "youtube" | "rss";
   date?: string;
   url?: string;
   snippet?: string;
-  score?: number; // upvotes for reddit, views for youtube
+  score?: number;
 };
 
 // ===========================================================================
-// Google News RSS
+// YouTube page scraper (bypasses RSS 15-video limit)
+// ===========================================================================
+
+async function scrapeYouTubeChannel(channelId: string, channelName: string, limit: number): Promise<NewsItem[]> {
+  try {
+    const url = `https://www.youtube.com/channel/${channelId}/videos`;
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(10000),
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+
+    const match = html.match(/var ytInitialData = (\{.+?\});<\/script>/);
+    if (!match) return [];
+
+    const data = JSON.parse(match[1]);
+    const tabs = data?.contents?.twoColumnBrowseResultsRenderer?.tabs || [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const videosTab = tabs.find((t: any) => t?.tabRenderer?.content?.richGridRenderer);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const contents: any[] = videosTab?.tabRenderer?.content?.richGridRenderer?.contents || [];
+
+    const items: NewsItem[] = [];
+    for (const c of contents.slice(0, limit)) {
+      const video = c?.richItemRenderer?.content?.videoRenderer;
+      if (!video) continue;
+      const title = video?.title?.runs?.[0]?.text || video?.title?.simpleText;
+      const publishedText = video?.publishedTimeText?.simpleText;
+      const viewCountText = video?.viewCountText?.simpleText || video?.shortViewCountText?.simpleText;
+      const descSnippet = video?.descriptionSnippet?.runs?.map((r: { text: string }) => r.text).join("") || "";
+
+      if (!title) continue;
+
+      items.push({
+        title: title.trim(),
+        source: channelName,
+        type: "youtube",
+        date: publishedText || "",
+        score: viewCountText ? parseInt(viewCountText.replace(/[^0-9]/g, "")) || 0 : 0,
+        snippet: descSnippet,
+      });
+    }
+    return items;
+  } catch {
+    return [];
+  }
+}
+
+async function fetchYouTubeJournalism(): Promise<NewsItem[]> {
+  // Mick Talks Hoops = hourly WNBA coverage. Rachel DeMita = WNBA journalism.
+  const channels = [
+    { id: "UCcT4c8glrjIO0pIVzJ6BWbg", name: "Mick Talks Hoops", limit: 100 },
+    { id: "UCBS2RdExOLDYVLnfsZ2Q4-w", name: "Rachel DeMita", limit: 30 },
+  ];
+  const results = await Promise.all(channels.map((c) => scrapeYouTubeChannel(c.id, c.name, c.limit)));
+  return results.flat();
+}
+
+async function fetchYouTubeCompetitors(): Promise<NewsItem[]> {
+  // Narrative competitors — filter to CC/WNBA only, use RSS (15 latest is enough)
+  const channels = [
+    { id: "UCvWdLRqA7R2Gggisxn4Xkhg", name: "From The Logo" },
+    { id: "UCYZOGKxkcE3BUwF5HfuzP1w", name: "Hoop Reports" },
+    { id: "UCj7OqYE9cNEzT6y_-Z3BdbA", name: "Basketball Top Stories" },
+  ];
+
+  const items: NewsItem[] = [];
+  for (const channel of channels) {
+    try {
+      const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
+      const res = await fetch(url, {
+        signal: AbortSignal.timeout(6000),
+        headers: { "User-Agent": "Mozilla/5.0" },
+      });
+      if (!res.ok) continue;
+      const xml = await res.text();
+
+      const entries = xml.match(/<entry>[\s\S]*?<\/entry>/g) || [];
+      for (const entry of entries.slice(0, 10)) {
+        const titleMatch = entry.match(/<title>(.*?)<\/title>/);
+        const publishedMatch = entry.match(/<published>(.*?)<\/published>/);
+        const title = titleMatch?.[1]?.trim();
+        if (!title) continue;
+
+        const lower = title.toLowerCase();
+        if (
+          !lower.includes("caitlin") &&
+          !lower.includes("clark") &&
+          !lower.includes("wnba") &&
+          !lower.includes("fever") &&
+          !lower.includes("indiana")
+        ) continue;
+
+        items.push({
+          title,
+          source: channel.name,
+          type: "youtube",
+          date: publishedMatch?.[1]?.slice(0, 10),
+        });
+      }
+    } catch { /* continue */ }
+  }
+  return items;
+}
+
+// ===========================================================================
+// Twitter via Nitter RSS (public X/Twitter mirror)
+// ===========================================================================
+
+async function fetchTwitter(): Promise<NewsItem[]> {
+  // Try multiple Twitter RSS mirrors — xcancel first (preferred by user),
+  // then Nitter as fallback. xcancel requires reader whitelist so it may
+  // return "not yet whitelisted" — we detect that and try next instance.
+  const instances = [
+    { host: "rss.xcancel.com", path: (h: string) => `https://rss.xcancel.com/${h}/rss` },
+    { host: "nitter.net", path: (h: string) => `https://nitter.net/${h}/rss` },
+    { host: "nitter.tiekoetter.com", path: (h: string) => `https://nitter.tiekoetter.com/${h}/rss` },
+  ];
+  const accounts = [
+    { handle: "CClarkReport", name: "@CClarkReport" },
+    { handle: "kenswift", name: "@kenswift" },
+  ];
+
+  const items: NewsItem[] = [];
+  for (const account of accounts) {
+    for (const instance of instances) {
+      try {
+        const url = instance.path(account.handle);
+        const res = await fetch(url, {
+          signal: AbortSignal.timeout(8000),
+          headers: { "User-Agent": "Mozilla/5.0 (X11; Linux x86_64)" },
+        });
+        if (!res.ok) continue;
+        const xml = await res.text();
+        // Validate it's a real feed (skip xcancel whitelist page)
+        if (!xml.includes("<item>") || xml.includes("not yet whitelisted")) continue;
+
+        const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
+        for (const block of itemBlocks.slice(0, 25)) {
+          const titleMatch =
+            block.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/) ||
+            block.match(/<title>([\s\S]*?)<\/title>/);
+          const dateMatch = block.match(/<pubDate>(.*?)<\/pubDate>/);
+          const linkMatch = block.match(/<link>(.*?)<\/link>/);
+
+          let title = titleMatch?.[1]?.trim();
+          if (!title || title.length < 15) continue;
+
+          // Collapse whitespace
+          title = title.replace(/\s+/g, " ").trim();
+
+          items.push({
+            title,
+            source: account.name,
+            type: "twitter",
+            date: dateMatch?.[1]?.slice(0, 16),
+            url: linkMatch?.[1],
+          });
+        }
+        break; // instance worked, skip remaining instances for this account
+      } catch { /* try next instance */ }
+    }
+  }
+  return items;
+}
+
+// ===========================================================================
+// Outlet coverage via Google News site search (SI, ClutchPoints, Athlon)
+// ===========================================================================
+
+async function fetchOutletNews(): Promise<NewsItem[]> {
+  const outlets = [
+    { query: "%22Sports+Illustrated%22+caitlin+clark+OR+fever", source: "Sports Illustrated" },
+    { query: "%22ClutchPoints%22+caitlin+clark+OR+fever+OR+wnba", source: "ClutchPoints" },
+    { query: "%22Athlon+Sports%22+caitlin+clark+OR+fever", source: "Athlon Sports" },
+  ];
+
+  const items: NewsItem[] = [];
+  for (const outlet of outlets) {
+    try {
+      const url = `https://news.google.com/rss/search?q=${outlet.query}&hl=en-US&gl=US&ceid=US:en`;
+      const res = await fetch(url, {
+        signal: AbortSignal.timeout(8000),
+        headers: { "User-Agent": "Mozilla/5.0" },
+      });
+      if (!res.ok) continue;
+      const xml = await res.text();
+
+      const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
+      for (const block of itemBlocks.slice(0, 15)) {
+        const titleMatch = block.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || block.match(/<title>(.*?)<\/title>/);
+        const dateMatch = block.match(/<pubDate>(.*?)<\/pubDate>/);
+        const rawTitle = titleMatch?.[1]?.trim() || "";
+        if (!rawTitle || rawTitle.length < 15) continue;
+
+        // Google News titles often end with " - Outlet Name" — strip that
+        const title = rawTitle.replace(/\s*[-–—]\s*[^-–—]+$/, "").trim();
+        if (!title || title.length < 10) continue;
+
+        items.push({
+          title,
+          source: outlet.source,
+          type: "news",
+          date: dateMatch?.[1]?.slice(0, 16),
+        });
+      }
+    } catch { /* continue */ }
+  }
+  return items;
+}
+
+// ===========================================================================
+// General Google News (fallback / broader net)
 // ===========================================================================
 
 async function fetchGoogleNews(): Promise<NewsItem[]> {
   const queries = [
     '"caitlin clark"',
     '"indiana fever"',
-    '"caitlin clark" controversy OR drama',
-    '"caitlin clark" quote OR says OR responds',
-    '"sophie cunningham" OR "aliyah boston"',
+    '"caitlin clark" controversy OR quote OR responds',
   ];
 
   const items: NewsItem[] = [];
@@ -37,7 +255,7 @@ async function fetchGoogleNews(): Promise<NewsItem[]> {
       const xml = await res.text();
       const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
 
-      for (const block of itemBlocks.slice(0, 10)) {
+      for (const block of itemBlocks.slice(0, 8)) {
         const titleMatch = block.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || block.match(/<title>(.*?)<\/title>/);
         const sourceMatch = block.match(/<source[^>]*>([^<]+)<\/source>/);
         const dateMatch = block.match(/<pubDate>(.*?)<\/pubDate>/);
@@ -58,235 +276,18 @@ async function fetchGoogleNews(): Promise<NewsItem[]> {
 }
 
 // ===========================================================================
-// Reddit (no auth needed via .json endpoints)
-// ===========================================================================
-
-async function fetchReddit(): Promise<NewsItem[]> {
-  const subs = [
-    { name: "CaitlinClark", sort: "hot", limit: 15 },
-    { name: "wnba", sort: "hot", limit: 15 },
-    { name: "fever", sort: "hot", limit: 10 },
-    { name: "wnbadiscussion", sort: "hot", limit: 10 },
-  ];
-
-  const items: NewsItem[] = [];
-  for (const sub of subs) {
-    try {
-      const url = `https://www.reddit.com/r/${sub.name}/${sub.sort}.json?limit=${sub.limit}`;
-      const res = await fetch(url, {
-        signal: AbortSignal.timeout(6000),
-        headers: { "User-Agent": "from-the-logo-bot/1.0" },
-      });
-      if (!res.ok) continue;
-      const data = await res.json();
-
-      for (const child of data?.data?.children || []) {
-        const post = child.data;
-        if (!post?.title) continue;
-
-        // Skip mega-threads and low effort
-        if (post.score < 5) continue;
-        if (post.stickied) continue;
-
-        const title = post.title.trim();
-        const selftext = (post.selftext || "").slice(0, 200);
-
-        items.push({
-          title,
-          source: `r/${sub.name}`,
-          type: "reddit",
-          score: post.score,
-          url: `https://reddit.com${post.permalink}`,
-          snippet: selftext,
-        });
-      }
-    } catch { /* continue */ }
-  }
-  return items.sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 30);
-}
-
-// ===========================================================================
-// YouTube competitors — recent video titles
-// ===========================================================================
-
-// Scrape a YouTube channel page HTML to get recent video titles (up to ~30).
-// Works without cookies for public channels.
-async function scrapeYouTubeChannel(channelId: string, channelName: string, limit: number): Promise<NewsItem[]> {
-  try {
-    const url = `https://www.youtube.com/channel/${channelId}/videos`;
-    const res = await fetch(url, {
-      signal: AbortSignal.timeout(8000),
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-        "Accept-Language": "en-US,en;q=0.9",
-      },
-    });
-    if (!res.ok) return [];
-    const html = await res.text();
-
-    // Extract the ytInitialData JSON embedded in the page
-    const match = html.match(/var ytInitialData = (\{.+?\});<\/script>/);
-    if (!match) return [];
-
-    const data = JSON.parse(match[1]);
-    const tabs = data?.contents?.twoColumnBrowseResultsRenderer?.tabs || [];
-    const videosTab = tabs.find((t: any) =>
-      t?.tabRenderer?.content?.richGridRenderer
-    );
-    const contents: any[] = videosTab?.tabRenderer?.content?.richGridRenderer?.contents || [];
-
-    const items: NewsItem[] = [];
-    for (const c of contents.slice(0, limit)) {
-      const video = c?.richItemRenderer?.content?.videoRenderer;
-      if (!video) continue;
-      const title = video?.title?.runs?.[0]?.text || video?.title?.simpleText;
-      const publishedText = video?.publishedTimeText?.simpleText;
-      const viewCountText = video?.viewCountText?.simpleText || video?.shortViewCountText?.simpleText;
-
-      if (!title) continue;
-
-      items.push({
-        title: title.trim(),
-        source: channelName,
-        type: "youtube",
-        date: publishedText || "",
-        score: viewCountText
-          ? parseInt(viewCountText.replace(/[^0-9]/g, "")) || 0
-          : 0,
-      });
-    }
-    return items;
-  } catch {
-    return [];
-  }
-}
-
-async function fetchYouTubeCompetitors(): Promise<NewsItem[]> {
-  // Mick Talks Hoops covers WNBA hourly — use the page scraper to get ~100 videos.
-  // Rachel DeMita also uploads frequently — scrape for more history.
-  // Other channels use RSS (15 latest, sufficient for narrative channels).
-  const scrapeChannels = [
-    { id: "UCcT4c8glrjIO0pIVzJ6BWbg", name: "Mick Talks Hoops", limit: 100 },
-    { id: "UCBS2RdExOLDYVLnfsZ2Q4-w", name: "Rachel DeMita", limit: 30 },
-  ];
-
-  const rssChannels = [
-    { id: "UCvWdLRqA7R2Gggisxn4Xkhg", name: "From The Logo", filterCC: false, pullCount: 10 },
-    { id: "UCYZOGKxkcE3BUwF5HfuzP1w", name: "Hoop Reports", filterCC: true, pullCount: 10 },
-    { id: "UCj7OqYE9cNEzT6y_-Z3BdbA", name: "Basketball Top Stories", filterCC: true, pullCount: 10 },
-  ];
-
-  // Run scrapers in parallel
-  const scraped = await Promise.all(
-    scrapeChannels.map((c) => scrapeYouTubeChannel(c.id, c.name, c.limit))
-  );
-  const items: NewsItem[] = scraped.flat();
-
-  for (const channel of rssChannels) {
-    try {
-      const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
-      const res = await fetch(url, {
-        signal: AbortSignal.timeout(6000),
-        headers: { "User-Agent": "Mozilla/5.0" },
-      });
-      if (!res.ok) continue;
-      const xml = await res.text();
-
-      const entries = xml.match(/<entry>[\s\S]*?<\/entry>/g) || [];
-      for (const entry of entries.slice(0, channel.pullCount)) {
-        const titleMatch = entry.match(/<title>(.*?)<\/title>/);
-        const publishedMatch = entry.match(/<published>(.*?)<\/published>/);
-        const viewsMatch = entry.match(/views="(\d+)"/);
-
-        const title = titleMatch?.[1]?.trim();
-        if (!title) continue;
-
-        if (channel.filterCC) {
-          // Filter for CC/WNBA/Fever content
-          const lower = title.toLowerCase();
-          if (
-            !lower.includes("caitlin") &&
-            !lower.includes("clark") &&
-            !lower.includes("wnba") &&
-            !lower.includes("fever") &&
-            !lower.includes("indiana")
-          ) {
-            continue;
-          }
-        }
-
-        items.push({
-          title,
-          source: channel.name,
-          type: "youtube",
-          date: publishedMatch?.[1]?.slice(0, 10),
-          score: viewsMatch ? parseInt(viewsMatch[1]) : 0,
-        });
-      }
-    } catch {
-      /* continue */
-    }
-  }
-  return items;
-}
-
-// ===========================================================================
-// RSS feeds from specific outlets
-// ===========================================================================
-
-async function fetchOutletRSS(): Promise<NewsItem[]> {
-  const feeds = [
-    { url: "https://www.si.com/.rss/full/", name: "Sports Illustrated" },
-    { url: "https://clutchpoints.com/wnba/feed", name: "ClutchPoints WNBA" },
-    { url: "https://www.bleacherreport.com/articles/feed?tag_id=1020", name: "Bleacher Report WNBA" },
-  ];
-
-  const items: NewsItem[] = [];
-  for (const feed of feeds) {
-    try {
-      const res = await fetch(feed.url, {
-        signal: AbortSignal.timeout(6000),
-        headers: { "User-Agent": "Mozilla/5.0" },
-      });
-      if (!res.ok) continue;
-      const xml = await res.text();
-
-      const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
-      for (const block of itemBlocks.slice(0, 15)) {
-        const titleMatch = block.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || block.match(/<title>(.*?)<\/title>/);
-        const title = titleMatch?.[1]?.trim();
-        if (!title || title.length < 15) continue;
-
-        // Only keep CC/Fever/WNBA related
-        const lower = title.toLowerCase();
-        if (!lower.includes("caitlin") && !lower.includes("clark") &&
-            !lower.includes("wnba") && !lower.includes("fever") &&
-            !lower.includes("indiana")) continue;
-
-        items.push({
-          title,
-          source: feed.name,
-          type: "rss",
-        });
-      }
-    } catch { /* continue */ }
-  }
-  return items;
-}
-
-// ===========================================================================
 // Aggregator — formats everything for the AI prompt
 // ===========================================================================
 
 export async function fetchAllNewsSources(): Promise<string> {
-  const [gnews, reddit, youtube, rss] = await Promise.all([
+  const [journalism, twitter, outlet, gnews, competitors] = await Promise.all([
+    fetchYouTubeJournalism(),
+    fetchTwitter(),
+    fetchOutletNews(),
     fetchGoogleNews(),
-    fetchReddit(),
     fetchYouTubeCompetitors(),
-    fetchOutletRSS(),
   ]);
 
-  // Dedupe by title
   const seen = new Set<string>();
   const dedupe = (items: NewsItem[]): NewsItem[] =>
     items.filter((i) => {
@@ -298,54 +299,61 @@ export async function fetchAllNewsSources(): Promise<string> {
 
   const sections: string[] = [];
 
-  const uniqGnews = dedupe(gnews).slice(0, 15);
-  if (uniqGnews.length) {
-    sections.push("=== MAINSTREAM NEWS (Google News) ===");
-    sections.push(uniqGnews.map((i, n) => `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`).join("\n"));
-  }
-
-  const uniqRss = dedupe(rss).slice(0, 10);
-  if (uniqRss.length) {
-    sections.push("\n=== OUTLET DEEP COVERAGE (SI, ClutchPoints, BR) ===");
-    sections.push(uniqRss.map((i, n) => `${n + 1}. "${i.title}" — ${i.source}`).join("\n"));
-  }
-
-  const uniqReddit = dedupe(reddit).slice(0, 25);
-  if (uniqReddit.length) {
-    sections.push("\n=== FAN COMMUNITY DISCUSSION (Reddit) ===");
+  const uniqJournalism = dedupe(journalism).slice(0, 80);
+  if (uniqJournalism.length) {
+    sections.push("=== WNBA JOURNALISM VIDEOS (Mick Talks Hoops + Rachel DeMita — PRIMARY STORYLINE SOURCE) ===");
     sections.push(
-      uniqReddit
-        .map((i, n) => `${n + 1}. [${i.score}↑] "${i.title}" — ${i.source}${i.snippet ? ` | ${i.snippet.slice(0, 120)}...` : ""}`)
+      uniqJournalism
+        .map((i, n) => {
+          const base = `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`;
+          return i.snippet ? `${base}\n   ↳ ${i.snippet.slice(0, 180)}` : base;
+        })
         .join("\n")
     );
   }
 
-  // Split YouTube into journalism channels (Mick/Rachel — real-time WNBA news)
-  // vs. narrative competitor channels (Hoop Reports/BTS/FTL — what they're covering)
-  const journalismChannels = new Set(["Mick Talks Hoops", "Rachel DeMita"]);
-  const uniqYoutubeJournalism = dedupe(youtube.filter((i) => journalismChannels.has(i.source))).slice(0, 60);
-  const uniqYoutubeCompetitor = dedupe(youtube.filter((i) => !journalismChannels.has(i.source))).slice(0, 20);
-
-  if (uniqYoutubeJournalism.length) {
-    sections.push("\n=== WNBA JOURNALISM VIDEOS (Mick Talks Hoops, Rachel DeMita — trending storylines) ===");
+  const uniqTwitter = dedupe(twitter).slice(0, 50);
+  if (uniqTwitter.length) {
+    sections.push("\n=== TWITTER / X (Clark Report + Ken Swift — breaking takes and drama) ===");
     sections.push(
-      uniqYoutubeJournalism
+      uniqTwitter
+        .map((i, n) => `${n + 1}. ${i.source}: "${i.title}"${i.date ? ` (${i.date})` : ""}`)
+        .join("\n")
+    );
+  }
+
+  const uniqOutlet = dedupe(outlet).slice(0, 20);
+  if (uniqOutlet.length) {
+    sections.push("\n=== OUTLET DEEP COVERAGE (SI, ClutchPoints, Athlon Sports) ===");
+    sections.push(
+      uniqOutlet
         .map((i, n) => `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`)
         .join("\n")
     );
   }
 
-  if (uniqYoutubeCompetitor.length) {
-    sections.push("\n=== COMPETITOR VIDEO TITLES (what other CC channels are covering) ===");
+  const uniqGnews = dedupe(gnews).slice(0, 15);
+  if (uniqGnews.length) {
+    sections.push("\n=== GENERAL MAINSTREAM NEWS (Google News) ===");
     sections.push(
-      uniqYoutubeCompetitor
+      uniqGnews
+        .map((i, n) => `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`)
+        .join("\n")
+    );
+  }
+
+  const uniqCompetitors = dedupe(competitors).slice(0, 15);
+  if (uniqCompetitors.length) {
+    sections.push("\n=== COMPETITOR CC CHANNELS (what they're covering — don't copy, but see what's resonating) ===");
+    sections.push(
+      uniqCompetitors
         .map((i, n) => `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`)
         .join("\n")
     );
   }
 
   if (sections.length === 0) {
-    return "No news could be fetched from any source. Fall back to evergreen Caitlin Clark career moments.";
+    return "No news could be fetched. Fall back to evergreen Caitlin Clark career moments.";
   }
 
   return sections.join("\n");

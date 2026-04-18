@@ -106,17 +106,17 @@ ${freshNews}
 
 === HOW TO USE THE SOURCES (priority order) ===
 
-1. **WNBA JOURNALISM VIDEOS (Mick Talks Hoops, Rachel DeMita)** — HIGHEST PRIORITY. These journalists break WNBA/CC stories multiple times per day. Each title is a storyline with real characters. If you see overlap (e.g. multiple Mick videos about one topic this week), that's a hot story.
+1. **WNBA JOURNALISM VIDEOS (Mick Talks Hoops + Rachel DeMita)** — HIGHEST PRIORITY. Mick covers WNBA hourly. Rachel DeMita does deeper WNBA journalism. Each title is a live storyline. Look for TOPIC CLUSTERS — if 3+ Mick videos cover the same theme this week, that's a guaranteed hot story.
 
-2. **FAN COMMUNITY (Reddit)** — High-upvote posts show what fans are actually arguing about. Specific quotes, specific incidents, named villains.
+2. **TWITTER / X (@CClarkReport + @kenswift)** — Real-time reactions, breaking news, specific quotes and tweets. These often contain the exact viral moments and hater takes. When a tweet goes viral, it becomes a pitch.
 
-3. **OUTLET DEEP COVERAGE (SI, ClutchPoints, BR)** — Longer narratives for pitch depth.
+3. **OUTLET DEEP COVERAGE (SI, ClutchPoints, Athlon Sports)** — Longer narrative pieces with named characters. Goldmine for pitch angles.
 
-4. **COMPETITOR VIDEO TITLES** — What Hoop Reports / BTS / From The Logo are covering. Don't copy, but see what's resonating.
+4. **GENERAL MAINSTREAM NEWS (Google News)** — Basic facts, games, announcements. Thinnest source.
 
-5. **MAINSTREAM NEWS (Google News)** — Basic facts only. Thinnest source.
+5. **COMPETITOR CC CHANNELS** — What Hoop Reports / BTS / From The Logo are covering. Don't copy, but use to see which angles are resonating.
 
-**KEY INSIGHT**: When Mick Talks Hoops + Rachel DeMita both cover a storyline AND it shows up on Reddit, that's a guaranteed viral pitch. Cross-reference these three for the best stories.
+**KEY CROSS-REFERENCE INSIGHT**: When (Mick OR Rachel) cover a topic AND (@CClarkReport OR @kenswift) tweet about it AND an outlet writes it up — that's a three-way confirmation. These stories get 2-5x more views than any single-source pitch.
 
 === ALREADY COVERED — DO NOT RECREATE ===
 ${coveredTopics}
