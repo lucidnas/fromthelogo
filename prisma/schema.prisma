@@ -78,3 +78,10 @@ model ChannelStat {
   publishedAt DateTime
   lastChecked DateTime @default(now())
 }
+
+model ThumbnailAnalysis {
+  id        Int      @id @default(autoincrement())
+  analysis  String   @db.Text
+  videoIds  String[]
+  createdAt DateTime @default(now())
+}
