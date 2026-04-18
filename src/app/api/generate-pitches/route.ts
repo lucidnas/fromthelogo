@@ -104,6 +104,20 @@ ${templates}
 === CURRENT STORIES (the news to adapt the templates to) ===
 ${freshNews}
 
+=== HOW TO USE THE SOURCES (priority order) ===
+
+1. **WNBA JOURNALISM VIDEOS (Mick Talks Hoops, Rachel DeMita)** — HIGHEST PRIORITY. These journalists break WNBA/CC stories multiple times per day. Each title is a storyline with real characters. If you see overlap (e.g. multiple Mick videos about one topic this week), that's a hot story.
+
+2. **FAN COMMUNITY (Reddit)** — High-upvote posts show what fans are actually arguing about. Specific quotes, specific incidents, named villains.
+
+3. **OUTLET DEEP COVERAGE (SI, ClutchPoints, BR)** — Longer narratives for pitch depth.
+
+4. **COMPETITOR VIDEO TITLES** — What Hoop Reports / BTS / From The Logo are covering. Don't copy, but see what's resonating.
+
+5. **MAINSTREAM NEWS (Google News)** — Basic facts only. Thinnest source.
+
+**KEY INSIGHT**: When Mick Talks Hoops + Rachel DeMita both cover a storyline AND it shows up on Reddit, that's a guaranteed viral pitch. Cross-reference these three for the best stories.
+
 === ALREADY COVERED — DO NOT RECREATE ===
 ${coveredTopics}
 

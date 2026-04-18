@@ -109,16 +109,80 @@ async function fetchReddit(): Promise<NewsItem[]> {
 // YouTube competitors — recent video titles
 // ===========================================================================
 
+// Scrape a YouTube channel page HTML to get recent video titles (up to ~30).
+// Works without cookies for public channels.
+async function scrapeYouTubeChannel(channelId: string, channelName: string, limit: number): Promise<NewsItem[]> {
+  try {
+    const url = `https://www.youtube.com/channel/${channelId}/videos`;
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+
+    // Extract the ytInitialData JSON embedded in the page
+    const match = html.match(/var ytInitialData = (\{.+?\});<\/script>/);
+    if (!match) return [];
+
+    const data = JSON.parse(match[1]);
+    const tabs = data?.contents?.twoColumnBrowseResultsRenderer?.tabs || [];
+    const videosTab = tabs.find((t: any) =>
+      t?.tabRenderer?.content?.richGridRenderer
+    );
+    const contents: any[] = videosTab?.tabRenderer?.content?.richGridRenderer?.contents || [];
+
+    const items: NewsItem[] = [];
+    for (const c of contents.slice(0, limit)) {
+      const video = c?.richItemRenderer?.content?.videoRenderer;
+      if (!video) continue;
+      const title = video?.title?.runs?.[0]?.text || video?.title?.simpleText;
+      const publishedText = video?.publishedTimeText?.simpleText;
+      const viewCountText = video?.viewCountText?.simpleText || video?.shortViewCountText?.simpleText;
+
+      if (!title) continue;
+
+      items.push({
+        title: title.trim(),
+        source: channelName,
+        type: "youtube",
+        date: publishedText || "",
+        score: viewCountText
+          ? parseInt(viewCountText.replace(/[^0-9]/g, "")) || 0
+          : 0,
+      });
+    }
+    return items;
+  } catch {
+    return [];
+  }
+}
+
 async function fetchYouTubeCompetitors(): Promise<NewsItem[]> {
-  // Use YouTube RSS feeds (no API key required)
-  const channels = [
-    { id: "UCvWdLRqA7R2Gggisxn4Xkhg", name: "From The Logo" }, // the user's own channel
-    { id: "UCYZOGKxkcE3BUwF5HfuzP1w", name: "Hoop Reports" },
-    { id: "UCj7OqYE9cNEzT6y_-Z3BdbA", name: "Basketball Top Stories" },
+  // Mick Talks Hoops covers WNBA hourly — use the page scraper to get ~100 videos.
+  // Rachel DeMita also uploads frequently — scrape for more history.
+  // Other channels use RSS (15 latest, sufficient for narrative channels).
+  const scrapeChannels = [
+    { id: "UCcT4c8glrjIO0pIVzJ6BWbg", name: "Mick Talks Hoops", limit: 100 },
+    { id: "UCBS2RdExOLDYVLnfsZ2Q4-w", name: "Rachel DeMita", limit: 30 },
   ];
 
-  const items: NewsItem[] = [];
-  for (const channel of channels) {
+  const rssChannels = [
+    { id: "UCvWdLRqA7R2Gggisxn4Xkhg", name: "From The Logo", filterCC: false, pullCount: 10 },
+    { id: "UCYZOGKxkcE3BUwF5HfuzP1w", name: "Hoop Reports", filterCC: true, pullCount: 10 },
+    { id: "UCj7OqYE9cNEzT6y_-Z3BdbA", name: "Basketball Top Stories", filterCC: true, pullCount: 10 },
+  ];
+
+  // Run scrapers in parallel
+  const scraped = await Promise.all(
+    scrapeChannels.map((c) => scrapeYouTubeChannel(c.id, c.name, c.limit))
+  );
+  const items: NewsItem[] = scraped.flat();
+
+  for (const channel of rssChannels) {
     try {
       const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
       const res = await fetch(url, {
@@ -129,7 +193,7 @@ async function fetchYouTubeCompetitors(): Promise<NewsItem[]> {
       const xml = await res.text();
 
       const entries = xml.match(/<entry>[\s\S]*?<\/entry>/g) || [];
-      for (const entry of entries.slice(0, 10)) {
+      for (const entry of entries.slice(0, channel.pullCount)) {
         const titleMatch = entry.match(/<title>(.*?)<\/title>/);
         const publishedMatch = entry.match(/<published>(.*?)<\/published>/);
         const viewsMatch = entry.match(/views="(\d+)"/);
@@ -137,11 +201,19 @@ async function fetchYouTubeCompetitors(): Promise<NewsItem[]> {
         const title = titleMatch?.[1]?.trim();
         if (!title) continue;
 
-        // Filter for CC/WNBA/Fever content
-        const lower = title.toLowerCase();
-        if (!lower.includes("caitlin") && !lower.includes("clark") &&
-            !lower.includes("wnba") && !lower.includes("fever") &&
-            !lower.includes("indiana")) continue;
+        if (channel.filterCC) {
+          // Filter for CC/WNBA/Fever content
+          const lower = title.toLowerCase();
+          if (
+            !lower.includes("caitlin") &&
+            !lower.includes("clark") &&
+            !lower.includes("wnba") &&
+            !lower.includes("fever") &&
+            !lower.includes("indiana")
+          ) {
+            continue;
+          }
+        }
 
         items.push({
           title,
@@ -151,7 +223,9 @@ async function fetchYouTubeCompetitors(): Promise<NewsItem[]> {
           score: viewsMatch ? parseInt(viewsMatch[1]) : 0,
         });
       }
-    } catch { /* continue */ }
+    } catch {
+      /* continue */
+    }
   }
   return items;
 }
@@ -246,11 +320,27 @@ export async function fetchAllNewsSources(): Promise<string> {
     );
   }
 
-  const uniqYoutube = dedupe(youtube).slice(0, 15);
-  if (uniqYoutube.length) {
+  // Split YouTube into journalism channels (Mick/Rachel — real-time WNBA news)
+  // vs. narrative competitor channels (Hoop Reports/BTS/FTL — what they're covering)
+  const journalismChannels = new Set(["Mick Talks Hoops", "Rachel DeMita"]);
+  const uniqYoutubeJournalism = dedupe(youtube.filter((i) => journalismChannels.has(i.source))).slice(0, 60);
+  const uniqYoutubeCompetitor = dedupe(youtube.filter((i) => !journalismChannels.has(i.source))).slice(0, 20);
+
+  if (uniqYoutubeJournalism.length) {
+    sections.push("\n=== WNBA JOURNALISM VIDEOS (Mick Talks Hoops, Rachel DeMita — trending storylines) ===");
+    sections.push(
+      uniqYoutubeJournalism
+        .map((i, n) => `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`)
+        .join("\n")
+    );
+  }
+
+  if (uniqYoutubeCompetitor.length) {
     sections.push("\n=== COMPETITOR VIDEO TITLES (what other CC channels are covering) ===");
     sections.push(
-      uniqYoutube.map((i, n) => `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`).join("\n")
+      uniqYoutubeCompetitor
+        .map((i, n) => `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`)
+        .join("\n")
     );
   }
 
