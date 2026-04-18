@@ -40,7 +40,7 @@ Every single title has CAITLIN CLARK's name. Non-negotiable.
 
 === TWO COLD OPEN STYLES — MIX BOTH ===
 
-You have TWO proven cold open approaches. Each pitch should clearly be ONE or the OTHER. Aim for a 3:2 mix — 3 punchy FTL-style, 2 epic Hoop Reports-style.
+You have TWO proven cold open approaches. Each pitch should clearly be ONE or the OTHER. Aim for a 6:4 mix — 6 punchy FTL-style, 4 epic Hoop Reports-style.
 
 STYLE A: **FROM THE LOGO — Punchy/Reactive** (use when there's a named villain or specific dramatic moment)
 Fast, emotional, drops viewer into the moment immediately. Works when there's fresh drama/quotes to build from.
@@ -224,9 +224,9 @@ ${coveredTopics}
 
 === INSTRUCTIONS ===
 
-1. Read the fresh news carefully. Identify the 3 stories with the most narrative potential — where there's a named villain, a specific moment, and stakes.
-2. For each of those 3 stories, construct a full Hoop Reports-style pitch with all 4 required elements (epic framing, named villain + quote, concrete vindication, bigger stakes).
-3. Generate 2 MORE pitches that are pure evergreen — career milestones, untold moments, specific games that haven't been covered yet. These should also have all 4 elements.
+1. Read the fresh news carefully. Identify the 6 stories with the most narrative potential — where there's a named villain, a specific moment, and stakes.
+2. For each of those 6 stories, construct a full pitch with all 4 required elements (cold open type, named villain/trigger, concrete vindication, payoff stakes).
+3. Generate 4 MORE pitches that are pure evergreen — career milestones, untold moments, specific games that haven't been covered yet. These should also have all 4 elements.
 4. Every pitch MUST have a specific named villain with a specific quote or action. If you can't find one, skip that pitch and find a different angle.
 5. Do NOT regurgitate the news headlines as titles. Transform them into narrative stories.
 6. Do NOT suggest anything similar to the "already covered" list.
@@ -236,9 +236,9 @@ OUTPUT FORMAT — critical:
 - No markdown code fences (no \`\`\`json or \`\`\`)
 - No explanation before or after the JSON
 - Structure: { "pitches": [ { ...pitch... }, { ...pitch... }, ... ] }
-- Exactly 5 pitches in the array
+- Exactly 10 pitches in the array
 
-All 5 pitches must have "Caitlin Clark" in the title. All 5 must pass the focus test and the 4-element test. If you can't generate 5 that pass, generate fewer — quality over quantity.`;
+All 10 pitches must have "Caitlin Clark" in the title. All 10 must pass the focus test and the 4-element test. If you can't generate 5 that pass, generate fewer — quality over quantity.`;
 
     const result = await generateText(prompt, SYSTEM_PROMPT);
 

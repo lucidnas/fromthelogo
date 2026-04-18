@@ -465,7 +465,7 @@ export default function PitchesPage() {
           ) : (
             <RefreshCw className="w-4 h-4" />
           )}
-          {refreshing ? "Generating 5 pitches..." : "Refresh with AI"}
+          {refreshing ? "Generating 10 pitches..." : "Refresh with AI"}
         </button>
       </div>
 
@@ -482,14 +482,14 @@ export default function PitchesPage() {
               </div>
               <h3 className="mt-6 text-xl font-semibold text-white">Generating Pitches</h3>
               <p className="mt-2 text-sm text-gray-400 text-center">
-                Scanning fresh Caitlin Clark news, analyzing your covered topics, and crafting 5 new narrative pitches with Opus 4.7...
+                Scanning fresh Caitlin Clark news, analyzing your covered topics, and crafting 10 new narrative pitches with Opus 4.7...
               </p>
               <div className="mt-4 w-full">
                 <div className="h-1 bg-purple-500/10 rounded-full overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-purple-500 to-violet-500 animate-pulse" style={{ width: "70%" }} />
                 </div>
               </div>
-              <p className="mt-3 text-xs text-gray-500">This usually takes 30-60 seconds</p>
+              <p className="mt-3 text-xs text-gray-500">This usually takes 60-120 seconds</p>
             </div>
           </div>
         </div>
