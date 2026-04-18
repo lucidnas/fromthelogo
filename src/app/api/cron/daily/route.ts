@@ -80,7 +80,7 @@ ${coveredTopics}
     }
 
     const provider = process.env.AI_PROVIDER || "anthropic";
-    const model = process.env.AI_MODEL || "claude-sonnet-4-6";
+    const model = process.env.AI_MODEL || "claude-opus-4-7";
 
     const created = await Promise.all(
       pitches.map((p: { title: string; format: string; pitchType?: string; angle: string; hookLine: string; talkingPoints: string[]; performanceScore: number }) =>

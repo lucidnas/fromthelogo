@@ -6,7 +6,7 @@ export async function generateText(
   systemPrompt?: string
 ): Promise<AIResponse> {
   const provider = (process.env.AI_PROVIDER || "anthropic") as AIProvider;
-  const model = process.env.AI_MODEL || "claude-sonnet-4-6";
+  const model = process.env.AI_MODEL || "claude-opus-4-7";
 
   switch (provider) {
     case "anthropic":
