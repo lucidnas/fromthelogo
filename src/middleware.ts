@@ -14,6 +14,12 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Accept internal cron calls via x-cron-secret header
+  const cronSecret = req.headers.get("x-cron-secret");
+  if (cronSecret && cronSecret === process.env.CRON_SECRET) {
+    return NextResponse.next();
+  }
+
   const token = req.cookies.get("ftl_auth")?.value;
 
   if (!token) {

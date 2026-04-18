@@ -85,3 +85,18 @@ model ThumbnailAnalysis {
   videoIds  String[]
   createdAt DateTime @default(now())
 }
+
+// Titles scraped from reference channels (Hoop Reports, DKM, JxmyHighroller)
+// Used as templates for generating pitches that adapt proven viral frameworks
+// to current Caitlin Clark / Fever news.
+model TitleTemplate {
+  id            Int      @id @default(autoincrement())
+  youtubeId     String   @unique
+  title         String
+  channel       String   // "hoop-reports" | "dkm" | "jxmy"
+  views         Int
+  duration      Int
+  subject       String   // "curry-warriors" | "nba-general" | "cc-wnba" | "other"
+  pattern       String?  // extracted title pattern: "the-day" | "trash-talk" | "why-scared" | etc
+  createdAt     DateTime @default(now())
+}

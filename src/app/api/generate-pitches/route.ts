@@ -3,226 +3,149 @@ import { generateText } from "@/lib/ai";
 import { prisma } from "@/lib/db";
 import { fetchAllNewsSources } from "@/lib/news-sources";
 
-const SYSTEM_PROMPT = `You are the lead content strategist for "From The Logo" — a YouTube channel about Caitlin Clark and the Indiana Fever, modeled after Hoop Reports (who built 500K+ subs covering Steph Curry/Warriors) and DKM Sports.
+const SYSTEM_PROMPT = `You are the lead content strategist for "From The Logo" — a YouTube channel about Caitlin Clark and the Indiana Fever.
 
-You generate pitches that are READY TO SCRIPT. Not surface-level headlines. Deep narratives.
+Your approach is ADAPTATION, not invention. You take proven viral title frameworks from three reference channels (Hoop Reports, DKM, JxmyHighroller) and adapt them to current Caitlin Clark storylines.
 
-=== ABSOLUTE FOCUS RULE (non-negotiable) ===
+=== THE METHODOLOGY ===
 
-This is THE Caitlin Clark channel. Every single pitch must be ABOUT Caitlin Clark, not adjacent to her. The way Hoop Reports was THE Steph Curry channel — not "NBA stories that mention Curry," but CURRY stories.
+For each pitch:
+1. PICK a proven high-performing title from the template library (you'll be given the library)
+2. IDENTIFY a current story from the news sources that naturally fits that template's structure
+3. ADAPT the title — swap in Caitlin Clark / Fever / WNBA characters and specifics
+4. BUILD the pitch around that story with the same narrative DNA
 
-**REQUIRED:**
-- "Caitlin Clark" MUST appear in every title. No exceptions.
-- The main character of every video is Caitlin Clark. She's the hero, the subject, the reason people clicked.
-- Fever stories are allowed ONLY when Clark is the protagonist of that story (e.g. "How Caitlin Clark Turned Indiana Into A Championship Team")
-- Teammate stories work ONLY through Clark's lens (e.g. "How Caitlin Clark SAVED Sophie Cunningham's Career")
+Example:
+- Template: "The Day Steph Curry Exposed the Rockets" (Hoop Reports, 600K views)
+- Current news: "Caitlin Clark drops 40 on Connecticut Sun in OT win"
+- Adapted title: "The Day Caitlin Clark Exposed the Connecticut Sun"
+- Pitch: Story about the specific game, the doubters before, the 40-point response, what it proved
 
-**REJECT these angles (they fail the focus test):**
-- ❌ Stories about other WNBA rookies, even if Clark is mentioned
-- ❌ Boston/Sophie/Fever teammate stories where THEY are the main character
-- ❌ General WNBA business/CBA stories
-- ❌ Stories where Clark is a supporting reference, not the subject
+=== NON-NEGOTIABLE RULES ===
 
-**KEEP these angles (they pass):**
-- ✅ "The Day Caitlin Clark [verb] [target]"
-- ✅ "How Caitlin Clark [did something]"
-- ✅ "Caitlin Clark's [thing]"
-- ✅ "The Story Of Why [someone] [action about] Caitlin Clark"
-- ✅ "This Is Why [bold claim] About Caitlin Clark"
-- ✅ "The WNBA/[Person] Just [action] Caitlin Clark.. But It Backfired"
+1. Title MUST include "Caitlin Clark" (or an opponent's name where Clark is the subject). This is THE Caitlin Clark channel.
+2. Each pitch must cite BOTH:
+   a) The specific template title it's adapted from (with channel + views)
+   b) The specific current news story it's based on (with source)
+3. The pitch must have a named villain with a specific quote or specific action.
+4. The pitch must have a concrete vindication moment with stats or a specific play.
+5. Do NOT generate pitches for topics already in the "already covered" list.
 
-Model it after Hoop Reports' Curry videos — their top titles:
-- "The Day Caitlin Clark Exposed USA Basketball" (2.4M)
-- "The Day Caitlin Clark Showed Her WNBA Bully Who's Boss" (2.7M)
-- "The WNBA Will Regret Losing Caitlin Clark" (1.9M)
-- "How Caitlin Clark SAVED Lexie Hull's WNBA Career" (383K)
+=== OUTPUT FORMAT ===
 
-Every single title has CAITLIN CLARK's name. Non-negotiable.
+JSON only, no markdown, no explanation. Structure:
+{
+  "pitches": [
+    {
+      "title": "The adapted CC title (must include Caitlin Clark)",
+      "templateTitle": "The original template title it was adapted from",
+      "templateChannel": "hoop-reports | dkm | jxmy",
+      "templateViews": 500000,
+      "sourceNews": "The news story or fan discussion this is based on",
+      "sourceChannel": "Reddit r/wnba | Sports Illustrated | etc",
+      "format": "evergreen",
+      "pitchType": "evergreen",
+      "angle": "2-3 sentence explanation covering: the villain, the vindication moment, the stakes",
+      "hookLine": "The first 2-3 sentences of the video — cold open style",
+      "talkingPoints": ["4 talking points"],
+      "performanceScore": 75
+    }
+  ]
+}
 
-=== TWO COLD OPEN STYLES — MIX BOTH ===
+Aim for 10 pitches. Each must adapt a DIFFERENT template. Prefer templates with the highest views.`;
 
-You have TWO proven cold open approaches. Each pitch should clearly be ONE or the OTHER. Aim for a 6:4 mix — 6 punchy FTL-style, 4 epic Hoop Reports-style.
+async function getTemplateLibrary(): Promise<string> {
+  // Get top-performing templates across all 3 channels
+  // Prioritize Curry/Warriors content (most directly adaptable to CC) and high-view videos
+  const templates = await prisma.titleTemplate.findMany({
+    where: {
+      views: { gt: 100000 }, // Only high-performing templates
+    },
+    orderBy: { views: "desc" },
+    take: 80,
+  });
 
-STYLE A: **FROM THE LOGO — Punchy/Reactive** (use when there's a named villain or specific dramatic moment)
-Fast, emotional, drops viewer into the moment immediately. Works when there's fresh drama/quotes to build from.
-
-STYLE B: **HOOP REPORTS — Epic/Evergreen** (use when there's no fresh villain but the story is big enough)
-Historical framing, generational talent positioning. Works for career retrospectives, records, deep analyses. More scalable — doesn't need a viral moment.
-
-Hoop Reports epic examples (up to 2.7M views):
-- "At just 22 years old, Caitlin Clark has already redefined the landscape of women's basketball..."
-- "In every sports league a generational talent inevitably rises... Phelps in swimming, Ali in boxing, Jordan in basketball..."
-- "I've been a passionate NBA fan for more than two decades. None of these however compared to the trials Caitlin Clark has faced..."
-
-The key question for each pitch: **Do I have a specific viral villain moment?** If yes, use Style A. If no but the topic is epic enough to stand on narrative alone, use Style B.
-
-**1. THE COLD OPEN — pick a type based on style:**
-
-For STYLE A (Punchy/Reactive) — use ONE of:
-
-A1) **BAD ACT ON CLARK** — describe a specific foul, cheap shot, or dirty play
-   Example (2.05M views): "So here's Aaliyah Boston stealing the ball and finding Caitlin Clark on the break. But as soon as she's about to build up a head of steam, Diamond DeShields just bulldozed her out of nowhere and even laughed it off afterward."
-
-A2) **EMOTIONAL QUOTE FROM A HATER** — drop a named person's actual quote as the opener
-   Example (1.07M views): "'I get two shits.' That's how Cheryl Reeve welcomed Caitlin Clark to Minnesota."
-
-A3) **AMAZING SKILL MOMENT** — a specific play that shows Clark's greatness
-   Example: "Clark brings it up, waves off the screen, pulls up from 33 feet. Splash. From the logo. Again."
-
-For STYLE B (Epic/Evergreen) — use ONE of:
-
-B1) **GENERATIONAL FRAMING** — position Clark against historical greats
-   Example: "In every sports league a generational talent inevitably rises. Phelps. Ali. Jordan. And now — Caitlin Clark."
-
-B2) **STATISTICAL BOMBSHELL** — lead with a stat that stops the scroll
-   Example: "First in fast break points. First in assists. First in three-pointers made. At just 22 years old, Caitlin Clark has already redefined women's basketball."
-
-B3) **REFLECTIVE SETUP** — personal observation that builds weight
-   Example: "I've been a passionate basketball fan for more than two decades. I've never seen anything quite like what Caitlin Clark is doing right now."
-
-**2. A SPECIFIC NAMED VILLAIN OR TRIGGERING PERSON**
-Not "the WNBA" — a NAMED PERSON. The cold open features THEM:
-- Diana Taurasi saying "I'm taking Paige. Next question."
-- Cheryl Reeve's dismissive comments
-- Sheryl Swoopes' false claims about shot attempts
-- A specific ref making a specific bad call
-- A specific opponent doing a dirty play
-
-**3. A CONCRETE VINDICATION MOMENT**
-A SPECIFIC moment with SPECIFIC stats where Clark answered back:
-- "38 points, 8 assists, 5 threes — including two from the logo"
-- "Clark dropped 10 in the 4th alone, outscoring the Lynx by herself"
-- "The Fever ran them off the floor 95-75"
-- Single game, single moment, real receipts.
-
-**4. THE PAYOFF STAKES**
-What this moment proved in ONE sentence:
-- "Clark doesn't need to talk. She just hoops."
-- "The WNBA tried to break her. They made her stronger."
-- "That's what happens when you come at number 22."
-
-=== TITLE PATTERNS (USE THESE EXACTLY) ===
-
-From The Logo's top performers (YOUR channel data):
-- "The Day [Person] [DRAMATIC PAST TENSE VERB] [Target]" — avg 800K views
-- "[Thing].. but they get increasingly [ADJECTIVE]" — avg 500K views
-- "The [Entity] [Action].. But it Backfired [SPECTACULARLY]" — avg 200K views
-
-Hoop Reports CC titles (up to 2.7M views):
-- "The Day Caitlin Clark [Showed Her Bully Who's Boss / Exposed USA Basketball / etc.]"
-- "The WNBA Will Regret [Losing/Doing Something To] Caitlin Clark"
-- "How Caitlin Clark SAVED [Person/Team]"
-- "The Story Of Why [Entity] Is Attacking Caitlin Clark"
-- "This Is How Caitlin Clark Is Saving The WNBA From [Something]"
-- "[Number] Times Caitlin Clark Proved Her Haters Wrong"
-
-=== REQUIRED OUTPUT PER PITCH ===
-
-Each pitch must include:
-- **title**: Dramatic, narrative-driven, using proven patterns above
-- **format**: "evergreen"
-- **pitchType**: "evergreen"
-- **angle**: Must explicitly identify:
-    a) The COLD OPEN TYPE (bad act / hater quote / amazing skill moment) + exactly what it shows
-    b) The SPECIFIC NAMED VILLAIN or triggering person (with their actual quote or action if possible)
-    c) The CONCRETE VINDICATION MOMENT (exact stats, exact game)
-    d) The PAYOFF (what this proves in one sentence)
-- **hookLine**: The actual first 2-3 sentences of the video. Must be either a provocative clip/quote from a hater, a description of a bad act on Clark, OR a description of her pulling off something amazing. NEVER start with "Caitlin Clark is amazing" or historical framing. Drop the viewer into the moment.
-- **talkingPoints**: 4 bullets, each a CHAPTER of the video (who's the villain, what they did, how Clark responded, what it means)
-- **performanceScore**: 1-100 based on how well this matches top-performing patterns
-
-Respond in this exact JSON format:
-{ "pitches": [{...}, {...}, {...}, {...}, {...}] }
-
-CRITICAL: If you can't identify a specific named villain with a specific quote for a pitch, DON'T generate that pitch. Go deeper. Find a real story with real characters.`;
+  return templates
+    .map((t) => `[${t.views.toLocaleString()} views][${t.channel}][${t.pattern}] "${t.title}"`)
+    .join("\n");
+}
 
 async function getAlreadyCoveredTopics(): Promise<string> {
   const channelVideos = await prisma.channelStat.findMany({
     select: { title: true },
     orderBy: { views: "desc" },
   });
-
   const pastPitches = await prisma.pitch.findMany({
     select: { title: true, status: true },
     orderBy: { createdAt: "desc" },
     take: 100,
   });
-
   const covered = channelVideos.map((v) => `- ${v.title} [PUBLISHED]`);
   const pitched = pastPitches.map((p) => `- ${p.title} [${p.status.toUpperCase()}]`);
-
   return [...covered, ...pitched].join("\n");
 }
 
 export async function POST() {
   try {
-    const [freshNews, coveredTopics] = await Promise.all([
+    const [freshNews, coveredTopics, templates] = await Promise.all([
       fetchAllNewsSources(),
       getAlreadyCoveredTopics(),
+      getTemplateLibrary(),
     ]);
 
-    const prompt = `Generate 10 deeply researched video pitches for today.
+    const prompt = `Generate 10 video pitches by ADAPTING proven viral titles to current Caitlin Clark / Fever / WNBA stories.
 
+=== PROVEN TITLE TEMPLATES (your raw material — pick from these) ===
+These are real titles from Hoop Reports, DKM, and JxmyHighroller with their view counts. Pick the ones that naturally adapt to a Caitlin Clark story. Each template shows [views][channel][pattern] "title".
+
+${templates}
+
+=== CURRENT STORIES (the news to adapt the templates to) ===
 ${freshNews}
 
-=== ALREADY COVERED — DO NOT REPEAT ===
-These topics/angles have been used. Find COMPLETELY different stories:
+=== ALREADY COVERED — DO NOT RECREATE ===
 ${coveredTopics}
 
-=== HOW TO USE THE SOURCES ===
-- MAINSTREAM NEWS = basic facts, recent games, official announcements
-- OUTLET DEEP COVERAGE = SI/BR/ClutchPoints longer narratives — goldmines for pitch ideas
-- FAN COMMUNITY (Reddit) = highest upvoted posts show what fans are ACTUALLY outraged or excited about. This is the VIRAL pulse. WEIGHT THESE HEAVILY — they tell you the real storylines driving discussion.
-- COMPETITOR VIDEOS = what other CC channels are covering. Don't copy their angles, but see what's RESONATING this week.
+=== YOUR TASK ===
 
-The Reddit posts especially will surface specific named villains, specific incidents, and viral moments that mainstream coverage misses. These are your best source for authentic storylines.
+For each of 10 pitches:
 
-=== INSTRUCTIONS ===
+1. Pick a template from the library above. Aim to use templates with 500K+ views when possible. Vary the patterns across pitches.
+2. Find a matching current story from the news sources (prioritize Reddit discussions and outlet coverage — those have the specific characters and incidents).
+3. Adapt the template by swapping in Caitlin Clark / Fever / WNBA names and specifics.
+4. The adapted title MUST include "Caitlin Clark" (or frame her as the subject).
+5. Verify:
+   - Is there a specific named villain with a quote or action?
+   - Is there a concrete vindication moment with stats or a specific play?
+   - Does this match a PROVEN viral framework?
+6. Reject and pick a different template/story if any element is missing.
 
-1. Read all the sources. Look for patterns — what's being discussed across multiple platforms?
-2. Identify 6 stories with the most narrative potential from the REDDIT + OUTLET sources (not just mainstream headlines). Look for named villains, specific incidents, viral moments.
-3. For each of those 6, construct a full pitch with all 4 required elements (cold open type, named villain/trigger, concrete vindication, payoff stakes).
-4. Generate 4 MORE pitches that are pure evergreen — career milestones, untold moments, specific past games that haven't been covered yet.
-5. Every pitch MUST have a specific named villain with a specific quote or action. Use Reddit posts to find these — the most upvoted threads usually have the specific receipts.
-6. Do NOT regurgitate the news headlines as titles. Transform them into narrative stories.
-7. Do NOT suggest anything similar to the "already covered" list.
+Vary the template patterns. Don't use 10 "The Day..." titles. Mix: "The Day", "This Is Why", "How [X] Became", "Why [X] Is Scared Of", "The Story Of Why", "[X] Times [Y] Did [Z]", etc.
 
-OUTPUT FORMAT — critical:
-- Respond with ONLY a valid JSON object, nothing else
-- No markdown code fences (no \`\`\`json or \`\`\`)
-- No explanation before or after the JSON
-- Structure: { "pitches": [ { ...pitch... }, { ...pitch... }, ... ] }
-- Exactly 10 pitches in the array
-
-All 10 pitches must have "Caitlin Clark" in the title. All 10 must pass the focus test and the 4-element test. If you can't generate 5 that pass, generate fewer — quality over quantity.`;
+Return ONLY the JSON object with 10 pitches. No markdown, no explanation.`;
 
     const result = await generateText(prompt, SYSTEM_PROMPT);
 
     let pitches;
     let rawText = result.text;
     try {
-      // Strip markdown code fences if present
       rawText = rawText.replace(/```(?:json)?\s*/g, "").replace(/```\s*$/g, "").trim();
-
-      // Try to find the pitches array first (more reliable than matching whole object)
       const pitchesArrayMatch = rawText.match(/"pitches"\s*:\s*(\[[\s\S]*?\])\s*\}?\s*$/);
       if (pitchesArrayMatch) {
-        // Try parsing just the array
         pitches = JSON.parse(pitchesArrayMatch[1]);
       } else {
-        // Fallback: greedy match for the outermost {...}
         const jsonMatch = rawText.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error("No JSON found in response");
         const parsed = JSON.parse(jsonMatch[0]);
         pitches = parsed.pitches;
       }
-
       if (!Array.isArray(pitches) || pitches.length === 0) {
         throw new Error("No pitches in parsed response");
       }
     } catch (parseError) {
-      console.error("Failed to parse AI response. Error:", parseError);
-      console.error("Raw text:", rawText.slice(0, 2000));
+      console.error("Failed to parse AI response:", parseError);
+      console.error("Raw:", rawText.slice(0, 2000));
       return NextResponse.json(
         {
           error: "Failed to parse AI response",
@@ -240,19 +163,28 @@ All 10 pitches must have "Caitlin Clark" in the title. All 10 must pass the focu
       pitches.map(
         (p: {
           title: string;
+          templateTitle?: string;
+          templateChannel?: string;
+          templateViews?: number;
+          sourceNews?: string;
+          sourceChannel?: string;
           format: string;
           pitchType?: string;
           angle: string;
           hookLine: string;
           talkingPoints: string[];
           performanceScore: number;
-        }) =>
-          prisma.pitch.create({
+        }) => {
+          // Embed template metadata into the angle so the user can see what it's based on
+          const metadataPrefix = p.templateTitle
+            ? `📐 Template: "${p.templateTitle}" (${p.templateChannel}, ${p.templateViews?.toLocaleString()} views)\n📰 Source: ${p.sourceNews || "N/A"} (${p.sourceChannel || "N/A"})\n\n`
+            : "";
+          return prisma.pitch.create({
             data: {
               title: p.title,
               format: "evergreen",
               pitchType: "evergreen",
-              angle: p.angle,
+              angle: metadataPrefix + p.angle,
               hookLine: p.hookLine,
               talkingPoints: p.talkingPoints,
               performanceScore: p.performanceScore || 0,
@@ -260,7 +192,8 @@ All 10 pitches must have "Caitlin Clark" in the title. All 10 must pass the focu
               aiProvider: provider,
               aiModel: model,
             },
-          })
+          });
+        }
       )
     );
 
@@ -269,7 +202,6 @@ All 10 pitches must have "Caitlin Clark" in the title. All 10 must pass the focu
       count: created.length,
       provider,
       model,
-      newsHeadlinesUsed: !freshNews.includes("No fresh news"),
     });
   } catch (error) {
     console.error("Pitch generation error:", error);
