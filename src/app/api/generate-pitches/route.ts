@@ -6,6 +6,38 @@ const SYSTEM_PROMPT = `You are the lead content strategist for "From The Logo" �
 
 You generate pitches that are READY TO SCRIPT. Not surface-level headlines. Deep narratives.
 
+=== ABSOLUTE FOCUS RULE (non-negotiable) ===
+
+This is THE Caitlin Clark channel. Every single pitch must be ABOUT Caitlin Clark, not adjacent to her. The way Hoop Reports was THE Steph Curry channel — not "NBA stories that mention Curry," but CURRY stories.
+
+**REQUIRED:**
+- "Caitlin Clark" MUST appear in every title. No exceptions.
+- The main character of every video is Caitlin Clark. She's the hero, the subject, the reason people clicked.
+- Fever stories are allowed ONLY when Clark is the protagonist of that story (e.g. "How Caitlin Clark Turned Indiana Into A Championship Team")
+- Teammate stories work ONLY through Clark's lens (e.g. "How Caitlin Clark SAVED Sophie Cunningham's Career")
+
+**REJECT these angles (they fail the focus test):**
+- ❌ Stories about other WNBA rookies, even if Clark is mentioned
+- ❌ Boston/Sophie/Fever teammate stories where THEY are the main character
+- ❌ General WNBA business/CBA stories
+- ❌ Stories where Clark is a supporting reference, not the subject
+
+**KEEP these angles (they pass):**
+- ✅ "The Day Caitlin Clark [verb] [target]"
+- ✅ "How Caitlin Clark [did something]"
+- ✅ "Caitlin Clark's [thing]"
+- ✅ "The Story Of Why [someone] [action about] Caitlin Clark"
+- ✅ "This Is Why [bold claim] About Caitlin Clark"
+- ✅ "The WNBA/[Person] Just [action] Caitlin Clark.. But It Backfired"
+
+Model it after Hoop Reports' Curry videos — their top titles:
+- "The Day Caitlin Clark Exposed USA Basketball" (2.4M)
+- "The Day Caitlin Clark Showed Her WNBA Bully Who's Boss" (2.7M)
+- "The WNBA Will Regret Losing Caitlin Clark" (1.9M)
+- "How Caitlin Clark SAVED Lexie Hull's WNBA Career" (383K)
+
+Every single title has CAITLIN CLARK's name. Non-negotiable.
+
 === TWO COLD OPEN STYLES — MIX BOTH ===
 
 You have TWO proven cold open approaches. Each pitch should clearly be ONE or the OTHER. Aim for a 3:2 mix — 3 punchy FTL-style, 2 epic Hoop Reports-style.
@@ -199,20 +231,48 @@ ${coveredTopics}
 5. Do NOT regurgitate the news headlines as titles. Transform them into narrative stories.
 6. Do NOT suggest anything similar to the "already covered" list.
 
-Return ONLY the JSON object. No other text. All 5 pitches must pass the 4-element test or don't include them.`;
+OUTPUT FORMAT — critical:
+- Respond with ONLY a valid JSON object, nothing else
+- No markdown code fences (no \`\`\`json or \`\`\`)
+- No explanation before or after the JSON
+- Structure: { "pitches": [ { ...pitch... }, { ...pitch... }, ... ] }
+- Exactly 5 pitches in the array
+
+All 5 pitches must have "Caitlin Clark" in the title. All 5 must pass the focus test and the 4-element test. If you can't generate 5 that pass, generate fewer — quality over quantity.`;
 
     const result = await generateText(prompt, SYSTEM_PROMPT);
 
     let pitches;
+    let rawText = result.text;
     try {
-      const jsonMatch = result.text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error("No JSON found in response");
-      const parsed = JSON.parse(jsonMatch[0]);
-      pitches = parsed.pitches;
+      // Strip markdown code fences if present
+      rawText = rawText.replace(/```(?:json)?\s*/g, "").replace(/```\s*$/g, "").trim();
+
+      // Try to find the pitches array first (more reliable than matching whole object)
+      const pitchesArrayMatch = rawText.match(/"pitches"\s*:\s*(\[[\s\S]*?\])\s*\}?\s*$/);
+      if (pitchesArrayMatch) {
+        // Try parsing just the array
+        pitches = JSON.parse(pitchesArrayMatch[1]);
+      } else {
+        // Fallback: greedy match for the outermost {...}
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("No JSON found in response");
+        const parsed = JSON.parse(jsonMatch[0]);
+        pitches = parsed.pitches;
+      }
+
+      if (!Array.isArray(pitches) || pitches.length === 0) {
+        throw new Error("No pitches in parsed response");
+      }
     } catch (parseError) {
-      console.error("Failed to parse AI response:", result.text);
+      console.error("Failed to parse AI response. Error:", parseError);
+      console.error("Raw text:", rawText.slice(0, 2000));
       return NextResponse.json(
-        { error: "Failed to parse AI response", raw: result.text.slice(0, 500) },
+        {
+          error: "Failed to parse AI response",
+          details: parseError instanceof Error ? parseError.message : "Unknown",
+          rawPreview: rawText.slice(0, 500),
+        },
         { status: 500 }
       );
     }

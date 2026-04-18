@@ -32,7 +32,7 @@ async function callAnthropic(
 
   const body: Record<string, unknown> = {
     model,
-    max_tokens: 4096,
+    max_tokens: 8192,
     messages: [{ role: "user", content: prompt }],
   };
   if (systemPrompt) {
