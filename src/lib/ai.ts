@@ -22,6 +22,16 @@ export async function generateText(
   }
 }
 
+// Strip unpaired UTF-16 surrogates that break JSON.stringify.
+// These come from third-party feeds (tweets, comments) with broken emoji.
+function sanitize(text: string): string {
+  // Remove lone high surrogates and lone low surrogates
+  // eslint-disable-next-line no-misleading-character-class
+  return text
+    .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g, "")
+    .replace(/(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "$1");
+}
+
 async function callAnthropic(
   prompt: string,
   systemPrompt: string | undefined,
@@ -33,10 +43,10 @@ async function callAnthropic(
   const body: Record<string, unknown> = {
     model,
     max_tokens: 8192,
-    messages: [{ role: "user", content: prompt }],
+    messages: [{ role: "user", content: sanitize(prompt) }],
   };
   if (systemPrompt) {
-    body.system = systemPrompt;
+    body.system = sanitize(systemPrompt);
   }
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {
