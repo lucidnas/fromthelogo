@@ -131,11 +131,8 @@ async function fetchYouTubeCompetitors(): Promise<NewsItem[]> {
 // ===========================================================================
 
 async function fetchTwitter(): Promise<NewsItem[]> {
-  // Try multiple Twitter RSS mirrors — xcancel first (preferred by user),
-  // then Nitter as fallback. xcancel requires reader whitelist so it may
-  // return "not yet whitelisted" — we detect that and try next instance.
+  // Nitter RSS mirrors — multiple instances for reliability
   const instances = [
-    { host: "rss.xcancel.com", path: (h: string) => `https://rss.xcancel.com/${h}/rss` },
     { host: "nitter.net", path: (h: string) => `https://nitter.net/${h}/rss` },
     { host: "nitter.tiekoetter.com", path: (h: string) => `https://nitter.tiekoetter.com/${h}/rss` },
   ];
