@@ -469,6 +469,32 @@ export default function PitchesPage() {
         </button>
       </div>
 
+      {/* Full-screen loading overlay when generating pitches */}
+      {refreshing && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-[#121217] border border-purple-500/30 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl shadow-purple-500/20">
+            <div className="flex flex-col items-center">
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full border-4 border-purple-500/20 border-t-purple-500 animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <RefreshCw className="w-6 h-6 text-purple-400" />
+                </div>
+              </div>
+              <h3 className="mt-6 text-xl font-semibold text-white">Generating Pitches</h3>
+              <p className="mt-2 text-sm text-gray-400 text-center">
+                Scanning fresh Caitlin Clark news, analyzing your covered topics, and crafting 5 new narrative pitches with Opus 4.7...
+              </p>
+              <div className="mt-4 w-full">
+                <div className="h-1 bg-purple-500/10 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-purple-500 to-violet-500 animate-pulse" style={{ width: "70%" }} />
+                </div>
+              </div>
+              <p className="mt-3 text-xs text-gray-500">This usually takes 30-60 seconds</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
