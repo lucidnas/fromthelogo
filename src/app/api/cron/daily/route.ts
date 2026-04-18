@@ -1,33 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateText } from "@/lib/ai";
 import { prisma } from "@/lib/db";
-
-async function fetchFreshNews(): Promise<string> {
-  try {
-    const urls = [
-      "https://news.google.com/rss/search?q=caitlin+clark+wnba&hl=en-US&gl=US&ceid=US:en",
-      "https://news.google.com/rss/search?q=indiana+fever&hl=en-US&gl=US&ceid=US:en",
-    ];
-    const headlines: string[] = [];
-    for (const url of urls) {
-      try {
-        const res = await fetch(url, { signal: AbortSignal.timeout(5000), headers: { "User-Agent": "Mozilla/5.0" } });
-        if (res.ok) {
-          const xml = await res.text();
-          const titleMatches = xml.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/g)
-            || xml.match(/<title>(.*?)<\/title>/g) || [];
-          for (const match of titleMatches.slice(0, 10)) {
-            const title = match.replace(/<\/?title>/g, "").replace(/<!\[CDATA\[|\]\]>/g, "").trim();
-            if (title && !title.includes("Google News") && title.length > 10) headlines.push(title);
-          }
-        }
-      } catch { /* continue */ }
-    }
-    return headlines.length > 0 ? headlines.slice(0, 15).join("\n") : "No fresh news available. Use recent WNBA storylines.";
-  } catch {
-    return "No fresh news available.";
-  }
-}
+import { fetchAllNewsSources } from "@/lib/news-sources";
 
 async function getAlreadyCoveredTopics(): Promise<string> {
   const channelVideos = await prisma.channelStat.findMany({ select: { title: true }, orderBy: { views: "desc" } });
@@ -56,7 +30,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const [freshNews, coveredTopics] = await Promise.all([fetchFreshNews(), getAlreadyCoveredTopics()]);
+    const [freshNews, coveredTopics] = await Promise.all([fetchAllNewsSources(), getAlreadyCoveredTopics()]);
 
     const prompt = `Generate 5 new video pitches.
 

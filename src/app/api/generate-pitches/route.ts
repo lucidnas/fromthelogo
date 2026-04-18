@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateText } from "@/lib/ai";
 import { prisma } from "@/lib/db";
+import { fetchAllNewsSources } from "@/lib/news-sources";
 
 const SYSTEM_PROMPT = `You are the lead content strategist for "From The Logo" — a YouTube channel about Caitlin Clark and the Indiana Fever, modeled after Hoop Reports (who built 500K+ subs covering Steph Curry/Warriors) and DKM Sports.
 
@@ -135,59 +136,6 @@ Respond in this exact JSON format:
 
 CRITICAL: If you can't identify a specific named villain with a specific quote for a pitch, DON'T generate that pitch. Go deeper. Find a real story with real characters.`;
 
-async function fetchFreshNews(): Promise<string> {
-  const sources = [
-    "https://news.google.com/rss/search?q=%22caitlin+clark%22&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=%22indiana+fever%22&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=wnba+drama+OR+controversy&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=caitlin+clark+angel+reese+OR+sophie+cunningham&hl=en-US&gl=US&ceid=US:en",
-  ];
-
-  const headlines: Array<{ title: string; source: string; date: string }> = [];
-  const seen = new Set<string>();
-
-  for (const url of sources) {
-    try {
-      const res = await fetch(url, {
-        signal: AbortSignal.timeout(8000),
-        headers: { "User-Agent": "Mozilla/5.0" },
-      });
-      if (!res.ok) continue;
-      const xml = await res.text();
-
-      // Parse <item> blocks
-      const items = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
-      for (const item of items.slice(0, 20)) {
-        const titleMatch = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || item.match(/<title>(.*?)<\/title>/);
-        const sourceMatch = item.match(/<source[^>]*>([^<]+)<\/source>/);
-        const dateMatch = item.match(/<pubDate>(.*?)<\/pubDate>/);
-
-        const title = titleMatch?.[1]?.trim() || "";
-        if (!title || seen.has(title) || title.length < 15) continue;
-        seen.add(title);
-
-        headlines.push({
-          title,
-          source: sourceMatch?.[1]?.trim() || "Unknown",
-          date: dateMatch?.[1]?.trim() || "",
-        });
-      }
-    } catch {
-      /* continue */
-    }
-  }
-
-  if (headlines.length === 0) {
-    return "No fresh news could be fetched. Generate pitches based on evergreen Caitlin Clark storylines and career moments.";
-  }
-
-  // Format as a numbered list with sources
-  return headlines
-    .slice(0, 25)
-    .map((h, i) => `${i + 1}. "${h.title}" — ${h.source}${h.date ? ` (${h.date.slice(0, 16)})` : ""}`)
-    .join("\n");
-}
-
 async function getAlreadyCoveredTopics(): Promise<string> {
   const channelVideos = await prisma.channelStat.findMany({
     select: { title: true },
@@ -209,27 +157,35 @@ async function getAlreadyCoveredTopics(): Promise<string> {
 export async function POST() {
   try {
     const [freshNews, coveredTopics] = await Promise.all([
-      fetchFreshNews(),
+      fetchAllNewsSources(),
       getAlreadyCoveredTopics(),
     ]);
 
-    const prompt = `Generate 5 deeply researched video pitches for today.
+    const prompt = `Generate 10 deeply researched video pitches for today.
 
-=== FRESH NEWS SOURCES (today's headlines) ===
 ${freshNews}
 
 === ALREADY COVERED — DO NOT REPEAT ===
 These topics/angles have been used. Find COMPLETELY different stories:
 ${coveredTopics}
 
+=== HOW TO USE THE SOURCES ===
+- MAINSTREAM NEWS = basic facts, recent games, official announcements
+- OUTLET DEEP COVERAGE = SI/BR/ClutchPoints longer narratives — goldmines for pitch ideas
+- FAN COMMUNITY (Reddit) = highest upvoted posts show what fans are ACTUALLY outraged or excited about. This is the VIRAL pulse. WEIGHT THESE HEAVILY — they tell you the real storylines driving discussion.
+- COMPETITOR VIDEOS = what other CC channels are covering. Don't copy their angles, but see what's RESONATING this week.
+
+The Reddit posts especially will surface specific named villains, specific incidents, and viral moments that mainstream coverage misses. These are your best source for authentic storylines.
+
 === INSTRUCTIONS ===
 
-1. Read the fresh news carefully. Identify the 6 stories with the most narrative potential — where there's a named villain, a specific moment, and stakes.
-2. For each of those 6 stories, construct a full pitch with all 4 required elements (cold open type, named villain/trigger, concrete vindication, payoff stakes).
-3. Generate 4 MORE pitches that are pure evergreen — career milestones, untold moments, specific games that haven't been covered yet. These should also have all 4 elements.
-4. Every pitch MUST have a specific named villain with a specific quote or action. If you can't find one, skip that pitch and find a different angle.
-5. Do NOT regurgitate the news headlines as titles. Transform them into narrative stories.
-6. Do NOT suggest anything similar to the "already covered" list.
+1. Read all the sources. Look for patterns — what's being discussed across multiple platforms?
+2. Identify 6 stories with the most narrative potential from the REDDIT + OUTLET sources (not just mainstream headlines). Look for named villains, specific incidents, viral moments.
+3. For each of those 6, construct a full pitch with all 4 required elements (cold open type, named villain/trigger, concrete vindication, payoff stakes).
+4. Generate 4 MORE pitches that are pure evergreen — career milestones, untold moments, specific past games that haven't been covered yet.
+5. Every pitch MUST have a specific named villain with a specific quote or action. Use Reddit posts to find these — the most upvoted threads usually have the specific receipts.
+6. Do NOT regurgitate the news headlines as titles. Transform them into narrative stories.
+7. Do NOT suggest anything similar to the "already covered" list.
 
 OUTPUT FORMAT — critical:
 - Respond with ONLY a valid JSON object, nothing else
