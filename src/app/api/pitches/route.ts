@@ -6,10 +6,12 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const pitchType = searchParams.get("pitchType");
+    const hasScript = searchParams.get("hasScript");
 
-    const where: Record<string, string> = {};
+    const where: Record<string, unknown> = {};
     if (status) where.status = status;
     if (pitchType) where.pitchType = pitchType;
+    if (hasScript === "true") where.generatedScript = { not: null };
 
     const pitches = await prisma.pitch.findMany({
       where,
