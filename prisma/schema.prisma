@@ -100,3 +100,18 @@ model TitleTemplate {
   pattern       String?  // extracted title pattern: "the-day" | "trash-talk" | "why-scared" | etc
   createdAt     DateTime @default(now())
 }
+
+// Gemini-generated research summaries keyed by source URL. Stores the
+// structured extraction (angle, villain, key moments, quote, stat, why-it-resonated)
+// so we don't re-pay for Gemini calls on URLs we've already researched.
+model ResearchSummary {
+  id          Int      @id @default(autoincrement())
+  url         String   @unique
+  source      String   // "Mick Talks Hoops" | "Rachel DeMita" | "Athlon Sports"
+  title       String
+  viewCount   Int?     // YouTube view count at time of research, if applicable
+  summary     Json     // { angle, villain, keyMoments, quotes, stats, whyItResonated }
+  rawText     String?  @db.Text // optional raw text Gemini returned (debug/inspection)
+  model       String?  // which Gemini model produced this
+  fetchedAt   DateTime @default(now())
+}

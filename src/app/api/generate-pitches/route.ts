@@ -2,10 +2,13 @@ import { NextResponse } from "next/server";
 import { generateText } from "@/lib/ai";
 import { prisma } from "@/lib/db";
 import { fetchAllNewsSources } from "@/lib/news-sources";
+import type { ResearchSummaryShape } from "@/lib/research";
 
-const SYSTEM_PROMPT = `You are the lead content strategist for "From The Logo" — a YouTube channel about Caitlin Clark and the Indiana Fever.
+const SYSTEM_PROMPT = `You are the lead content strategist for "From The Logo" — a faceless YouTube channel focused on Caitlin Clark and the Indiana Fever.
 
-Your approach is ADAPTATION, not invention. You take proven viral title frameworks from three reference channels (Hoop Reports, DKM, JxmyHighroller) and adapt them to current Caitlin Clark storylines.
+POSITIONING (one line): FTL is the faceless version of Rachel DeMita — same beat (Caitlin Clark, Indiana Fever, plus bigger NBA/WNBA stories that intersect with Clark), same editorial sensibility, delivered through narrative voiceover + visuals instead of on-camera presentation. Pitches should feel like something Rachel would cover, just in FTL's faceless format.
+
+Your approach is ADAPTATION, not invention. You take proven viral title frameworks — primarily from Hoop Reports and JxmyHighroller (DKM is a secondary reference) — and adapt them to current Caitlin Clark storylines. Rachel DeMita's own titles lean into that same Hoop-Reports/Jxmy aesthetic, so when her videos show up in the research block, treat her titles as additional aligned examples of the style you're matching.
 
 === THE METHODOLOGY ===
 
@@ -90,6 +93,48 @@ async function getTemplateLibrary(): Promise<string> {
     .join("\n");
 }
 
+async function getFTLTopPerformers(): Promise<string> {
+  const rows = await prisma.channelStat.findMany({
+    where: { views: { gt: 50_000 } },
+    orderBy: { views: "desc" },
+    take: 30,
+  });
+  if (rows.length === 0) return "";
+  return rows
+    .map((r) => `[${r.views.toLocaleString()} views][from-the-logo] "${r.title}"`)
+    .join("\n");
+}
+
+async function getResearchBlock(urls: string[]): Promise<string> {
+  if (urls.length === 0) return "";
+  const rows = await prisma.researchSummary.findMany({
+    where: { url: { in: urls } },
+    orderBy: { fetchedAt: "desc" },
+  });
+  if (rows.length === 0) return "";
+
+  return rows
+    .map((r, i) => {
+      const s = r.summary as unknown as ResearchSummaryShape;
+      const views = r.viewCount ? ` (${r.viewCount.toLocaleString()} views)` : "";
+      const bullets = [
+        `Angle: ${s.angle}`,
+        s.villain ? `Villain: ${s.villain}` : null,
+        s.keyMoments?.length ? `Key moments:\n${s.keyMoments.map((m) => `  - ${m}`).join("\n")}` : null,
+        s.quotes?.length ? `Quotes:\n${s.quotes.map((q) => `  - ${q}`).join("\n")}` : null,
+        s.stats?.length ? `Stats:\n${s.stats.map((st) => `  - ${st}`).join("\n")}` : null,
+        s.whyItResonated ? `Why it resonated: ${s.whyItResonated}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n");
+      return `${i + 1}. "${r.title}" — ${r.source}${views}\n   URL: ${r.url}\n${bullets
+        .split("\n")
+        .map((l) => `   ${l}`)
+        .join("\n")}`;
+    })
+    .join("\n\n");
+}
+
 async function getAlreadyCoveredTopics(): Promise<string> {
   const channelVideos = await prisma.channelStat.findMany({
     select: { title: true },
@@ -105,27 +150,57 @@ async function getAlreadyCoveredTopics(): Promise<string> {
   return [...covered, ...pitched].join("\n");
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    const [freshNews, coveredTopics, templates] = await Promise.all([
-      fetchAllNewsSources(),
-      getAlreadyCoveredTopics(),
-      getTemplateLibrary(),
-    ]);
+    let researchUrls: string[] = [];
+    try {
+      const body = await request.json();
+      if (Array.isArray(body?.researchUrls)) researchUrls = body.researchUrls;
+    } catch {
+      // no body — default behavior (fresh news)
+    }
+    const useResearch = researchUrls.length > 0;
+
+    const [freshNews, researchBlock, coveredTopics, templates, ftlTop] =
+      await Promise.all([
+        useResearch ? Promise.resolve("") : fetchAllNewsSources(),
+        useResearch ? getResearchBlock(researchUrls) : Promise.resolve(""),
+        getAlreadyCoveredTopics(),
+        getTemplateLibrary(),
+        getFTLTopPerformers(),
+      ]);
+
+    const storiesBlock = useResearch
+      ? `=== RESEARCHED STORIES (Gemini-extracted summaries — your PRIMARY material) ===
+Each item includes the angle, named villain, specific quotes, stats, and why it resonated. Use the concrete specifics (named people, exact quotes, numbers) in your pitches — not vague paraphrase.
+
+${researchBlock}`
+      : `=== CURRENT STORIES (the news to adapt the templates to) ===
+${freshNews}`;
+
+    const ftlBlock = ftlTop
+      ? `
+
+=== FROM THE LOGO — OWN TOP PERFORMERS (voice reference) ===
+Your channel's own best-performing titles. Use for cadence and vocabulary — but the NORTH STAR for title style is Hoop Reports + JxmyHighroller (from the templates above). Rachel DeMita's titles in the research block already lean into that same Hoop-Reports/Jxmy aesthetic — treat her as an aligned reference, not a separate voice.
+
+${ftlTop}`
+      : "";
 
     const prompt = `Generate 10 video pitches by ADAPTING proven viral titles to current Caitlin Clark / Fever / WNBA stories.
 
 === PROVEN TITLE TEMPLATES (your raw material — pick from these) ===
 These are real titles from Hoop Reports, DKM, and JxmyHighroller with their view counts. Pick the ones that naturally adapt to a Caitlin Clark story. Each template shows [views][channel][pattern] "title".
 
-${templates}
+${templates}${ftlBlock}
 
-=== CURRENT STORIES (the news to adapt the templates to) ===
-${freshNews}
+${storiesBlock}
 
 === HOW TO USE THE SOURCES ===
 
 1. **WNBA YOUTUBE COVERAGE (primary)** — Every item is already sorted by view count. HIGH VIEWS = PROVEN AUDIENCE DEMAND for that story. If Mick dropped a video on a topic and it has 100K+ views in 3 days, viewers are hungry for more angles on it. Cluster topics: if 3+ videos across the channels cover the same storyline, that's a guaranteed hot story and a strong pitch candidate.
+
+**BEAT FOCUS (FTL's lane):** Caitlin Clark + Indiana Fever is the primary beat. Pitches should be anchored there. Bigger NBA or WNBA stories are fair game ONLY when they intersect with Clark/Fever (e.g. a league-wide narrative where Clark is a central figure, or a comparison/contrast that illuminates her). Pure NBA-without-Clark angles or pure WNBA-without-Clark angles should be rare and only make it in if the audience overlap is clear.
 
 2. **ATHLON SPORTS (secondary)** — Longer outlet pieces with named characters and quotes. Use to add narrative depth and specific villain quotes to a pitch you've already picked from YouTube demand.
 

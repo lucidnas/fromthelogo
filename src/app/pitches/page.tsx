@@ -294,6 +294,7 @@ export default function PitchesPage() {
   const [loading, setLoading] = useState(true);
   const [generatingScript, setGeneratingScript] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [researchCount, setResearchCount] = useState(0);
   const [activeTab, setActiveTab] = useState<FilterTab>("today");
 
   const fetchPitches = useCallback(async () => {
@@ -312,6 +313,10 @@ export default function PitchesPage() {
 
   useEffect(() => {
     fetchPitches();
+    fetch("/api/research")
+      .then((r) => (r.ok ? r.json() : { results: [] }))
+      .then((d) => setResearchCount((d.results || []).length))
+      .catch(() => {});
   }, [fetchPitches]);
 
   async function handleAccept(pitch: Pitch) {
@@ -420,10 +425,23 @@ export default function PitchesPage() {
     }
   }
 
-  async function handleRefreshPitches() {
+  async function handleRefreshPitches(useResearch = false) {
     setRefreshing(true);
     try {
-      const res = await fetch("/api/generate-pitches", { method: "POST" });
+      let researchUrls: string[] = [];
+      if (useResearch) {
+        const r = await fetch("/api/research");
+        if (r.ok) {
+          const rd = await r.json();
+          researchUrls = (rd.results || []).map((x: { url: string }) => x.url);
+        }
+      }
+
+      const res = await fetch("/api/generate-pitches", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(useResearch ? { researchUrls } : {}),
+      });
 
       if (!res.ok) {
         const err = await res.json();
@@ -433,7 +451,6 @@ export default function PitchesPage() {
 
       const data = await res.json();
       if (data.pitches && data.pitches.length > 0) {
-        // Prepend new pitches to the list
         setPitches((prev) => [...data.pitches, ...prev]);
       }
     } catch {
@@ -513,7 +530,7 @@ export default function PitchesPage() {
           ))}
         </div>
         <button
-          onClick={handleRefreshPitches}
+          onClick={() => handleRefreshPitches(false)}
           disabled={refreshing}
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 text-sm font-medium hover:bg-purple-500/20 transition-colors disabled:opacity-50"
         >
@@ -522,8 +539,19 @@ export default function PitchesPage() {
           ) : (
             <RefreshCw className="w-4 h-4" />
           )}
-          {refreshing ? "Generating 10 pitches..." : "Refresh with AI"}
+          {refreshing ? "Generating..." : "Refresh with AI"}
         </button>
+        {researchCount > 0 && (
+          <button
+            onClick={() => handleRefreshPitches(true)}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+            title="Use researched summaries (Gemini) as the primary material"
+          >
+            <Sparkles className="w-4 h-4" />
+            From research ({researchCount})
+          </button>
+        )}
       </div>
 
       {/* Full-screen loading overlay when generating pitches */}
@@ -567,7 +595,7 @@ export default function PitchesPage() {
                 : "No pitches found."}
           </p>
           <button
-            onClick={handleRefreshPitches}
+            onClick={() => handleRefreshPitches(false)}
             disabled={refreshing}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 text-sm font-medium hover:bg-purple-500/20 transition-colors disabled:opacity-50"
           >

@@ -135,6 +135,55 @@ async function callGroq(
   return { text: data.choices?.[0]?.message?.content || "" };
 }
 
+export type GeminiOptions = {
+  urlContext?: boolean;
+  googleSearch?: boolean;
+  forceJson?: boolean;
+};
+
+export async function callGeminiWithTools(
+  prompt: string,
+  systemPrompt: string | undefined,
+  model: string,
+  options: GeminiOptions = {}
+): Promise<AIResponse> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY not set");
+
+  const tools: Record<string, unknown>[] = [];
+  if (options.urlContext) tools.push({ urlContext: {} });
+  if (options.googleSearch) tools.push({ googleSearch: {} });
+
+  const body: Record<string, unknown> = {
+    contents: [{ role: "user", parts: [{ text: sanitize(prompt) }] }],
+    generationConfig: {
+      maxOutputTokens: 8192,
+      ...(options.forceJson ? { responseMimeType: "application/json" } : {}),
+    },
+    ...(tools.length ? { tools } : {}),
+  };
+  if (systemPrompt) {
+    body.systemInstruction = { parts: [{ text: sanitize(systemPrompt) }] };
+  }
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Gemini API error (${res.status}): ${err}`);
+  }
+  const data = await res.json();
+  const text =
+    data.candidates?.[0]?.content?.parts
+      ?.map((p: { text?: string }) => p.text || "")
+      .join("") || "";
+  return { text };
+}
+
 async function callGemini(
   prompt: string,
   systemPrompt: string | undefined,

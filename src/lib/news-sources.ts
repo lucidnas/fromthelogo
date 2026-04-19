@@ -26,7 +26,7 @@ type YouTubeChannel = { id: string; name: string; limit: number };
 
 const YOUTUBE_CHANNELS: YouTubeChannel[] = [
   { id: "UCPzp2k1LSr1ctDEsOhg4-aw", name: "Mick Talks Hoops", limit: 30 },
-  { id: "UCsobdlQ3SXG8LRE-zg0IHHg", name: "Rachel DeMita", limit: 30 },
+  { id: "UCBS2RdExOLDYVLnfsZ2Q4-w", name: "Rachel DeMita", limit: 30 },
 ];
 
 // ============================================================================
