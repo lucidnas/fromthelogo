@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateText } from "@/lib/ai";
+import { callGeminiWithTools } from "@/lib/ai";
 import { prisma } from "@/lib/db";
 import { fetchAllNewsSources } from "@/lib/news-sources";
 import type { ResearchSummaryShape } from "@/lib/research";
@@ -257,7 +257,11 @@ Examples of template narrative logic:
 
 Return ONLY the JSON object with 10 pitches. No markdown, no explanation.`;
 
-    const result = await generateText(prompt, SYSTEM_PROMPT);
+    const pitchModel = process.env.PITCH_MODEL || "gemini-3.1-pro-preview";
+    const result = await callGeminiWithTools(prompt, SYSTEM_PROMPT, pitchModel, {
+      forceJson: true,
+      maxOutputTokens: 32768,
+    });
 
     let pitches;
     let rawText = result.text;
@@ -288,8 +292,8 @@ Return ONLY the JSON object with 10 pitches. No markdown, no explanation.`;
       );
     }
 
-    const provider = process.env.AI_PROVIDER || "anthropic";
-    const model = process.env.AI_MODEL || "claude-opus-4-7";
+    const provider = "gemini";
+    const model = pitchModel;
 
     const created = await Promise.all(
       pitches.map(
