@@ -147,12 +147,18 @@ async function fetchTwitter(): Promise<NewsItem[]> {
       try {
         const url = instance.path(account.handle);
         const res = await fetch(url, {
-          signal: AbortSignal.timeout(8000),
-          headers: { "User-Agent": "Mozilla/5.0 (X11; Linux x86_64)" },
+          signal: AbortSignal.timeout(10000),
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            Accept: "application/rss+xml, application/xml, text/xml, */*",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "identity",
+          },
         });
         if (!res.ok) continue;
         const xml = await res.text();
-        // Validate it's a real feed (skip xcancel whitelist page)
+        // Validate it's a real feed
         if (!xml.includes("<item>") || xml.includes("not yet whitelisted")) continue;
 
         const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];

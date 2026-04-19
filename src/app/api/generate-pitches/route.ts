@@ -56,17 +56,36 @@ JSON only, no markdown, no explanation. Structure:
 Aim for 10 pitches. Each must adapt a DIFFERENT template. Prefer templates with the highest views.`;
 
 async function getTemplateLibrary(): Promise<string> {
-  // Get top-performing templates across all 3 channels
-  // Prioritize Curry/Warriors content (most directly adaptable to CC) and high-view videos
-  const templates = await prisma.titleTemplate.findMany({
-    where: {
-      views: { gt: 100000 }, // Only high-performing templates
-    },
-    orderBy: { views: "desc" },
-    take: 80,
-  });
+  // Balanced sample: top 30 from each channel so no single channel dominates.
+  // Taking top by views ensures we get proven viral formulas.
+  const [hoopReports, dkm, jxmy] = await Promise.all([
+    prisma.titleTemplate.findMany({
+      where: { channel: "hoop-reports", views: { gt: 100000 } },
+      orderBy: { views: "desc" },
+      take: 30,
+    }),
+    prisma.titleTemplate.findMany({
+      where: { channel: "dkm", views: { gt: 100000 } },
+      orderBy: { views: "desc" },
+      take: 30,
+    }),
+    prisma.titleTemplate.findMany({
+      where: { channel: "jxmy", views: { gt: 100000 } },
+      orderBy: { views: "desc" },
+      take: 30,
+    }),
+  ]);
 
-  return templates
+  // Interleave so the AI sees diverse channels early in the list
+  const maxLen = Math.max(hoopReports.length, dkm.length, jxmy.length);
+  const interleaved: typeof hoopReports = [];
+  for (let i = 0; i < maxLen; i++) {
+    if (hoopReports[i]) interleaved.push(hoopReports[i]);
+    if (dkm[i]) interleaved.push(dkm[i]);
+    if (jxmy[i]) interleaved.push(jxmy[i]);
+  }
+
+  return interleaved
     .map((t) => `[${t.views.toLocaleString()} views][${t.channel}][${t.pattern}] "${t.title}"`)
     .join("\n");
 }
@@ -118,24 +137,32 @@ ${freshNews}
 
 **KEY CROSS-REFERENCE INSIGHT**: When (Mick OR Rachel) cover a topic AND (@CClarkReport OR @kenswift) tweet about it AND an outlet writes it up — that's a three-way confirmation. These stories get 2-5x more views than any single-source pitch.
 
-=== ALREADY COVERED — DO NOT RECREATE ===
+=== ALREADY COVERED — HARD RULE: DO NOT SUGGEST ANYTHING SIMILAR ===
+These titles have been PUBLISHED, ACCEPTED, REJECTED, or PENDING. Do not propose pitches that:
+- Cover the same incident or storyline
+- Feature the same villain doing the same thing
+- Use a similar "angle" even with a different title framing
+- Recycle an existing rejected idea with a tweak
+
+If your candidate pitch touches any topic in this list, DISCARD IT and find a new story.
+
 ${coveredTopics}
 
 === YOUR TASK ===
 
 For each of 10 pitches:
 
-1. Pick a template from the library above. Aim to use templates with 500K+ views when possible. Vary the patterns across pitches.
-2. Find a matching current story from the news sources (prioritize Reddit discussions and outlet coverage — those have the specific characters and incidents).
+1. Pick a template from the library above. **Balance across channels — use AT LEAST 3 from Hoop Reports, 2 from DKM, and 2 from JxmyHighroller. Do not over-index on one channel.**
+2. Find a matching current story from the news sources. **CRITICAL: At least 6 of your 10 pitches must cite a source from Mick Talks Hoops, Rachel DeMita, @CClarkReport, @kenswift, SI, ClutchPoints, or Athlon Sports. Do NOT rely primarily on Google News for story material.**
 3. Adapt the template by swapping in Caitlin Clark / Fever / WNBA names and specifics.
 4. The adapted title MUST include "Caitlin Clark" (or frame her as the subject).
 5. Verify:
    - Is there a specific named villain with a quote or action?
    - Is there a concrete vindication moment with stats or a specific play?
    - Does this match a PROVEN viral framework?
-6. Reject and pick a different template/story if any element is missing.
+6. Check the ALREADY COVERED list strictly. If your pitch topic is similar in any way (same villain, same incident, same angle) to an accepted/rejected/pending pitch, skip it. Being "slightly different" is NOT enough. Use a different storyline entirely.
 
-Vary the template patterns. Don't use 10 "The Day..." titles. Mix: "The Day", "This Is Why", "How [X] Became", "Why [X] Is Scared Of", "The Story Of Why", "[X] Times [Y] Did [Z]", etc.
+Vary the template patterns. Mix: "The Day", "This Is Why", "How [X] Became", "Why [X] Is Scared Of", "The Story Of Why", "[X] Times [Y] Did [Z]", "When You're The Best...", "They Said... But...", etc.
 
 Return ONLY the JSON object with 10 pitches. No markdown, no explanation.`;
 
