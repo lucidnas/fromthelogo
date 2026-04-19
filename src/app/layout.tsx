@@ -34,6 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <Link href="/thumbnails" className="text-sm text-gray-400 hover:text-white transition-colors">Thumbnails</Link>
                 <Link href="/calendar" className="text-sm text-gray-400 hover:text-white transition-colors">Calendar</Link>
                 <Link href="/pitches" className="text-sm text-gray-400 hover:text-white transition-colors">Daily Pitches</Link>
+                <Link href="/news" className="text-sm text-gray-400 hover:text-white transition-colors">News</Link>
                 <Link href="/scripts" className="text-sm text-gray-400 hover:text-white transition-colors">Scripts</Link>
                 <LogoutButton />
               </div>

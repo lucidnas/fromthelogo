@@ -279,10 +279,18 @@ async function fetchGoogleNews(): Promise<NewsItem[]> {
 }
 
 // ===========================================================================
-// Aggregator — formats everything for the AI prompt
+// Aggregator — structured (for UI) + prompt-string (for AI) variants
 // ===========================================================================
 
-export async function fetchAllNewsSources(): Promise<string> {
+export type GroupedNews = {
+  journalism: NewsItem[];
+  twitter: NewsItem[];
+  outlet: NewsItem[];
+  gnews: NewsItem[];
+  competitors: NewsItem[];
+};
+
+export async function fetchAllNewsItems(): Promise<GroupedNews> {
   const [journalism, twitter, outlet, gnews, competitors] = await Promise.all([
     fetchYouTubeJournalism(),
     fetchTwitter(),
@@ -300,9 +308,20 @@ export async function fetchAllNewsSources(): Promise<string> {
       return true;
     });
 
+  return {
+    journalism: dedupe(journalism).slice(0, 80),
+    twitter: dedupe(twitter).slice(0, 50),
+    outlet: dedupe(outlet).slice(0, 20),
+    gnews: dedupe(gnews).slice(0, 15),
+    competitors: dedupe(competitors).slice(0, 15),
+  };
+}
+
+export async function fetchAllNewsSources(): Promise<string> {
+  const grouped = await fetchAllNewsItems();
   const sections: string[] = [];
 
-  const uniqJournalism = dedupe(journalism).slice(0, 80);
+  const uniqJournalism = grouped.journalism;
   if (uniqJournalism.length) {
     sections.push("=== WNBA JOURNALISM VIDEOS (Mick Talks Hoops + Rachel DeMita — PRIMARY STORYLINE SOURCE) ===");
     sections.push(
@@ -315,41 +334,37 @@ export async function fetchAllNewsSources(): Promise<string> {
     );
   }
 
-  const uniqTwitter = dedupe(twitter).slice(0, 50);
-  if (uniqTwitter.length) {
+  if (grouped.twitter.length) {
     sections.push("\n=== TWITTER / X (Clark Report + Ken Swift — breaking takes and drama) ===");
     sections.push(
-      uniqTwitter
+      grouped.twitter
         .map((i, n) => `${n + 1}. ${i.source}: "${i.title}"${i.date ? ` (${i.date})` : ""}`)
         .join("\n")
     );
   }
 
-  const uniqOutlet = dedupe(outlet).slice(0, 20);
-  if (uniqOutlet.length) {
+  if (grouped.outlet.length) {
     sections.push("\n=== OUTLET DEEP COVERAGE (SI, ClutchPoints, Athlon Sports) ===");
     sections.push(
-      uniqOutlet
+      grouped.outlet
         .map((i, n) => `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`)
         .join("\n")
     );
   }
 
-  const uniqGnews = dedupe(gnews).slice(0, 15);
-  if (uniqGnews.length) {
+  if (grouped.gnews.length) {
     sections.push("\n=== GENERAL MAINSTREAM NEWS (Google News) ===");
     sections.push(
-      uniqGnews
+      grouped.gnews
         .map((i, n) => `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`)
         .join("\n")
     );
   }
 
-  const uniqCompetitors = dedupe(competitors).slice(0, 15);
-  if (uniqCompetitors.length) {
+  if (grouped.competitors.length) {
     sections.push("\n=== COMPETITOR CC CHANNELS (what they're covering — don't copy, but see what's resonating) ===");
     sections.push(
-      uniqCompetitors
+      grouped.competitors
         .map((i, n) => `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`)
         .join("\n")
     );
