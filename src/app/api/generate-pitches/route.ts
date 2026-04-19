@@ -41,8 +41,8 @@ JSON only, no markdown, no explanation. Structure:
       "templateTitle": "The original template title it was adapted from",
       "templateChannel": "hoop-reports | dkm | jxmy",
       "templateViews": 500000,
-      "sourceNews": "The news story or fan discussion this is based on",
-      "sourceChannel": "Reddit r/wnba | Sports Illustrated | etc",
+      "sourceNews": "The news story this is based on (include view count if YouTube)",
+      "sourceChannel": "Mick Talks Hoops | Rachel DeMita | Athlon Sports",
       "format": "evergreen",
       "pitchType": "evergreen",
       "angle": "2-3 sentence explanation covering: the villain, the vindication moment, the stakes",
@@ -123,19 +123,13 @@ ${templates}
 === CURRENT STORIES (the news to adapt the templates to) ===
 ${freshNews}
 
-=== HOW TO USE THE SOURCES (priority order) ===
+=== HOW TO USE THE SOURCES ===
 
-1. **WNBA JOURNALISM VIDEOS (Mick Talks Hoops + Rachel DeMita)** — HIGHEST PRIORITY. Mick covers WNBA hourly. Rachel DeMita does deeper WNBA journalism. Each title is a live storyline. Look for TOPIC CLUSTERS — if 3+ Mick videos cover the same theme this week, that's a guaranteed hot story.
+1. **WNBA YOUTUBE COVERAGE (primary)** — Every item is already sorted by view count. HIGH VIEWS = PROVEN AUDIENCE DEMAND for that story. If Mick dropped a video on a topic and it has 100K+ views in 3 days, viewers are hungry for more angles on it. Cluster topics: if 3+ videos across the channels cover the same storyline, that's a guaranteed hot story and a strong pitch candidate.
 
-2. **TWITTER / X (@CClarkReport + @kenswift)** — Real-time reactions, breaking news, specific quotes and tweets. These often contain the exact viral moments and hater takes. When a tweet goes viral, it becomes a pitch.
+2. **ATHLON SPORTS (secondary)** — Longer outlet pieces with named characters and quotes. Use to add narrative depth and specific villain quotes to a pitch you've already picked from YouTube demand.
 
-3. **OUTLET DEEP COVERAGE (SI, ClutchPoints, Athlon Sports)** — Longer narrative pieces with named characters. Goldmine for pitch angles.
-
-4. **GENERAL MAINSTREAM NEWS (Google News)** — Basic facts, games, announcements. Thinnest source.
-
-5. **COMPETITOR CC CHANNELS** — What Hoop Reports / BTS / From The Logo are covering. Don't copy, but use to see which angles are resonating.
-
-**KEY CROSS-REFERENCE INSIGHT**: When (Mick OR Rachel) cover a topic AND (@CClarkReport OR @kenswift) tweet about it AND an outlet writes it up — that's a three-way confirmation. These stories get 2-5x more views than any single-source pitch.
+**KEY CROSS-REFERENCE INSIGHT**: When YouTube coverage of a topic is racking up views AND Athlon has written a piece on it — that's two-way confirmation the story has both audience demand and narrative meat. Those are your strongest pitches.
 
 === ALREADY COVERED — HARD RULE: DO NOT SUGGEST ANYTHING SIMILAR ===
 These titles have been PUBLISHED, ACCEPTED, REJECTED, or PENDING. Do not propose pitches that:
@@ -178,7 +172,7 @@ Examples of template narrative logic:
 
 1. Pick a template. **Balance: at least 3 Hoop Reports, 2 DKM, 2 JxmyHighroller.**
 2. IDENTIFY the template's narrative logic (what story does it really tell?).
-3. Find a current story from Mick/Rachel/Twitter/SI/ClutchPoints/Athlon that has the SAME narrative logic. **At least 6 of 10 pitches must cite these journalism sources, not Google News.**
+3. Find a current story from the YouTube coverage (prioritize high-view items) or Athlon that has the SAME narrative logic. **At least 7 of 10 pitches must be anchored to a specific YouTube item with its view count cited as proof of demand.**
 4. Check: does the news story's actual characters, events, and stakes match the template's story type? If it feels forced or aesthetic-only, reject.
 5. Verify the 4 elements: specific named villain with quote/action, concrete vindication moment with stats, proven viral framework, not already covered.
 6. The adapted title must include "Caitlin Clark" or frame her as the subject.

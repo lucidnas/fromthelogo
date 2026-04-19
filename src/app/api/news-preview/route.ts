@@ -8,15 +8,11 @@ export async function GET() {
     const durationMs = Date.now() - started;
 
     const counts = {
-      journalism: grouped.journalism.length,
-      twitter: grouped.twitter.length,
-      outlet: grouped.outlet.length,
-      gnews: grouped.gnews.length,
-      competitors: grouped.competitors.length,
+      youtube: grouped.youtube.length,
+      athlon: grouped.athlon.length,
     };
-    const total = Object.values(counts).reduce((a, b) => a + b, 0);
-    const youtubeCount = counts.journalism + counts.competitors;
-    const youtubeShare = total > 0 ? Math.round((youtubeCount / total) * 100) : 0;
+    const total = counts.youtube + counts.athlon;
+    const youtubeShare = total > 0 ? Math.round((counts.youtube / total) * 100) : 0;
 
     return NextResponse.json({
       fetchedAt: new Date().toISOString(),

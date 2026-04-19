@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, RefreshCw, Newspaper, PlayCircle, MessageCircle, Globe } from "lucide-react";
+import { Loader2, RefreshCw, Newspaper, PlayCircle, ExternalLink, Flame } from "lucide-react";
 
 type NewsItem = {
   title: string;
   source: string;
-  type: "news" | "twitter" | "youtube" | "rss";
+  type: "youtube" | "athlon";
   date?: string;
   url?: string;
   snippet?: string;
@@ -14,11 +14,8 @@ type NewsItem = {
 };
 
 type GroupedNews = {
-  journalism: NewsItem[];
-  twitter: NewsItem[];
-  outlet: NewsItem[];
-  gnews: NewsItem[];
-  competitors: NewsItem[];
+  youtube: NewsItem[];
+  athlon: NewsItem[];
 };
 
 type NewsPreview = {
@@ -30,49 +27,18 @@ type NewsPreview = {
   items: GroupedNews;
 };
 
-const GROUPS: Array<{
-  key: keyof GroupedNews;
-  label: string;
-  subtitle: string;
-  icon: React.ComponentType<{ className?: string }>;
-  accent: string;
-}> = [
-  {
-    key: "journalism",
-    label: "YouTube Journalism",
-    subtitle: "Mick Talks Hoops + Rachel DeMita — primary storyline source",
-    icon: PlayCircle,
-    accent: "from-red-500/20 to-rose-500/5 border-red-500/30 text-red-300",
-  },
-  {
-    key: "competitors",
-    label: "Competitor Channels",
-    subtitle: "From The Logo, Hoop Reports, Basketball Top Stories",
-    icon: PlayCircle,
-    accent: "from-orange-500/20 to-amber-500/5 border-orange-500/30 text-orange-300",
-  },
-  {
-    key: "twitter",
-    label: "Twitter / X",
-    subtitle: "@CClarkReport + @kenswift via Nitter RSS",
-    icon: MessageCircle,
-    accent: "from-sky-500/20 to-blue-500/5 border-sky-500/30 text-sky-300",
-  },
-  {
-    key: "outlet",
-    label: "Outlet Deep Coverage",
-    subtitle: "SI, ClutchPoints, Athlon Sports (Google News site search)",
-    icon: Newspaper,
-    accent: "from-emerald-500/20 to-teal-500/5 border-emerald-500/30 text-emerald-300",
-  },
-  {
-    key: "gnews",
-    label: "General Google News",
-    subtitle: "Broad queries for caitlin clark / indiana fever",
-    icon: Globe,
-    accent: "from-gray-500/20 to-gray-600/5 border-gray-500/30 text-gray-300",
-  },
-];
+function formatViews(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(0) + "K";
+  return n.toString();
+}
+
+function viewsTierClass(n: number) {
+  if (n >= 500_000) return "text-yellow-300 bg-yellow-500/15 border-yellow-500/40";
+  if (n >= 100_000) return "text-purple-300 bg-purple-500/15 border-purple-500/40";
+  if (n >= 20_000) return "text-emerald-300 bg-emerald-500/15 border-emerald-500/40";
+  return "text-gray-400 bg-gray-700/30 border-gray-600/40";
+}
 
 export default function NewsPage() {
   const [data, setData] = useState<NewsPreview | null>(null);
@@ -107,7 +73,7 @@ export default function NewsPage() {
             <h1 className="text-3xl font-bold text-white">News Preview</h1>
           </div>
           <p className="text-gray-400 text-sm">
-            Live view of what the pitch generator is actually pulling from each source.
+            Live view of what the pitch generator is pulling. YouTube items are sorted by views — proven audience demand.
           </p>
         </div>
         <button
@@ -145,22 +111,29 @@ export default function NewsPage() {
         <>
           <SummaryBar data={data} />
 
-          <div className="space-y-10 mt-10">
-            {GROUPS.map((group) => {
-              const items = data.items[group.key];
-              return (
-                <SourceSection
-                  key={group.key}
-                  label={group.label}
-                  subtitle={group.subtitle}
-                  icon={group.icon}
-                  accent={group.accent}
-                  items={items}
-                  share={data.total > 0 ? (items.length / data.total) * 100 : 0}
-                />
-              );
-            })}
-          </div>
+          <HotRow youtube={data.items.youtube} />
+
+          <section className="mt-12">
+            <SectionHeader
+              icon={PlayCircle}
+              accent="from-red-500/20 to-rose-500/5 border-red-500/30 text-red-300"
+              label="YouTube Coverage"
+              subtitle="Sorted by views — proven audience demand"
+              count={data.items.youtube.length}
+            />
+            <YouTubeList items={data.items.youtube} />
+          </section>
+
+          <section className="mt-12">
+            <SectionHeader
+              icon={Newspaper}
+              accent="from-emerald-500/20 to-teal-500/5 border-emerald-500/30 text-emerald-300"
+              label="Athlon Sports"
+              subtitle="Outlet narrative coverage — named characters and quotes"
+              count={data.items.athlon.length}
+            />
+            <AthlonList items={data.items.athlon} />
+          </section>
         </>
       )}
     </div>
@@ -168,176 +141,241 @@ export default function NewsPage() {
 }
 
 function SummaryBar({ data }: { data: NewsPreview }) {
-  const youtubeCount = data.counts.journalism + data.counts.competitors;
+  const topView = data.items.youtube[0]?.score || 0;
   return (
     <div className="rounded-2xl border border-[#22222b] bg-[#121217] p-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-        <div>
-          <div className="text-sm text-gray-400">Total items</div>
-          <div className="text-3xl font-bold text-white">{data.total}</div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-400">YouTube share</div>
-          <div className="flex items-baseline gap-2">
-            <span
-              className={`text-3xl font-bold ${
-                data.youtubeShare >= 80
-                  ? "text-emerald-300"
-                  : data.youtubeShare >= 60
-                  ? "text-yellow-300"
-                  : "text-red-300"
-              }`}
-            >
-              {data.youtubeShare}%
-            </span>
-            <span className="text-xs text-gray-500">
-              {youtubeCount} / {data.total}
-            </span>
-          </div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-400">Fetch time</div>
-          <div className="text-3xl font-bold text-white">{(data.durationMs / 1000).toFixed(1)}s</div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-400">Fetched at</div>
-          <div className="text-sm text-gray-300 font-mono">
-            {new Date(data.fetchedAt).toLocaleTimeString()}
-          </div>
-        </div>
-      </div>
-
-      <div className="h-2 w-full rounded-full overflow-hidden bg-[#1a1a24] flex">
-        {GROUPS.map((group) => {
-          const count = data.counts[group.key];
-          const pct = data.total > 0 ? (count / data.total) * 100 : 0;
-          if (pct === 0) return null;
-          const bg =
-            group.key === "journalism"
-              ? "bg-red-500"
-              : group.key === "competitors"
-              ? "bg-orange-500"
-              : group.key === "twitter"
-              ? "bg-sky-500"
-              : group.key === "outlet"
-              ? "bg-emerald-500"
-              : "bg-gray-500";
-          return (
-            <div
-              key={group.key}
-              className={bg}
-              style={{ width: `${pct}%` }}
-              title={`${group.label}: ${count} (${pct.toFixed(1)}%)`}
-            />
-          );
-        })}
-      </div>
-
-      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs">
-        {GROUPS.map((group) => {
-          const count = data.counts[group.key];
-          const dot =
-            group.key === "journalism"
-              ? "bg-red-500"
-              : group.key === "competitors"
-              ? "bg-orange-500"
-              : group.key === "twitter"
-              ? "bg-sky-500"
-              : group.key === "outlet"
-              ? "bg-emerald-500"
-              : "bg-gray-500";
-          return (
-            <div key={group.key} className="flex items-center gap-2 text-gray-400">
-              <span className={`w-2 h-2 rounded-full ${dot}`} />
-              <span className="text-gray-300">{group.label}</span>
-              <span className="font-mono">{count}</span>
-            </div>
-          );
-        })}
+      <div className="flex flex-wrap items-center justify-between gap-6">
+        <Stat label="Total items" value={data.total.toString()} />
+        <Stat
+          label="YouTube"
+          value={data.counts.youtube.toString()}
+          sub={`${data.youtubeShare}% of mix`}
+        />
+        <Stat label="Athlon" value={data.counts.athlon.toString()} />
+        <Stat label="Top item" value={formatViews(topView)} sub="views" />
+        <Stat label="Fetch time" value={`${(data.durationMs / 1000).toFixed(1)}s`} />
+        <Stat
+          label="Fetched"
+          value={new Date(data.fetchedAt).toLocaleTimeString()}
+          mono
+        />
       </div>
     </div>
   );
 }
 
-function SourceSection({
+function Stat({
   label,
-  subtitle,
-  icon: Icon,
-  accent,
-  items,
-  share,
+  value,
+  sub,
+  mono,
 }: {
   label: string;
-  subtitle: string;
-  icon: React.ComponentType<{ className?: string }>;
-  accent: string;
-  items: NewsItem[];
-  share: number;
+  value: string;
+  sub?: string;
+  mono?: boolean;
 }) {
   return (
-    <section>
-      <div
-        className={`inline-flex items-center gap-2 px-3 py-1.5 mb-4 rounded-lg bg-gradient-to-r ${accent} border`}
-      >
-        <Icon className="w-4 h-4" />
-        <span className="text-sm font-semibold text-white">{label}</span>
-        <span className="text-xs text-gray-300">
-          {items.length} item{items.length === 1 ? "" : "s"} · {share.toFixed(1)}%
-        </span>
-      </div>
-      <p className="text-xs text-gray-500 mb-3">{subtitle}</p>
+    <div>
+      <div className="text-xs text-gray-500 uppercase tracking-wider">{label}</div>
+      <div className={`text-2xl font-bold text-white ${mono ? "font-mono text-lg" : ""}`}>{value}</div>
+      {sub && <div className="text-[11px] text-gray-500 mt-0.5">{sub}</div>}
+    </div>
+  );
+}
 
-      {items.length === 0 ? (
-        <div className="p-4 rounded-lg border border-[#22222b] bg-[#121217] text-sm text-gray-500 italic">
-          No items fetched from this source.
-        </div>
-      ) : (
-        <ul className="space-y-2">
-          {items.map((item, i) => (
-            <li
-              key={`${label}-${i}`}
-              className="p-3 rounded-lg border border-[#22222b] bg-[#121217] hover:border-purple-500/40 transition-colors"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm text-white leading-snug">
-                    {item.url ? (
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-purple-300 transition-colors"
-                      >
-                        {item.title}
-                      </a>
-                    ) : (
-                      item.title
-                    )}
-                  </div>
-                  {item.snippet && (
-                    <div className="text-xs text-gray-400 mt-1 line-clamp-2">
-                      {item.snippet}
-                    </div>
-                  )}
-                  <div className="text-[11px] text-gray-500 mt-1.5 flex items-center gap-2 flex-wrap">
-                    <span className="text-gray-400">{item.source}</span>
-                    {item.date && <span>· {item.date}</span>}
-                    {typeof item.score === "number" && item.score > 0 && (
-                      <span>· {formatViews(item.score)} views</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+function HotRow({ youtube }: { youtube: NewsItem[] }) {
+  const top = youtube.slice(0, 6);
+  if (top.length === 0) return null;
+  return (
+    <section className="mt-10">
+      <div className="flex items-center gap-2 mb-4">
+        <Flame className="w-5 h-5 text-orange-400" />
+        <h2 className="text-lg font-semibold text-white">Top by Views</h2>
+        <span className="text-xs text-gray-500">across all YouTube sources</span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {top.map((item, i) => (
+          <HotCard key={`hot-${i}`} item={item} rank={i + 1} />
+        ))}
+      </div>
     </section>
   );
 }
 
-function formatViews(n: number): string {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
-  if (n >= 1_000) return (n / 1_000).toFixed(0) + "K";
-  return n.toString();
+function HotCard({ item, rank }: { item: NewsItem; rank: number }) {
+  const views = item.score || 0;
+  return (
+    <a
+      href={item.url || "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group p-4 rounded-xl border border-[#22222b] bg-[#121217] hover:border-purple-500/50 transition-colors"
+    >
+      <div className="flex items-start gap-3">
+        <div className="text-xl font-bold text-gray-600 font-mono w-8 shrink-0">
+          {rank.toString().padStart(2, "0")}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold border mb-2 ${viewsTierClass(
+              views
+            )}`}
+          >
+            {formatViews(views)} views
+          </div>
+          <div className="text-sm text-white leading-snug group-hover:text-purple-300 transition-colors line-clamp-3">
+            {item.title}
+          </div>
+          <div className="text-[11px] text-gray-500 mt-2 flex items-center gap-2 flex-wrap">
+            <span className="text-gray-400">{item.source}</span>
+            {item.date && <span>· {item.date}</span>}
+          </div>
+        </div>
+      </div>
+    </a>
+  );
+}
+
+function SectionHeader({
+  icon: Icon,
+  accent,
+  label,
+  subtitle,
+  count,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  accent: string;
+  label: string;
+  subtitle: string;
+  count: number;
+}) {
+  return (
+    <div className="mb-4">
+      <div
+        className={`inline-flex items-center gap-2 px-3 py-1.5 mb-2 rounded-lg bg-gradient-to-r ${accent} border`}
+      >
+        <Icon className="w-4 h-4" />
+        <span className="text-sm font-semibold text-white">{label}</span>
+        <span className="text-xs text-gray-300">{count} items</span>
+      </div>
+      <p className="text-xs text-gray-500">{subtitle}</p>
+    </div>
+  );
+}
+
+function YouTubeList({ items }: { items: NewsItem[] }) {
+  if (items.length === 0) {
+    return (
+      <div className="p-4 rounded-lg border border-[#22222b] bg-[#121217] text-sm text-gray-500 italic">
+        No YouTube items fetched.
+      </div>
+    );
+  }
+
+  // Group by source so you can scan per channel
+  const bySource = new Map<string, NewsItem[]>();
+  for (const item of items) {
+    if (!bySource.has(item.source)) bySource.set(item.source, []);
+    bySource.get(item.source)!.push(item);
+  }
+
+  return (
+    <div className="space-y-8">
+      {Array.from(bySource.entries()).map(([source, list]) => (
+        <div key={source}>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-gray-300">{source}</h3>
+            <span className="text-xs text-gray-500">
+              {list.length} videos · top {formatViews(list[0]?.score || 0)}
+            </span>
+          </div>
+          <ul className="space-y-2">
+            {list.map((item, i) => {
+              const views = item.score || 0;
+              return (
+                <li
+                  key={`${source}-${i}`}
+                  className="p-3 rounded-lg border border-[#22222b] bg-[#121217] hover:border-purple-500/40 transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`shrink-0 px-2 py-1 rounded-md text-[11px] font-bold border ${viewsTierClass(
+                        views
+                      )}`}
+                      style={{ minWidth: 64, textAlign: "center" }}
+                    >
+                      {formatViews(views)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      {item.url ? (
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-white hover:text-purple-300 transition-colors leading-snug"
+                        >
+                          {item.title}
+                        </a>
+                      ) : (
+                        <span className="text-sm text-white leading-snug">{item.title}</span>
+                      )}
+                      {item.snippet && (
+                        <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+                          {item.snippet}
+                        </div>
+                      )}
+                      {item.date && (
+                        <div className="text-[11px] text-gray-500 mt-1">{item.date}</div>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AthlonList({ items }: { items: NewsItem[] }) {
+  if (items.length === 0) {
+    return (
+      <div className="p-4 rounded-lg border border-[#22222b] bg-[#121217] text-sm text-gray-500 italic">
+        No Athlon items fetched.
+      </div>
+    );
+  }
+  return (
+    <ul className="space-y-2">
+      {items.map((item, i) => (
+        <li
+          key={`athlon-${i}`}
+          className="p-3 rounded-lg border border-[#22222b] bg-[#121217] hover:border-purple-500/40 transition-colors"
+        >
+          <div className="min-w-0 flex-1">
+            {item.url ? (
+              <a
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-white hover:text-purple-300 transition-colors leading-snug inline-flex items-start gap-1.5"
+              >
+                {item.title}
+                <ExternalLink className="w-3.5 h-3.5 shrink-0 mt-0.5 opacity-50" />
+              </a>
+            ) : (
+              <span className="text-sm text-white leading-snug">{item.title}</span>
+            )}
+            {item.snippet && (
+              <div className="text-xs text-gray-500 mt-1 line-clamp-2">{item.snippet}</div>
+            )}
+            {item.date && <div className="text-[11px] text-gray-500 mt-1">{item.date}</div>}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
 }

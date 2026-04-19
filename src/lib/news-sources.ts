@@ -1,28 +1,41 @@
-// Multi-source news aggregator for Caitlin Clark / WNBA stories.
-// Sources (priority order):
-// 1. Mick Talks Hoops + Rachel DeMita — WNBA journalism YouTube channels
-// 2. Twitter: @CClarkReport, @kenswift via Nitter RSS
-// 3. SI, ClutchPoints, Athlon Sports via Google News site search
-// 4. Google News (general CC search)
-// 5. Competitor narrative channels (Hoop Reports, BTS, From The Logo)
+// News aggregator for Caitlin Clark / WNBA story discovery.
+//
+// Sources:
+// 1. YouTube channels — page scraped (bypasses RSS 15-cap, gets view counts)
+//    Add new channels to YOUTUBE_CHANNELS below.
+// 2. Athlon Sports WNBA — site RSS filtered for /wnba/ + Google News site search, deduped.
+//
+// NOT a news source: Hoop Reports / DKM / JxmyHighroller — those live in the
+// TitleTemplate table and are used only for title/story-structure framing.
 
 export type NewsItem = {
   title: string;
   source: string;
-  type: "news" | "twitter" | "youtube" | "rss";
+  type: "youtube" | "athlon";
   date?: string;
   url?: string;
   snippet?: string;
-  score?: number;
+  score?: number; // view count for YouTube items
 };
 
-// ===========================================================================
-// YouTube page scraper (bypasses RSS 15-video limit)
-// ===========================================================================
+// ============================================================================
+// YouTube channel config — append here to add more news sources
+// ============================================================================
 
-async function scrapeYouTubeChannel(channelId: string, channelName: string, limit: number): Promise<NewsItem[]> {
+type YouTubeChannel = { id: string; name: string; limit: number };
+
+const YOUTUBE_CHANNELS: YouTubeChannel[] = [
+  { id: "UCcT4c8glrjIO0pIVzJ6BWbg", name: "Mick Talks Hoops", limit: 100 },
+  { id: "UCBS2RdExOLDYVLnfsZ2Q4-w", name: "Rachel DeMita", limit: 30 },
+];
+
+// ============================================================================
+// YouTube page scraper (view counts + up to channel.limit videos)
+// ============================================================================
+
+async function scrapeYouTubeChannel(channel: YouTubeChannel): Promise<NewsItem[]> {
   try {
-    const url = `https://www.youtube.com/channel/${channelId}/videos`;
+    const url = `https://www.youtube.com/channel/${channel.id}/videos`;
     const res = await fetch(url, {
       signal: AbortSignal.timeout(10000),
       headers: {
@@ -44,21 +57,23 @@ async function scrapeYouTubeChannel(channelId: string, channelName: string, limi
     const contents: any[] = videosTab?.tabRenderer?.content?.richGridRenderer?.contents || [];
 
     const items: NewsItem[] = [];
-    for (const c of contents.slice(0, limit)) {
+    for (const c of contents.slice(0, channel.limit)) {
       const video = c?.richItemRenderer?.content?.videoRenderer;
       if (!video) continue;
       const title = video?.title?.runs?.[0]?.text || video?.title?.simpleText;
       const publishedText = video?.publishedTimeText?.simpleText;
       const viewCountText = video?.viewCountText?.simpleText || video?.shortViewCountText?.simpleText;
       const descSnippet = video?.descriptionSnippet?.runs?.map((r: { text: string }) => r.text).join("") || "";
+      const videoId = video?.videoId;
 
       if (!title) continue;
 
       items.push({
         title: title.trim(),
-        source: channelName,
+        source: channel.name,
         type: "youtube",
         date: publishedText || "",
+        url: videoId ? `https://youtube.com/watch?v=${videoId}` : undefined,
         score: viewCountText ? parseInt(viewCountText.replace(/[^0-9]/g, "")) || 0 : 0,
         snippet: descSnippet,
       });
@@ -69,251 +84,134 @@ async function scrapeYouTubeChannel(channelId: string, channelName: string, limi
   }
 }
 
-async function fetchYouTubeJournalism(): Promise<NewsItem[]> {
-  // Mick Talks Hoops = hourly WNBA coverage. Rachel DeMita = WNBA journalism.
-  const channels = [
-    { id: "UCcT4c8glrjIO0pIVzJ6BWbg", name: "Mick Talks Hoops", limit: 100 },
-    { id: "UCBS2RdExOLDYVLnfsZ2Q4-w", name: "Rachel DeMita", limit: 30 },
-  ];
-  const results = await Promise.all(channels.map((c) => scrapeYouTubeChannel(c.id, c.name, c.limit)));
-  return results.flat();
+async function fetchYouTube(): Promise<NewsItem[]> {
+  const results = await Promise.all(YOUTUBE_CHANNELS.map(scrapeYouTubeChannel));
+  return results.flat().sort((a, b) => (b.score || 0) - (a.score || 0));
 }
 
-async function fetchYouTubeCompetitors(): Promise<NewsItem[]> {
-  // Narrative competitors — filter to CC/WNBA only, use RSS (15 latest is enough)
-  const channels = [
-    { id: "UCvWdLRqA7R2Gggisxn4Xkhg", name: "From The Logo" },
-    { id: "UCYZOGKxkcE3BUwF5HfuzP1w", name: "Hoop Reports" },
-    { id: "UCj7OqYE9cNEzT6y_-Z3BdbA", name: "Basketball Top Stories" },
-  ];
+// ============================================================================
+// Athlon Sports — site RSS filtered for /wnba/ + Google News site search
+// ============================================================================
 
-  const items: NewsItem[] = [];
-  for (const channel of channels) {
-    try {
-      const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`;
-      const res = await fetch(url, {
-        signal: AbortSignal.timeout(6000),
-        headers: { "User-Agent": "Mozilla/5.0" },
+async function fetchAthlonRss(): Promise<NewsItem[]> {
+  try {
+    const res = await fetch("https://athlonsports.com/rss", {
+      signal: AbortSignal.timeout(8000),
+      redirect: "follow",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept: "application/rss+xml, application/xml, text/xml, */*",
+      },
+    });
+    if (!res.ok) return [];
+    const xml = await res.text();
+
+    const items: NewsItem[] = [];
+    const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
+    for (const block of itemBlocks) {
+      const linkMatch = block.match(/<link>(.*?)<\/link>/);
+      const link = linkMatch?.[1]?.trim();
+      if (!link || !link.includes("athlonsports.com/wnba/")) continue;
+
+      const titleMatch =
+        block.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/) ||
+        block.match(/<title>([\s\S]*?)<\/title>/);
+      const dateMatch = block.match(/<pubDate>(.*?)<\/pubDate>/);
+      const descMatch =
+        block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) ||
+        block.match(/<description>([\s\S]*?)<\/description>/);
+
+      const title = titleMatch?.[1]?.trim();
+      if (!title) continue;
+
+      items.push({
+        title,
+        source: "Athlon Sports",
+        type: "athlon",
+        date: dateMatch?.[1]?.slice(0, 16),
+        url: link,
+        snippet: descMatch?.[1]?.replace(/<[^>]+>/g, "").trim().slice(0, 240),
       });
-      if (!res.ok) continue;
-      const xml = await res.text();
-
-      const entries = xml.match(/<entry>[\s\S]*?<\/entry>/g) || [];
-      for (const entry of entries.slice(0, 10)) {
-        const titleMatch = entry.match(/<title>(.*?)<\/title>/);
-        const publishedMatch = entry.match(/<published>(.*?)<\/published>/);
-        const title = titleMatch?.[1]?.trim();
-        if (!title) continue;
-
-        const lower = title.toLowerCase();
-        if (
-          !lower.includes("caitlin") &&
-          !lower.includes("clark") &&
-          !lower.includes("wnba") &&
-          !lower.includes("fever") &&
-          !lower.includes("indiana")
-        ) continue;
-
-        items.push({
-          title,
-          source: channel.name,
-          type: "youtube",
-          date: publishedMatch?.[1]?.slice(0, 10),
-        });
-      }
-    } catch { /* continue */ }
-  }
-  return items;
-}
-
-// ===========================================================================
-// Twitter via Nitter RSS (public X/Twitter mirror)
-// ===========================================================================
-
-async function fetchTwitter(): Promise<NewsItem[]> {
-  // Nitter RSS mirrors — multiple instances for reliability
-  const instances = [
-    { host: "nitter.net", path: (h: string) => `https://nitter.net/${h}/rss` },
-    { host: "nitter.tiekoetter.com", path: (h: string) => `https://nitter.tiekoetter.com/${h}/rss` },
-  ];
-  const accounts = [
-    { handle: "CClarkReport", name: "@CClarkReport" },
-    { handle: "kenswift", name: "@kenswift" },
-  ];
-
-  const items: NewsItem[] = [];
-  for (const account of accounts) {
-    for (const instance of instances) {
-      try {
-        const url = instance.path(account.handle);
-        const res = await fetch(url, {
-          signal: AbortSignal.timeout(10000),
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            Accept: "application/rss+xml, application/xml, text/xml, */*",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Accept-Encoding": "identity",
-          },
-        });
-        if (!res.ok) continue;
-        const xml = await res.text();
-        // Validate it's a real feed
-        if (!xml.includes("<item>") || xml.includes("not yet whitelisted")) continue;
-
-        const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
-        for (const block of itemBlocks.slice(0, 25)) {
-          const titleMatch =
-            block.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/) ||
-            block.match(/<title>([\s\S]*?)<\/title>/);
-          const dateMatch = block.match(/<pubDate>(.*?)<\/pubDate>/);
-          const linkMatch = block.match(/<link>(.*?)<\/link>/);
-
-          let title = titleMatch?.[1]?.trim();
-          if (!title || title.length < 15) continue;
-
-          // Collapse whitespace
-          title = title.replace(/\s+/g, " ").trim();
-
-          items.push({
-            title,
-            source: account.name,
-            type: "twitter",
-            date: dateMatch?.[1]?.slice(0, 16),
-            url: linkMatch?.[1],
-          });
-        }
-        break; // instance worked, skip remaining instances for this account
-      } catch { /* try next instance */ }
     }
+    return items;
+  } catch {
+    return [];
   }
-  return items;
 }
 
-// ===========================================================================
-// Outlet coverage via Google News site search (SI, ClutchPoints, Athlon)
-// ===========================================================================
+async function fetchAthlonGoogleNews(): Promise<NewsItem[]> {
+  try {
+    const query = "site:athlonsports.com/wnba caitlin clark OR fever OR wnba";
+    const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`;
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      headers: { "User-Agent": "Mozilla/5.0" },
+    });
+    if (!res.ok) return [];
+    const xml = await res.text();
 
-async function fetchOutletNews(): Promise<NewsItem[]> {
-  const outlets = [
-    { query: "%22Sports+Illustrated%22+caitlin+clark+OR+fever", source: "Sports Illustrated" },
-    { query: "%22ClutchPoints%22+caitlin+clark+OR+fever+OR+wnba", source: "ClutchPoints" },
-    { query: "%22Athlon+Sports%22+caitlin+clark+OR+fever", source: "Athlon Sports" },
-  ];
+    const items: NewsItem[] = [];
+    const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
+    for (const block of itemBlocks.slice(0, 25)) {
+      const titleMatch =
+        block.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
+        block.match(/<title>(.*?)<\/title>/);
+      const dateMatch = block.match(/<pubDate>(.*?)<\/pubDate>/);
+      const linkMatch = block.match(/<link>(.*?)<\/link>/);
 
-  const items: NewsItem[] = [];
-  for (const outlet of outlets) {
-    try {
-      const url = `https://news.google.com/rss/search?q=${outlet.query}&hl=en-US&gl=US&ceid=US:en`;
-      const res = await fetch(url, {
-        signal: AbortSignal.timeout(8000),
-        headers: { "User-Agent": "Mozilla/5.0" },
+      const rawTitle = titleMatch?.[1]?.trim() || "";
+      if (!rawTitle || rawTitle.length < 15) continue;
+      // Google News titles end with " - Outlet Name"
+      const title = rawTitle.replace(/\s*[-–—]\s*[^-–—]+$/, "").trim();
+      if (!title || title.length < 10) continue;
+
+      items.push({
+        title,
+        source: "Athlon Sports",
+        type: "athlon",
+        date: dateMatch?.[1]?.slice(0, 16),
+        url: linkMatch?.[1],
       });
-      if (!res.ok) continue;
-      const xml = await res.text();
-
-      const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
-      for (const block of itemBlocks.slice(0, 15)) {
-        const titleMatch = block.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || block.match(/<title>(.*?)<\/title>/);
-        const dateMatch = block.match(/<pubDate>(.*?)<\/pubDate>/);
-        const rawTitle = titleMatch?.[1]?.trim() || "";
-        if (!rawTitle || rawTitle.length < 15) continue;
-
-        // Google News titles often end with " - Outlet Name" — strip that
-        const title = rawTitle.replace(/\s*[-–—]\s*[^-–—]+$/, "").trim();
-        if (!title || title.length < 10) continue;
-
-        items.push({
-          title,
-          source: outlet.source,
-          type: "news",
-          date: dateMatch?.[1]?.slice(0, 16),
-        });
-      }
-    } catch { /* continue */ }
+    }
+    return items;
+  } catch {
+    return [];
   }
-  return items;
 }
 
-// ===========================================================================
-// General Google News (fallback / broader net)
-// ===========================================================================
-
-async function fetchGoogleNews(): Promise<NewsItem[]> {
-  const queries = [
-    '"caitlin clark"',
-    '"indiana fever"',
-    '"caitlin clark" controversy OR quote OR responds',
-  ];
-
-  const items: NewsItem[] = [];
-  for (const q of queries) {
-    try {
-      const url = `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en-US&gl=US&ceid=US:en`;
-      const res = await fetch(url, {
-        signal: AbortSignal.timeout(6000),
-        headers: { "User-Agent": "Mozilla/5.0" },
-      });
-      if (!res.ok) continue;
-      const xml = await res.text();
-      const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
-
-      for (const block of itemBlocks.slice(0, 8)) {
-        const titleMatch = block.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || block.match(/<title>(.*?)<\/title>/);
-        const sourceMatch = block.match(/<source[^>]*>([^<]+)<\/source>/);
-        const dateMatch = block.match(/<pubDate>(.*?)<\/pubDate>/);
-
-        const title = titleMatch?.[1]?.trim();
-        if (!title || title.length < 15) continue;
-
-        items.push({
-          title,
-          source: sourceMatch?.[1]?.trim() || "Google News",
-          type: "news",
-          date: dateMatch?.[1]?.slice(0, 16),
-        });
-      }
-    } catch { /* continue */ }
+async function fetchAthlon(): Promise<NewsItem[]> {
+  const [rss, gnews] = await Promise.all([fetchAthlonRss(), fetchAthlonGoogleNews()]);
+  // Dedupe by URL first, then by title prefix as a fallback for Google's wrapped URLs.
+  const seenUrls = new Set<string>();
+  const seenTitles = new Set<string>();
+  const merged: NewsItem[] = [];
+  for (const item of [...rss, ...gnews]) {
+    const urlKey = item.url || "";
+    const titleKey = item.title.toLowerCase().slice(0, 60);
+    if (urlKey && seenUrls.has(urlKey)) continue;
+    if (seenTitles.has(titleKey)) continue;
+    if (urlKey) seenUrls.add(urlKey);
+    seenTitles.add(titleKey);
+    merged.push(item);
   }
-  return items;
+  return merged;
 }
 
-// ===========================================================================
+// ============================================================================
 // Aggregator — structured (for UI) + prompt-string (for AI) variants
-// ===========================================================================
+// ============================================================================
 
 export type GroupedNews = {
-  journalism: NewsItem[];
-  twitter: NewsItem[];
-  outlet: NewsItem[];
-  gnews: NewsItem[];
-  competitors: NewsItem[];
+  youtube: NewsItem[];
+  athlon: NewsItem[];
 };
 
 export async function fetchAllNewsItems(): Promise<GroupedNews> {
-  const [journalism, twitter, outlet, gnews, competitors] = await Promise.all([
-    fetchYouTubeJournalism(),
-    fetchTwitter(),
-    fetchOutletNews(),
-    fetchGoogleNews(),
-    fetchYouTubeCompetitors(),
-  ]);
-
-  const seen = new Set<string>();
-  const dedupe = (items: NewsItem[]): NewsItem[] =>
-    items.filter((i) => {
-      const key = i.title.toLowerCase().slice(0, 60);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-
+  const [youtube, athlon] = await Promise.all([fetchYouTube(), fetchAthlon()]);
   return {
-    journalism: dedupe(journalism).slice(0, 80),
-    twitter: dedupe(twitter).slice(0, 50),
-    outlet: dedupe(outlet).slice(0, 20),
-    gnews: dedupe(gnews).slice(0, 15),
-    competitors: dedupe(competitors).slice(0, 15),
+    youtube: youtube.slice(0, 150),
+    athlon: athlon.slice(0, 40),
   };
 }
 
@@ -321,51 +219,25 @@ export async function fetchAllNewsSources(): Promise<string> {
   const grouped = await fetchAllNewsItems();
   const sections: string[] = [];
 
-  const uniqJournalism = grouped.journalism;
-  if (uniqJournalism.length) {
-    sections.push("=== WNBA JOURNALISM VIDEOS (Mick Talks Hoops + Rachel DeMita — PRIMARY STORYLINE SOURCE) ===");
+  if (grouped.youtube.length) {
+    sections.push("=== WNBA YOUTUBE COVERAGE (primary storyline source — sorted by views, high views = proven audience demand) ===");
     sections.push(
-      uniqJournalism
+      grouped.youtube
         .map((i, n) => {
-          const base = `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`;
+          const views = i.score ? ` [${i.score.toLocaleString()} views]` : "";
+          const date = i.date ? ` (${i.date})` : "";
+          const base = `${n + 1}. "${i.title}" — ${i.source}${views}${date}`;
           return i.snippet ? `${base}\n   ↳ ${i.snippet.slice(0, 180)}` : base;
         })
         .join("\n")
     );
   }
 
-  if (grouped.twitter.length) {
-    sections.push("\n=== TWITTER / X (Clark Report + Ken Swift — breaking takes and drama) ===");
+  if (grouped.athlon.length) {
+    sections.push("\n=== ATHLON SPORTS WNBA (outlet coverage — named characters, narrative angles) ===");
     sections.push(
-      grouped.twitter
-        .map((i, n) => `${n + 1}. ${i.source}: "${i.title}"${i.date ? ` (${i.date})` : ""}`)
-        .join("\n")
-    );
-  }
-
-  if (grouped.outlet.length) {
-    sections.push("\n=== OUTLET DEEP COVERAGE (SI, ClutchPoints, Athlon Sports) ===");
-    sections.push(
-      grouped.outlet
-        .map((i, n) => `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`)
-        .join("\n")
-    );
-  }
-
-  if (grouped.gnews.length) {
-    sections.push("\n=== GENERAL MAINSTREAM NEWS (Google News) ===");
-    sections.push(
-      grouped.gnews
-        .map((i, n) => `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`)
-        .join("\n")
-    );
-  }
-
-  if (grouped.competitors.length) {
-    sections.push("\n=== COMPETITOR CC CHANNELS (what they're covering — don't copy, but see what's resonating) ===");
-    sections.push(
-      grouped.competitors
-        .map((i, n) => `${n + 1}. "${i.title}" — ${i.source}${i.date ? ` (${i.date})` : ""}`)
+      grouped.athlon
+        .map((i, n) => `${n + 1}. "${i.title}"${i.date ? ` (${i.date})` : ""}`)
         .join("\n")
     );
   }
