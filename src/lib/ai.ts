@@ -139,6 +139,7 @@ export type GeminiOptions = {
   urlContext?: boolean;
   googleSearch?: boolean;
   forceJson?: boolean;
+  maxOutputTokens?: number;
 };
 
 export async function callGeminiWithTools(
@@ -154,11 +155,16 @@ export async function callGeminiWithTools(
   if (options.urlContext) tools.push({ urlContext: {} });
   if (options.googleSearch) tools.push({ googleSearch: {} });
 
+  // Note: Gemini does not allow responseMimeType:application/json together
+  // with server-side tools like url_context. When both are requested we drop
+  // JSON mode and rely on the prompt's JSON-only instruction + lenient parsing.
+  const useJsonMode = options.forceJson && tools.length === 0;
+
   const body: Record<string, unknown> = {
     contents: [{ role: "user", parts: [{ text: sanitize(prompt) }] }],
     generationConfig: {
-      maxOutputTokens: 8192,
-      ...(options.forceJson ? { responseMimeType: "application/json" } : {}),
+      maxOutputTokens: options.maxOutputTokens ?? 8192,
+      ...(useJsonMode ? { responseMimeType: "application/json" } : {}),
     },
     ...(tools.length ? { tools } : {}),
   };

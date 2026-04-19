@@ -51,7 +51,13 @@ Output JSON ONLY, no markdown, no commentary, with this exact shape:
   ]
 }
 
-If url_context fails on a URL, still include it in results but set every summary field to a short error message starting with "UNAVAILABLE:" explaining what failed. Do not skip URLs.`;
+If url_context fails on a URL, still include it in results but set every summary field to a short error message starting with "UNAVAILABLE:" explaining what failed. Do not skip URLs.
+
+CRITICAL — VALID JSON ONLY:
+- Output must be parseable by JSON.parse. No trailing commas, no comments, no markdown fences.
+- Inside any string field, escape every internal double quote with a backslash (\\"). Use curly quotes (" ") if you want to show a real quote without escaping.
+- Inside any string field, escape every backslash (\\\\), every newline as \\n, every tab as \\t.
+- Do not wrap the JSON in a code block. Your first character should be '{' and your last character should be '}'.`;
 
 function buildPrompt(items: ResearchItem[]): string {
   const lines = items.map(
@@ -72,11 +78,38 @@ function parseResponse(raw: string): Array<{ url: string; summary: ResearchSumma
     .replace(/```(?:json)?\s*/g, "")
     .replace(/```\s*$/g, "")
     .trim();
-  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("No JSON found in Gemini response");
-  const parsed = JSON.parse(jsonMatch[0]);
-  if (!Array.isArray(parsed.results)) throw new Error("Missing results array");
-  return parsed.results;
+
+  // Try clean parse first (ideal case).
+  try {
+    const parsed = JSON.parse(cleaned);
+    if (Array.isArray(parsed.results)) return parsed.results;
+  } catch {
+    // fall through to recovery
+  }
+
+  // Trim to outermost braces and try again.
+  const firstBrace = cleaned.indexOf("{");
+  const lastBrace = cleaned.lastIndexOf("}");
+  if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+    throw new Error(`No JSON object found. First 300 chars: ${cleaned.slice(0, 300)}`);
+  }
+  const slice = cleaned.slice(firstBrace, lastBrace + 1);
+
+  try {
+    const parsed = JSON.parse(slice);
+    if (!Array.isArray(parsed.results)) throw new Error("Missing results array");
+    return parsed.results;
+  } catch (err) {
+    // Log the raw output server-side so we can see what Gemini returned.
+    console.error("[research] Failed to parse Gemini response. Raw length:", raw.length);
+    console.error("[research] First 400 chars:", cleaned.slice(0, 400));
+    console.error("[research] Last 400 chars:", cleaned.slice(-400));
+    throw new Error(
+      `Parse failed: ${err instanceof Error ? err.message : "unknown"}. Response length: ${
+        raw.length
+      } chars. The model likely returned malformed or truncated JSON — try researching fewer items at once.`
+    );
+  }
 }
 
 export async function researchUrls(
@@ -110,7 +143,12 @@ export async function researchUrls(
       buildPrompt(toFetch),
       SYSTEM_PROMPT,
       model,
-      { urlContext: true }
+      {
+        urlContext: true,
+        // Gemini blocks responseMimeType together with url_context, so we
+        // rely on the prompt's "JSON only" instruction + lenient parsing.
+        maxOutputTokens: 32768,
+      }
     );
 
     freshResults = parseResponse(result.text);
