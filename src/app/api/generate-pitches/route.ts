@@ -150,19 +150,41 @@ ${coveredTopics}
 
 === YOUR TASK ===
 
-For each of 10 pitches:
+=== THE NARRATIVE LOGIC TEST (MOST IMPORTANT STEP) ===
 
-1. Pick a template from the library above. **Balance across channels — use AT LEAST 3 from Hoop Reports, 2 from DKM, and 2 from JxmyHighroller. Do not over-index on one channel.**
-2. Find a matching current story from the news sources. **CRITICAL: At least 6 of your 10 pitches must cite a source from Mick Talks Hoops, Rachel DeMita, @CClarkReport, @kenswift, SI, ClutchPoints, or Athlon Sports. Do NOT rely primarily on Google News for story material.**
-3. Adapt the template by swapping in Caitlin Clark / Fever / WNBA names and specifics.
-4. The adapted title MUST include "Caitlin Clark" (or frame her as the subject).
-5. Verify:
-   - Is there a specific named villain with a quote or action?
-   - Is there a concrete vindication moment with stats or a specific play?
-   - Does this match a PROVEN viral framework?
-6. Check the ALREADY COVERED list strictly. If your pitch topic is similar in any way (same villain, same incident, same angle) to an accepted/rejected/pending pitch, skip it. Being "slightly different" is NOT enough. Use a different storyline entirely.
+Every template tells a specific KIND of story. Before picking a template, identify WHAT STORY it tells. Then check if your current news fits THAT story type.
 
-Vary the template patterns. Mix: "The Day", "This Is Why", "How [X] Became", "Why [X] Is Scared Of", "The Story Of Why", "[X] Times [Y] Did [Z]", "When You're The Best...", "They Said... But...", etc.
+Examples of template narrative logic:
+
+- "The Day Steph Curry Exposed [X]" → Story type: "Hero delivers on-court revenge against a specific opponent who doubted/disrespected them."
+  ✅ Fits: "The Day Caitlin Clark Exposed Diana Taurasi" (Taurasi publicly doubted her → Clark dropped 40 on Phoenix)
+  ❌ Doesn't fit: "The Day Caitlin Clark Exposed the WNBA Draft Lottery" (lottery isn't a villain)
+
+- "When You're The Best [X] But The [League] Doesn't Care" → Story type: "Elite player being under-recognized/under-paid despite dominance."
+  ✅ Fits: "When You're The Best Rookie Ever But The WNBA Pays You Less Than The New Rookie" (if Azzi Fudd gets paid more)
+  ❌ Doesn't fit: Any story where Clark IS being celebrated
+
+- "The Odds of [X happening] Are 1 in [huge number]" → Story type: "Mathematical improbability — a player defying the odds to become great."
+  ✅ Fits: "The Odds of Caitlin Clark Leading the WNBA in Assists as a Rookie" (actual improbable achievement)
+  ❌ Doesn't fit: "The Odds of Caitlin Clark Drafting Raven Johnson" (she didn't draft anyone, and picking 10th isn't improbable)
+
+- "This Is What Happens If You TRASH TALK [Hero]" → Story type: "Specific opponent trash talked, got punished with on-court domination."
+  ✅ Fits: Any opponent who said something dismissive before losing to Clark
+  ❌ Doesn't fit: Any story without a specific trash-talk incident
+
+**BEFORE writing each pitch, state the template's narrative logic and verify your current story matches. If it doesn't match PERFECTLY, reject and find a different template or different story.**
+
+=== STEPS FOR EACH OF 10 PITCHES ===
+
+1. Pick a template. **Balance: at least 3 Hoop Reports, 2 DKM, 2 JxmyHighroller.**
+2. IDENTIFY the template's narrative logic (what story does it really tell?).
+3. Find a current story from Mick/Rachel/Twitter/SI/ClutchPoints/Athlon that has the SAME narrative logic. **At least 6 of 10 pitches must cite these journalism sources, not Google News.**
+4. Check: does the news story's actual characters, events, and stakes match the template's story type? If it feels forced or aesthetic-only, reject.
+5. Verify the 4 elements: specific named villain with quote/action, concrete vindication moment with stats, proven viral framework, not already covered.
+6. The adapted title must include "Caitlin Clark" or frame her as the subject.
+7. Strict dedup: if similar to ANY accepted/rejected/pending pitch (same incident, villain, or angle), discard.
+
+**Vary template patterns.** Do not use 10 "The Day..." titles. Mix narrative types.
 
 Return ONLY the JSON object with 10 pitches. No markdown, no explanation.`;
 
