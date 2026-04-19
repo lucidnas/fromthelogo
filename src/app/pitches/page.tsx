@@ -14,6 +14,8 @@ import {
   TrendingUp,
   Leaf,
   Filter,
+  Trash2,
+  Undo2,
 } from "lucide-react";
 
 type Pitch = {
@@ -70,6 +72,8 @@ function PitchCard({
   pitch,
   onAccept,
   onReject,
+  onRevert,
+  onDelete,
   onGenerateScript,
   generatingScript,
   showActions,
@@ -77,6 +81,8 @@ function PitchCard({
   pitch: Pitch;
   onAccept: (pitch: Pitch) => void;
   onReject: (pitch: Pitch) => void;
+  onRevert: (pitch: Pitch) => void;
+  onDelete: (pitch: Pitch) => void;
   onGenerateScript: (pitch: Pitch) => void;
   generatingScript: number | null;
   showActions: boolean;
@@ -241,6 +247,26 @@ function PitchCard({
               </button>
             </>
           )}
+          {pitch.status === "accepted" && (
+            <>
+              <button
+                onClick={() => onRevert(pitch)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-500/10 text-gray-300 border border-gray-500/20 text-sm font-medium hover:bg-gray-500/20 transition-colors"
+                title="Move back to pending"
+              >
+                <Undo2 className="w-4 h-4" />
+                Unaccept
+              </button>
+              <button
+                onClick={() => onDelete(pitch)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 text-sm font-medium hover:bg-red-500/20 transition-colors"
+                title="Permanently delete this pitch"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+            </>
+          )}
           <button
             onClick={() => onGenerateScript(pitch)}
             disabled={generatingScript === pitch.id}
@@ -319,6 +345,37 @@ export default function PitchesPage() {
       }
     } catch {
       alert("Failed to reject pitch");
+    }
+  }
+
+  async function handleRevert(pitch: Pitch) {
+    try {
+      const res = await fetch(`/api/pitches/${pitch.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "pending" }),
+      });
+      if (res.ok) {
+        setPitches((prev) =>
+          prev.map((p) => (p.id === pitch.id ? { ...p, status: "pending" } : p))
+        );
+      }
+    } catch {
+      alert("Failed to unaccept pitch");
+    }
+  }
+
+  async function handleDelete(pitch: Pitch) {
+    if (!confirm(`Delete "${pitch.title}"? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`/api/pitches/${pitch.id}`, { method: "DELETE" });
+      if (res.ok) {
+        setPitches((prev) => prev.filter((p) => p.id !== pitch.id));
+      } else {
+        alert("Failed to delete pitch");
+      }
+    } catch {
+      alert("Failed to delete pitch");
     }
   }
 
@@ -541,6 +598,8 @@ export default function PitchesPage() {
                     pitch={pitch}
                     onAccept={handleAccept}
                     onReject={handleReject}
+                    onRevert={handleRevert}
+                    onDelete={handleDelete}
                     onGenerateScript={handleGenerateScript}
                     generatingScript={generatingScript}
                     showActions={true}
@@ -567,6 +626,8 @@ export default function PitchesPage() {
                     pitch={pitch}
                     onAccept={handleAccept}
                     onReject={handleReject}
+                    onRevert={handleRevert}
+                    onDelete={handleDelete}
                     onGenerateScript={handleGenerateScript}
                     generatingScript={generatingScript}
                     showActions={true}

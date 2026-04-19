@@ -35,6 +35,34 @@ export async function PATCH(
   }
 }
 
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const pitchId = parseInt(id, 10);
+
+    if (isNaN(pitchId)) {
+      return NextResponse.json({ error: "Invalid pitch ID" }, { status: 400 });
+    }
+
+    await prisma.calendarSlot.updateMany({
+      where: { pitchId },
+      data: { pitchId: null, status: "open" },
+    });
+    await prisma.pitch.delete({ where: { id: pitchId } });
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Delete pitch error:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Failed to delete pitch" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
