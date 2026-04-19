@@ -7,7 +7,6 @@ import {
   Newspaper,
   PlayCircle,
   ExternalLink,
-  Flame,
   ChevronDown,
   FlaskConical,
   Check,
@@ -198,7 +197,7 @@ export default function NewsPage() {
             <h1 className="text-3xl font-bold text-white">News Preview</h1>
           </div>
           <p className="text-gray-400 text-sm">
-            Last 30 videos per channel, sorted by views. Click a section to collapse it.
+            Last 30 videos per channel, newest first. Click a section to collapse it.
           </p>
         </div>
         <button
@@ -305,35 +304,26 @@ function NewsBody({
   toggleExpanded: (url: string) => void;
 }) {
   // Group YouTube items by source so each channel renders as its own section.
+  // Keep YouTube's natural order (newest first) within each channel.
   const channelGroups = useMemo(() => {
     const map = new Map<string, NewsItem[]>();
     for (const item of data.items.youtube) {
       if (!map.has(item.source)) map.set(item.source, []);
       map.get(item.source)!.push(item);
     }
-    return Array.from(map.entries()).map(([source, items]) => ({
-      source,
-      items: [...items].sort((a, b) => (b.score || 0) - (a.score || 0)),
-    }));
+    return Array.from(map.entries()).map(([source, items]) => ({ source, items }));
   }, [data]);
-
-  const topAcrossChannels = useMemo(
-    () => [...data.items.youtube].sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 6),
-    [data]
-  );
 
   return (
     <>
       <SummaryBar data={data} />
-
-      {topAcrossChannels.length > 0 && <HotRow items={topAcrossChannels} />}
 
       <div className="mt-10 space-y-4">
         {channelGroups.map((g) => (
           <CollapsibleSection
             key={g.source}
             title={g.source}
-            subtitle={`Last ${g.items.length} videos · top ${formatViews(g.items[0]?.score || 0)}`}
+            subtitle={`Last ${g.items.length} videos · newest first`}
             accent="from-red-500/20 to-rose-500/5 border-red-500/30"
             icon={PlayCircle}
             defaultOpen
@@ -413,57 +403,6 @@ function Stat({
       <div className={`text-2xl font-bold text-white ${mono ? "font-mono text-lg" : ""}`}>{value}</div>
       {sub && <div className="text-[11px] text-gray-500 mt-0.5">{sub}</div>}
     </div>
-  );
-}
-
-function HotRow({ items }: { items: NewsItem[] }) {
-  return (
-    <section className="mt-10">
-      <div className="flex items-center gap-2 mb-4">
-        <Flame className="w-5 h-5 text-orange-400" />
-        <h2 className="text-lg font-semibold text-white">Top by Views</h2>
-        <span className="text-xs text-gray-500">across all channels</span>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {items.map((item, i) => (
-          <HotCard key={`hot-${i}`} item={item} rank={i + 1} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function HotCard({ item, rank }: { item: NewsItem; rank: number }) {
-  const views = item.score || 0;
-  return (
-    <a
-      href={item.url || "#"}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group p-4 rounded-xl border border-[#22222b] bg-[#121217] hover:border-purple-500/50 transition-colors"
-    >
-      <div className="flex items-start gap-3">
-        <div className="text-xl font-bold text-gray-600 font-mono w-8 shrink-0">
-          {rank.toString().padStart(2, "0")}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold border mb-2 ${viewsTierClass(
-              views
-            )}`}
-          >
-            {formatViews(views)} views
-          </div>
-          <div className="text-sm text-white leading-snug group-hover:text-purple-300 transition-colors line-clamp-3">
-            {item.title}
-          </div>
-          <div className="text-[11px] text-gray-500 mt-2 flex items-center gap-2 flex-wrap">
-            <span className="text-gray-400">{item.source}</span>
-            {item.date && <span>· {item.date}</span>}
-          </div>
-        </div>
-      </div>
-    </a>
   );
 }
 

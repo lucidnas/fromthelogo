@@ -61,8 +61,8 @@ async function scrapeYouTubeChannel(channel: YouTubeChannel): Promise<NewsItem[]
       const item = parseYouTubeEntry(c, channel.name);
       if (item) items.push(item);
     }
-    // Per-channel sort: newest-first from YouTube, then sort those by views.
-    return items.sort((a, b) => (b.score || 0) - (a.score || 0));
+    // Keep YouTube's natural order (newest first).
+    return items;
   } catch {
     return [];
   }
