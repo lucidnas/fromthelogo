@@ -143,25 +143,27 @@ async function callGemini(
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY not set");
 
-  const contents: { role: string; parts: { text: string }[] }[] = [];
+  // Enable JSON mode automatically when the prompt asks for JSON output.
+  // Pitch generation asks for JSON; script generation produces prose.
+  const wantsJson = /return only the json|json only|respond with json/i.test(prompt);
+
+  const body: Record<string, unknown> = {
+    contents: [{ role: "user", parts: [{ text: sanitize(prompt) }] }],
+    generationConfig: {
+      maxOutputTokens: 8192,
+      ...(wantsJson ? { responseMimeType: "application/json" } : {}),
+    },
+  };
   if (systemPrompt) {
-    contents.push({ role: "user", parts: [{ text: systemPrompt }] });
-    contents.push({
-      role: "model",
-      parts: [{ text: "Understood. I will follow these instructions." }],
-    });
+    body.systemInstruction = { parts: [{ text: sanitize(systemPrompt) }] };
   }
-  contents.push({ role: "user", parts: [{ text: prompt }] });
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents,
-      generationConfig: { maxOutputTokens: 4096 },
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
