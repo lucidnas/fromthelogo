@@ -567,7 +567,7 @@ export default function PitchesPage() {
               </div>
               <h3 className="mt-6 text-xl font-semibold text-white">Generating Pitches</h3>
               <p className="mt-2 text-sm text-gray-400 text-center">
-                Scanning fresh Caitlin Clark news, analyzing your covered topics, and crafting 10 new narrative pitches with Opus 4.7...
+                Scanning fresh Caitlin Clark news, analyzing your covered topics, and crafting 10 new narrative pitches...
               </p>
               <div className="mt-4 w-full">
                 <div className="h-1 bg-purple-500/10 rounded-full overflow-hidden">
