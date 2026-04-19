@@ -1,7 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Loader2, RefreshCw, Newspaper, PlayCircle, ExternalLink, Flame } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Loader2,
+  RefreshCw,
+  Newspaper,
+  PlayCircle,
+  ExternalLink,
+  Flame,
+  ChevronDown,
+} from "lucide-react";
 
 type NewsItem = {
   title: string;
@@ -73,7 +81,7 @@ export default function NewsPage() {
             <h1 className="text-3xl font-bold text-white">News Preview</h1>
           </div>
           <p className="text-gray-400 text-sm">
-            Live view of what the pitch generator is pulling. YouTube items are sorted by views — proven audience demand.
+            Last 30 videos per channel, sorted by views. Click a section to collapse it.
           </p>
         </div>
         <button
@@ -107,41 +115,66 @@ export default function NewsPage() {
         </div>
       )}
 
-      {data && (
-        <>
-          <SummaryBar data={data} />
-
-          <HotRow youtube={data.items.youtube} />
-
-          <section className="mt-12">
-            <SectionHeader
-              icon={PlayCircle}
-              accent="from-red-500/20 to-rose-500/5 border-red-500/30 text-red-300"
-              label="YouTube Coverage"
-              subtitle="Sorted by views — proven audience demand"
-              count={data.items.youtube.length}
-            />
-            <YouTubeList items={data.items.youtube} />
-          </section>
-
-          <section className="mt-12">
-            <SectionHeader
-              icon={Newspaper}
-              accent="from-emerald-500/20 to-teal-500/5 border-emerald-500/30 text-emerald-300"
-              label="Athlon Sports"
-              subtitle="Outlet narrative coverage — named characters and quotes"
-              count={data.items.athlon.length}
-            />
-            <AthlonList items={data.items.athlon} />
-          </section>
-        </>
-      )}
+      {data && <NewsBody data={data} />}
     </div>
   );
 }
 
+function NewsBody({ data }: { data: NewsPreview }) {
+  // Group YouTube items by source so each channel renders as its own section.
+  const channelGroups = useMemo(() => {
+    const map = new Map<string, NewsItem[]>();
+    for (const item of data.items.youtube) {
+      if (!map.has(item.source)) map.set(item.source, []);
+      map.get(item.source)!.push(item);
+    }
+    return Array.from(map.entries()).map(([source, items]) => ({
+      source,
+      items: [...items].sort((a, b) => (b.score || 0) - (a.score || 0)),
+    }));
+  }, [data]);
+
+  const topAcrossChannels = useMemo(
+    () => [...data.items.youtube].sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 6),
+    [data]
+  );
+
+  return (
+    <>
+      <SummaryBar data={data} />
+
+      {topAcrossChannels.length > 0 && <HotRow items={topAcrossChannels} />}
+
+      <div className="mt-10 space-y-4">
+        {channelGroups.map((g) => (
+          <CollapsibleSection
+            key={g.source}
+            title={g.source}
+            subtitle={`Last ${g.items.length} videos · top ${formatViews(g.items[0]?.score || 0)}`}
+            accent="from-red-500/20 to-rose-500/5 border-red-500/30"
+            icon={PlayCircle}
+            defaultOpen
+          >
+            <ChannelVideos items={g.items} />
+          </CollapsibleSection>
+        ))}
+
+        <CollapsibleSection
+          title="Athlon Sports"
+          subtitle={`${data.items.athlon.length} articles · outlet coverage`}
+          accent="from-emerald-500/20 to-teal-500/5 border-emerald-500/30"
+          icon={Newspaper}
+          defaultOpen
+        >
+          <AthlonList items={data.items.athlon} />
+        </CollapsibleSection>
+      </div>
+    </>
+  );
+}
+
 function SummaryBar({ data }: { data: NewsPreview }) {
-  const topView = data.items.youtube[0]?.score || 0;
+  const topView = data.items.youtube.reduce((max, i) => Math.max(max, i.score || 0), 0);
   return (
     <div className="rounded-2xl border border-[#22222b] bg-[#121217] p-6">
       <div className="flex flex-wrap items-center justify-between gap-6">
@@ -184,18 +217,16 @@ function Stat({
   );
 }
 
-function HotRow({ youtube }: { youtube: NewsItem[] }) {
-  const top = youtube.slice(0, 6);
-  if (top.length === 0) return null;
+function HotRow({ items }: { items: NewsItem[] }) {
   return (
     <section className="mt-10">
       <div className="flex items-center gap-2 mb-4">
         <Flame className="w-5 h-5 text-orange-400" />
         <h2 className="text-lg font-semibold text-white">Top by Views</h2>
-        <span className="text-xs text-gray-500">across all YouTube sources</span>
+        <span className="text-xs text-gray-500">across all channels</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {top.map((item, i) => (
+        {items.map((item, i) => (
           <HotCard key={`hot-${i}`} item={item} rank={i + 1} />
         ))}
       </div>
@@ -237,113 +268,102 @@ function HotCard({ item, rank }: { item: NewsItem; rank: number }) {
   );
 }
 
-function SectionHeader({
-  icon: Icon,
-  accent,
-  label,
+function CollapsibleSection({
+  title,
   subtitle,
-  count,
+  accent,
+  icon: Icon,
+  defaultOpen = true,
+  children,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
-  accent: string;
-  label: string;
+  title: string;
   subtitle: string;
-  count: number;
+  accent: string;
+  icon: React.ComponentType<{ className?: string }>;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
 }) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="mb-4">
-      <div
-        className={`inline-flex items-center gap-2 px-3 py-1.5 mb-2 rounded-lg bg-gradient-to-r ${accent} border`}
+    <div
+      className={`rounded-2xl border bg-gradient-to-br ${accent} bg-[#121217]/60 overflow-hidden`}
+    >
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between gap-3 px-5 py-4 hover:bg-white/[0.02] transition-colors"
       >
-        <Icon className="w-4 h-4" />
-        <span className="text-sm font-semibold text-white">{label}</span>
-        <span className="text-xs text-gray-300">{count} items</span>
-      </div>
-      <p className="text-xs text-gray-500">{subtitle}</p>
+        <div className="flex items-center gap-3 text-left min-w-0">
+          <Icon className="w-5 h-5 text-white shrink-0" />
+          <div className="min-w-0">
+            <div className="text-base font-semibold text-white truncate">{title}</div>
+            <div className="text-xs text-gray-400 truncate">{subtitle}</div>
+          </div>
+        </div>
+        <ChevronDown
+          className={`w-5 h-5 text-gray-400 shrink-0 transition-transform ${open ? "" : "-rotate-90"}`}
+        />
+      </button>
+      {open && <div className="px-5 pb-5">{children}</div>}
     </div>
   );
 }
 
-function YouTubeList({ items }: { items: NewsItem[] }) {
+function ChannelVideos({ items }: { items: NewsItem[] }) {
   if (items.length === 0) {
     return (
-      <div className="p-4 rounded-lg border border-[#22222b] bg-[#121217] text-sm text-gray-500 italic">
-        No YouTube items fetched.
+      <div className="p-4 rounded-lg border border-[#22222b] bg-[#0d0d12] text-sm text-gray-500 italic">
+        No videos fetched for this channel.
       </div>
     );
   }
-
-  // Group by source so you can scan per channel
-  const bySource = new Map<string, NewsItem[]>();
-  for (const item of items) {
-    if (!bySource.has(item.source)) bySource.set(item.source, []);
-    bySource.get(item.source)!.push(item);
-  }
-
   return (
-    <div className="space-y-8">
-      {Array.from(bySource.entries()).map(([source, list]) => (
-        <div key={source}>
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-300">{source}</h3>
-            <span className="text-xs text-gray-500">
-              {list.length} videos · top {formatViews(list[0]?.score || 0)}
-            </span>
-          </div>
-          <ul className="space-y-2">
-            {list.map((item, i) => {
-              const views = item.score || 0;
-              return (
-                <li
-                  key={`${source}-${i}`}
-                  className="p-3 rounded-lg border border-[#22222b] bg-[#121217] hover:border-purple-500/40 transition-colors"
-                >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`shrink-0 px-2 py-1 rounded-md text-[11px] font-bold border ${viewsTierClass(
-                        views
-                      )}`}
-                      style={{ minWidth: 64, textAlign: "center" }}
-                    >
-                      {formatViews(views)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      {item.url ? (
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-white hover:text-purple-300 transition-colors leading-snug"
-                        >
-                          {item.title}
-                        </a>
-                      ) : (
-                        <span className="text-sm text-white leading-snug">{item.title}</span>
-                      )}
-                      {item.snippet && (
-                        <div className="text-xs text-gray-500 mt-1 line-clamp-2">
-                          {item.snippet}
-                        </div>
-                      )}
-                      {item.date && (
-                        <div className="text-[11px] text-gray-500 mt-1">{item.date}</div>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
-    </div>
+    <ul className="space-y-2">
+      {items.map((item, i) => {
+        const views = item.score || 0;
+        return (
+          <li
+            key={`${item.source}-${i}`}
+            className="p-3 rounded-lg border border-[#22222b] bg-[#0d0d12] hover:border-purple-500/40 transition-colors"
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className={`shrink-0 px-2 py-1 rounded-md text-[11px] font-bold border ${viewsTierClass(
+                  views
+                )}`}
+                style={{ minWidth: 64, textAlign: "center" }}
+              >
+                {formatViews(views)}
+              </div>
+              <div className="min-w-0 flex-1">
+                {item.url ? (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-white hover:text-purple-300 transition-colors leading-snug"
+                  >
+                    {item.title}
+                  </a>
+                ) : (
+                  <span className="text-sm text-white leading-snug">{item.title}</span>
+                )}
+                {item.snippet && (
+                  <div className="text-xs text-gray-500 mt-1 line-clamp-2">{item.snippet}</div>
+                )}
+                {item.date && <div className="text-[11px] text-gray-500 mt-1">{item.date}</div>}
+              </div>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
 function AthlonList({ items }: { items: NewsItem[] }) {
   if (items.length === 0) {
     return (
-      <div className="p-4 rounded-lg border border-[#22222b] bg-[#121217] text-sm text-gray-500 italic">
+      <div className="p-4 rounded-lg border border-[#22222b] bg-[#0d0d12] text-sm text-gray-500 italic">
         No Athlon items fetched.
       </div>
     );
@@ -353,7 +373,7 @@ function AthlonList({ items }: { items: NewsItem[] }) {
       {items.map((item, i) => (
         <li
           key={`athlon-${i}`}
-          className="p-3 rounded-lg border border-[#22222b] bg-[#121217] hover:border-purple-500/40 transition-colors"
+          className="p-3 rounded-lg border border-[#22222b] bg-[#0d0d12] hover:border-purple-500/40 transition-colors"
         >
           <div className="min-w-0 flex-1">
             {item.url ? (

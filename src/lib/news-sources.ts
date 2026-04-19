@@ -25,8 +25,8 @@ export type NewsItem = {
 type YouTubeChannel = { id: string; name: string; limit: number };
 
 const YOUTUBE_CHANNELS: YouTubeChannel[] = [
-  { id: "UCcT4c8glrjIO0pIVzJ6BWbg", name: "Mick Talks Hoops", limit: 100 },
-  { id: "UCBS2RdExOLDYVLnfsZ2Q4-w", name: "Rachel DeMita", limit: 30 },
+  { id: "UCPzp2k1LSr1ctDEsOhg4-aw", name: "Mick Talks Hoops", limit: 30 },
+  { id: "UCsobdlQ3SXG8LRE-zg0IHHg", name: "Rachel DeMita", limit: 30 },
 ];
 
 // ============================================================================
@@ -58,35 +58,77 @@ async function scrapeYouTubeChannel(channel: YouTubeChannel): Promise<NewsItem[]
 
     const items: NewsItem[] = [];
     for (const c of contents.slice(0, channel.limit)) {
-      const video = c?.richItemRenderer?.content?.videoRenderer;
-      if (!video) continue;
-      const title = video?.title?.runs?.[0]?.text || video?.title?.simpleText;
-      const publishedText = video?.publishedTimeText?.simpleText;
-      const viewCountText = video?.viewCountText?.simpleText || video?.shortViewCountText?.simpleText;
-      const descSnippet = video?.descriptionSnippet?.runs?.map((r: { text: string }) => r.text).join("") || "";
-      const videoId = video?.videoId;
-
-      if (!title) continue;
-
-      items.push({
-        title: title.trim(),
-        source: channel.name,
-        type: "youtube",
-        date: publishedText || "",
-        url: videoId ? `https://youtube.com/watch?v=${videoId}` : undefined,
-        score: viewCountText ? parseInt(viewCountText.replace(/[^0-9]/g, "")) || 0 : 0,
-        snippet: descSnippet,
-      });
+      const item = parseYouTubeEntry(c, channel.name);
+      if (item) items.push(item);
     }
-    return items;
+    // Per-channel sort: newest-first from YouTube, then sort those by views.
+    return items.sort((a, b) => (b.score || 0) - (a.score || 0));
   } catch {
     return [];
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parseYouTubeEntry(c: any, source: string): NewsItem | null {
+  // Legacy renderer (still used by most channels)
+  const video = c?.richItemRenderer?.content?.videoRenderer;
+  if (video) {
+    const title = video?.title?.runs?.[0]?.text || video?.title?.simpleText;
+    if (!title) return null;
+    const viewCountText = video?.viewCountText?.simpleText || video?.shortViewCountText?.simpleText;
+    const descSnippet = video?.descriptionSnippet?.runs?.map((r: { text: string }) => r.text).join("") || "";
+    return {
+      title: String(title).trim(),
+      source,
+      type: "youtube",
+      date: video?.publishedTimeText?.simpleText || "",
+      url: video?.videoId ? `https://youtube.com/watch?v=${video.videoId}` : undefined,
+      score: viewCountText ? parseViews(viewCountText) : 0,
+      snippet: descSnippet,
+    };
+  }
+
+  // New lockupViewModel layout (rolling out across channels)
+  const lockup = c?.richItemRenderer?.content?.lockupViewModel;
+  if (lockup) {
+    const meta = lockup?.metadata?.lockupMetadataViewModel;
+    const title = meta?.title?.content;
+    if (!title) return null;
+    const metaParts =
+      meta?.metadata?.contentMetadataViewModel?.metadataRows?.[0]?.metadataParts || [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const viewText = metaParts.find((p: any) => /view/i.test(p?.text?.content || ""))?.text?.content;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dateText = metaParts.find((p: any) => /ago/i.test(p?.text?.content || ""))?.text?.content;
+    return {
+      title: String(title).trim(),
+      source,
+      type: "youtube",
+      date: dateText || "",
+      url: lockup?.contentId ? `https://youtube.com/watch?v=${lockup.contentId}` : undefined,
+      score: viewText ? parseViews(viewText) : 0,
+    };
+  }
+
+  return null;
+}
+
+// Handles "1,234 views", "12K views", "3.4M views"
+function parseViews(text: string): number {
+  const match = text.match(/([\d.,]+)\s*([KMB])?/i);
+  if (!match) return 0;
+  const num = parseFloat(match[1].replace(/,/g, ""));
+  if (isNaN(num)) return 0;
+  const suffix = (match[2] || "").toUpperCase();
+  if (suffix === "K") return Math.round(num * 1_000);
+  if (suffix === "M") return Math.round(num * 1_000_000);
+  if (suffix === "B") return Math.round(num * 1_000_000_000);
+  return Math.round(num);
+}
+
 async function fetchYouTube(): Promise<NewsItem[]> {
   const results = await Promise.all(YOUTUBE_CHANNELS.map(scrapeYouTubeChannel));
-  return results.flat().sort((a, b) => (b.score || 0) - (a.score || 0));
+  return results.flat();
 }
 
 // ============================================================================
