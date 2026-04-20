@@ -16,6 +16,8 @@ import {
   Filter,
   Trash2,
   Undo2,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 
 type Pitch = {
@@ -35,7 +37,7 @@ type Pitch = {
   updatedAt: string;
 };
 
-type FilterTab = "today" | "accepted" | "all";
+type FilterTab = "today" | "accepted" | "all" | "trash";
 
 function getScoreColor(score: number) {
   if (score >= 90) return "text-emerald-400";
@@ -77,6 +79,9 @@ function PitchCard({
   onGenerateScript,
   generatingScript,
   showActions,
+  isTrash,
+  isSelected,
+  onToggleSelect,
 }: {
   pitch: Pitch;
   onAccept: (pitch: Pitch) => void;
@@ -86,16 +91,34 @@ function PitchCard({
   onGenerateScript: (pitch: Pitch) => void;
   generatingScript: number | null;
   showActions: boolean;
+  isTrash?: boolean;
+  isSelected: boolean;
+  onToggleSelect: (id: number) => void;
 }) {
   const [expandedScript, setExpandedScript] = useState(false);
   const [scriptViewMode, setScriptViewMode] = useState<"formatted" | "raw">("formatted");
   const score = pitch.performanceScore || 0;
 
   return (
-    <div className="p-6 rounded-xl bg-[#121217] border border-[#22222b] overflow-hidden">
+    <div
+      className={`p-6 rounded-xl bg-[#121217] border overflow-hidden transition-colors ${
+        isSelected ? "border-purple-500/50" : "border-[#22222b]"
+      }`}
+    >
       {/* Top row */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex items-center gap-3 flex-wrap">
+          {/* Checkbox */}
+          <button
+            onClick={() => onToggleSelect(pitch.id)}
+            className="text-gray-500 hover:text-purple-400 transition-colors shrink-0"
+          >
+            {isSelected ? (
+              <CheckSquare className="w-4 h-4 text-purple-400" />
+            ) : (
+              <Square className="w-4 h-4" />
+            )}
+          </button>
           <PitchTypeBadge pitchType={pitch.pitchType} />
           <div
             className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border ${getScoreBg(score)}`}
@@ -106,6 +129,11 @@ function PitchCard({
           {pitch.status === "accepted" && (
             <span className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <Check className="w-3 h-3" /> Accepted
+            </span>
+          )}
+          {isTrash && (
+            <span className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+              <Trash2 className="w-3 h-3" /> Rejected
             </span>
           )}
         </div>
@@ -229,60 +257,81 @@ function PitchCard({
       {/* Actions */}
       {showActions && (
         <div className="flex items-center gap-3 pt-4 border-t border-[#22222b]">
-          {pitch.status === "pending" && (
-            <>
-              <button
-                onClick={() => onAccept(pitch)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-sm font-medium hover:bg-emerald-500/20 transition-colors"
-              >
-                <Check className="w-4 h-4" />
-                Accept
-              </button>
-              <button
-                onClick={() => onReject(pitch)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 text-sm font-medium hover:bg-red-500/20 transition-colors"
-              >
-                <X className="w-4 h-4" />
-                Reject
-              </button>
-            </>
-          )}
-          {pitch.status === "accepted" && (
+          {isTrash ? (
             <>
               <button
                 onClick={() => onRevert(pitch)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-500/10 text-gray-300 border border-gray-500/20 text-sm font-medium hover:bg-gray-500/20 transition-colors"
-                title="Move back to pending"
               >
                 <Undo2 className="w-4 h-4" />
-                Unaccept
+                Restore
               </button>
               <button
                 onClick={() => onDelete(pitch)}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 text-sm font-medium hover:bg-red-500/20 transition-colors"
-                title="Permanently delete this pitch"
               >
                 <Trash2 className="w-4 h-4" />
-                Delete
+                Delete Permanently
+              </button>
+            </>
+          ) : (
+            <>
+              {pitch.status === "pending" && (
+                <>
+                  <button
+                    onClick={() => onAccept(pitch)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-sm font-medium hover:bg-emerald-500/20 transition-colors"
+                  >
+                    <Check className="w-4 h-4" />
+                    Accept
+                  </button>
+                  <button
+                    onClick={() => onReject(pitch)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 text-sm font-medium hover:bg-red-500/20 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    Reject
+                  </button>
+                </>
+              )}
+              {pitch.status === "accepted" && (
+                <>
+                  <button
+                    onClick={() => onRevert(pitch)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-500/10 text-gray-300 border border-gray-500/20 text-sm font-medium hover:bg-gray-500/20 transition-colors"
+                    title="Move back to pending"
+                  >
+                    <Undo2 className="w-4 h-4" />
+                    Unaccept
+                  </button>
+                  <button
+                    onClick={() => onDelete(pitch)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 text-sm font-medium hover:bg-red-500/20 transition-colors"
+                    title="Permanently delete this pitch"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => onGenerateScript(pitch)}
+                disabled={generatingScript === pitch.id}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 text-sm font-medium hover:bg-purple-500/20 transition-colors ml-auto disabled:opacity-50"
+              >
+                {generatingScript === pitch.id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
+                {generatingScript === pitch.id
+                  ? "Generating..."
+                  : pitch.generatedScript
+                    ? "Regenerate Script"
+                    : "Generate Script"}
               </button>
             </>
           )}
-          <button
-            onClick={() => onGenerateScript(pitch)}
-            disabled={generatingScript === pitch.id}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 text-sm font-medium hover:bg-purple-500/20 transition-colors ml-auto disabled:opacity-50"
-          >
-            {generatingScript === pitch.id ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Sparkles className="w-4 h-4" />
-            )}
-            {generatingScript === pitch.id
-              ? "Generating..."
-              : pitch.generatedScript
-                ? "Regenerate Script"
-                : "Generate Script"}
-          </button>
         </div>
       )}
     </div>
@@ -296,6 +345,8 @@ export default function PitchesPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [researchCount, setResearchCount] = useState(0);
   const [activeTab, setActiveTab] = useState<FilterTab>("today");
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   const fetchPitches = useCallback(async () => {
     try {
@@ -318,6 +369,28 @@ export default function PitchesPage() {
       .then((d) => setResearchCount((d.results || []).length))
       .catch(() => {});
   }, [fetchPitches]);
+
+  // Clear selection when switching tabs
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [activeTab]);
+
+  function toggleSelect(id: number) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll(ids: number[]) {
+    const allSelected = ids.every((id) => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(ids));
+    }
+  }
 
   async function handleAccept(pitch: Pitch) {
     try {
@@ -366,7 +439,7 @@ export default function PitchesPage() {
         );
       }
     } catch {
-      alert("Failed to unaccept pitch");
+      alert("Failed to restore pitch");
     }
   }
 
@@ -381,6 +454,43 @@ export default function PitchesPage() {
       }
     } catch {
       alert("Failed to delete pitch");
+    }
+  }
+
+  async function handleBulkAction(action: "accept" | "reject" | "restore" | "delete") {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    if (action === "delete" && !confirm(`Permanently delete ${ids.length} pitch(es)? This cannot be undone.`)) return;
+
+    setBulkLoading(true);
+    try {
+      const res = await fetch("/api/pitches/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids, action }),
+      });
+
+      if (!res.ok) {
+        alert("Bulk action failed");
+        return;
+      }
+
+      if (action === "delete") {
+        setPitches((prev) => prev.filter((p) => !selectedIds.has(p.id)));
+      } else {
+        const statusMap = { accept: "accepted", reject: "rejected", restore: "pending" } as const;
+        const newStatus = statusMap[action];
+        setPitches((prev) =>
+          prev.map((p) => (selectedIds.has(p.id) ? { ...p, status: newStatus } : p))
+        );
+      }
+
+      setSelectedIds(new Set());
+    } catch {
+      alert("Bulk action failed");
+    } finally {
+      setBulkLoading(false);
     }
   }
 
@@ -408,7 +518,6 @@ export default function PitchesPage() {
       const data = await res.json();
       const script = data.script;
 
-      // Save script to DB
       await fetch(`/api/pitches/${pitch.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -469,15 +578,20 @@ export default function PitchesPage() {
   });
 
   const acceptedPitches = pitches.filter((p) => p.status === "accepted");
-
   const allPitches = pitches.filter((p) => p.status !== "rejected");
+  const trashPitches = pitches.filter((p) => p.status === "rejected");
 
   const displayPitches =
-    activeTab === "today" ? todayPitches : activeTab === "accepted" ? acceptedPitches : allPitches;
+    activeTab === "today"
+      ? todayPitches
+      : activeTab === "accepted"
+        ? acceptedPitches
+        : activeTab === "trash"
+          ? trashPitches
+          : allPitches;
 
   const trendingPitches = displayPitches.filter((p) => p.pitchType === "trending");
   const evergreenPitches = displayPitches.filter((p) => p.pitchType === "evergreen");
-  // Pitches without pitchType (legacy) go into trending
   const untaggedPitches = displayPitches.filter(
     (p) => p.pitchType !== "trending" && p.pitchType !== "evergreen"
   );
@@ -486,7 +600,12 @@ export default function PitchesPage() {
     { key: "today", label: "Today's Pitches", count: todayPitches.length },
     { key: "accepted", label: "Accepted", count: acceptedPitches.length },
     { key: "all", label: "All", count: allPitches.length },
+    { key: "trash", label: "Trash", count: trashPitches.length },
   ];
+
+  const isTrash = activeTab === "trash";
+  const allDisplayIds = displayPitches.map((p) => p.id);
+  const allSelected = allDisplayIds.length > 0 && allDisplayIds.every((id) => selectedIds.has(id));
 
   return (
     <div className="w-full max-w-7xl mx-auto px-6 py-10">
@@ -502,7 +621,7 @@ export default function PitchesPage() {
       </div>
 
       {/* Tabs + Refresh */}
-      <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div className="flex items-center gap-1 p-1 rounded-xl bg-[#121217] border border-[#22222b]">
           {tabs.map((tab) => (
             <button
@@ -510,17 +629,22 @@ export default function PitchesPage() {
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === tab.key
-                  ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                  ? tab.key === "trash"
+                    ? "bg-red-500/20 text-red-300 border border-red-500/30"
+                    : "bg-purple-500/20 text-purple-300 border border-purple-500/30"
                   : "text-gray-500 hover:text-gray-300"
               }`}
             >
               {tab.key === "today" && <Filter className="w-3.5 h-3.5" />}
               {tab.key === "accepted" && <Check className="w-3.5 h-3.5" />}
+              {tab.key === "trash" && <Trash2 className="w-3.5 h-3.5" />}
               {tab.label}
               <span
                 className={`text-xs px-1.5 py-0.5 rounded-md ${
                   activeTab === tab.key
-                    ? "bg-purple-500/30 text-purple-200"
+                    ? tab.key === "trash"
+                      ? "bg-red-500/30 text-red-200"
+                      : "bg-purple-500/30 text-purple-200"
                     : "bg-[#1a1a24] text-gray-600"
                 }`}
               >
@@ -529,30 +653,104 @@ export default function PitchesPage() {
             </button>
           ))}
         </div>
-        <button
-          onClick={() => handleRefreshPitches(false)}
-          disabled={refreshing}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 text-sm font-medium hover:bg-purple-500/20 transition-colors disabled:opacity-50"
-        >
-          {refreshing ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <RefreshCw className="w-4 h-4" />
-          )}
-          {refreshing ? "Generating..." : "Refresh with AI"}
-        </button>
-        {researchCount > 0 && (
-          <button
-            onClick={() => handleRefreshPitches(true)}
-            disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-            title="Use researched summaries (Gemini) as the primary material"
-          >
-            <Sparkles className="w-4 h-4" />
-            From research ({researchCount})
-          </button>
+        {!isTrash && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleRefreshPitches(false)}
+              disabled={refreshing}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 text-sm font-medium hover:bg-purple-500/20 transition-colors disabled:opacity-50"
+            >
+              {refreshing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              {refreshing ? "Generating..." : "Refresh with AI"}
+            </button>
+            {researchCount > 0 && (
+              <button
+                onClick={() => handleRefreshPitches(true)}
+                disabled={refreshing}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+                title="Use researched summaries (Gemini) as the primary material"
+              >
+                <Sparkles className="w-4 h-4" />
+                From research ({researchCount})
+              </button>
+            )}
+          </div>
         )}
       </div>
+
+      {/* Bulk action bar */}
+      {displayPitches.length > 0 && (
+        <div className="flex items-center gap-3 mb-6 p-3 rounded-xl bg-[#121217] border border-[#22222b]">
+          <button
+            onClick={() => toggleSelectAll(allDisplayIds)}
+            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+          >
+            {allSelected ? (
+              <CheckSquare className="w-4 h-4 text-purple-400" />
+            ) : (
+              <Square className="w-4 h-4" />
+            )}
+            {allSelected ? "Deselect All" : "Select All"}
+          </button>
+
+          {selectedIds.size > 0 && (
+            <>
+              <span className="text-xs text-gray-500">{selectedIds.size} selected</span>
+              <div className="w-px h-4 bg-[#22222b]" />
+              {isTrash ? (
+                <>
+                  <button
+                    onClick={() => handleBulkAction("restore")}
+                    disabled={bulkLoading}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-500/10 text-gray-300 border border-gray-500/20 text-xs font-medium hover:bg-gray-500/20 transition-colors disabled:opacity-50"
+                  >
+                    <Undo2 className="w-3.5 h-3.5" />
+                    Restore Selected
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction("delete")}
+                    disabled={bulkLoading}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-medium hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Delete Selected
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleBulkAction("accept")}
+                    disabled={bulkLoading}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    Accept Selected
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction("reject")}
+                    disabled={bulkLoading}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-medium hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    Reject Selected
+                  </button>
+                </>
+              )}
+              {bulkLoading && <Loader2 className="w-4 h-4 animate-spin text-purple-400" />}
+              <button
+                onClick={() => setSelectedIds(new Set())}
+                className="ml-auto text-xs text-gray-600 hover:text-gray-400 transition-colors"
+              >
+                Clear
+              </button>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Full-screen loading overlay when generating pitches */}
       {refreshing && (
@@ -592,20 +790,44 @@ export default function PitchesPage() {
               ? "No pitches generated today yet."
               : activeTab === "accepted"
                 ? "No accepted pitches yet."
-                : "No pitches found."}
+                : activeTab === "trash"
+                  ? "Trash is empty."
+                  : "No pitches found."}
           </p>
-          <button
-            onClick={() => handleRefreshPitches(false)}
-            disabled={refreshing}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 text-sm font-medium hover:bg-purple-500/20 transition-colors disabled:opacity-50"
-          >
-            {refreshing ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Sparkles className="w-4 h-4" />
-            )}
-            Generate 5 Pitches
-          </button>
+          {!isTrash && (
+            <button
+              onClick={() => handleRefreshPitches(false)}
+              disabled={refreshing}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20 text-sm font-medium hover:bg-purple-500/20 transition-colors disabled:opacity-50"
+            >
+              {refreshing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Sparkles className="w-4 h-4" />
+              )}
+              Generate 5 Pitches
+            </button>
+          )}
+        </div>
+      ) : isTrash ? (
+        /* Trash tab — flat list, no type grouping */
+        <div className="space-y-6">
+          {displayPitches.map((pitch) => (
+            <PitchCard
+              key={pitch.id}
+              pitch={pitch}
+              onAccept={handleAccept}
+              onReject={handleReject}
+              onRevert={handleRevert}
+              onDelete={handleDelete}
+              onGenerateScript={handleGenerateScript}
+              generatingScript={generatingScript}
+              showActions={true}
+              isTrash={true}
+              isSelected={selectedIds.has(pitch.id)}
+              onToggleSelect={toggleSelect}
+            />
+          ))}
         </div>
       ) : (
         <>
@@ -631,6 +853,8 @@ export default function PitchesPage() {
                     onGenerateScript={handleGenerateScript}
                     generatingScript={generatingScript}
                     showActions={true}
+                    isSelected={selectedIds.has(pitch.id)}
+                    onToggleSelect={toggleSelect}
                   />
                 ))}
               </div>
@@ -659,6 +883,8 @@ export default function PitchesPage() {
                     onGenerateScript={handleGenerateScript}
                     generatingScript={generatingScript}
                     showActions={true}
+                    isSelected={selectedIds.has(pitch.id)}
+                    onToggleSelect={toggleSelect}
                   />
                 ))}
               </div>
