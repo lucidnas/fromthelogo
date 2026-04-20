@@ -37,6 +37,24 @@ type NewsPreview = {
   items: GroupedNews;
 };
 
+type CorroborationSource = {
+  url: string;
+  outlet: string;
+  excerpt: string;
+};
+
+type VideoReference = {
+  timestamp: string;
+  claim: string;
+};
+
+type ResearchTopic = {
+  topic: string;
+  summary: string;
+  sources: CorroborationSource[];
+  videoReferences: VideoReference[];
+};
+
 type ResearchSummary = {
   angle: string;
   villain: string | null;
@@ -44,6 +62,7 @@ type ResearchSummary = {
   quotes: string[];
   stats: string[];
   whyItResonated: string;
+  topics?: ResearchTopic[];
 };
 
 type ResearchRow = {
@@ -78,6 +97,8 @@ export default function NewsPage() {
   const [researching, setResearching] = useState(false);
   const [researchError, setResearchError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [ingesting, setIngesting] = useState(false);
+  const [ingestResult, setIngestResult] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -111,6 +132,24 @@ export default function NewsPage() {
     load();
     loadExistingResearch();
   }, []);
+
+  const runIngest = async () => {
+    setIngesting(true);
+    setIngestResult(null);
+    try {
+      const res = await fetch("/api/research/ingest", { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Ingestion failed");
+      setIngestResult(
+        `Ingested ${json.processed} new videos · skipped ${json.skippedAlreadyResearched} · errors: ${json.errors?.length ?? 0} · ${(json.durationMs / 1000).toFixed(1)}s`
+      );
+      await loadExistingResearch();
+    } catch (e) {
+      setIngestResult(`Failed: ${e instanceof Error ? e.message : "unknown"}`);
+    } finally {
+      setIngesting(false);
+    }
+  };
 
   const toggleSelected = (url: string) => {
     setSelected((prev) => {
@@ -200,28 +239,54 @@ export default function NewsPage() {
             Last 30 videos per channel, newest first. Click a section to collapse it.
           </p>
         </div>
-        <button
-          onClick={load}
-          disabled={loading}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-600/20 border border-purple-500/40 hover:bg-purple-600/30 text-purple-200 text-xs font-semibold transition-colors disabled:opacity-50"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              Fetching...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="w-3.5 h-3.5" />
-              Refresh
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={runIngest}
+            disabled={ingesting}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 text-white text-xs font-semibold hover:opacity-90 disabled:opacity-50"
+            title="Run the daily ingestion job right now — research + corroborate any new videos"
+          >
+            {ingesting ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Ingesting...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3.5 h-3.5" />
+                Run ingest now
+              </>
+            )}
+          </button>
+          <button
+            onClick={load}
+            disabled={loading}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-600/20 border border-purple-500/40 hover:bg-purple-600/30 text-purple-200 text-xs font-semibold transition-colors disabled:opacity-50"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Fetching...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-3.5 h-3.5" />
+                Refresh
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {error && (
         <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-sm mb-6">
           {error}
+        </div>
+      )}
+
+      {ingestResult && (
+        <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-200 text-sm mb-6">
+          {ingestResult}
         </div>
       )}
 
@@ -571,6 +636,60 @@ function ResearchPanel({
       <ResearchList label="Quotes" items={summary.quotes} />
       <ResearchList label="Stats" items={summary.stats} />
       <ResearchField label="Why it resonated" value={summary.whyItResonated} />
+      {summary.topics && summary.topics.length > 0 && (
+        <div className="pt-2 border-t border-[#1a1a24]/80">
+          <div className="text-[10px] uppercase tracking-wider text-gray-500 font-semibold mb-2">
+            Topics & corroboration
+          </div>
+          <div className="space-y-3">
+            {summary.topics.map((t, i) => (
+              <TopicBlock key={i} topic={t} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TopicBlock({ topic }: { topic: ResearchTopic }) {
+  return (
+    <div className="p-3 rounded-lg bg-[#0d0d12] border border-[#1a1a24]">
+      <div className="text-sm font-semibold text-purple-200">{topic.topic}</div>
+      <div className="text-xs text-gray-300 mt-1 leading-relaxed">{topic.summary}</div>
+      {topic.sources && topic.sources.length > 0 && (
+        <ul className="mt-2 space-y-1">
+          {topic.sources.map((s, i) => (
+            <li key={i} className="text-[11px] text-gray-400 flex items-start gap-2">
+              <span className="text-emerald-400 shrink-0">✓</span>
+              <span className="min-w-0">
+                <a
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-300 hover:text-emerald-200 font-semibold"
+                >
+                  {s.outlet}
+                </a>
+                <span className="text-gray-500"> — {s.excerpt}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {topic.videoReferences && topic.videoReferences.length > 0 && (
+        <ul className="mt-2 space-y-1">
+          {topic.videoReferences.map((ref, i) => (
+            <li key={i} className="text-[11px] text-gray-400 flex items-start gap-2">
+              <span className="text-amber-400 shrink-0">▶</span>
+              <span>
+                <span className="font-mono text-amber-300">{ref.timestamp}</span>
+                <span className="text-gray-500"> — {ref.claim}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

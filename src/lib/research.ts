@@ -13,6 +13,24 @@ export type ResearchItem = {
   viewCount?: number;
 };
 
+export type CorroborationSource = {
+  url: string;
+  outlet: string;
+  excerpt: string;
+};
+
+export type VideoReference = {
+  timestamp: string; // "MM:SS" or "HH:MM:SS"
+  claim: string;
+};
+
+export type ResearchTopic = {
+  topic: string;
+  summary: string;
+  sources: CorroborationSource[];
+  videoReferences: VideoReference[];
+};
+
 export type ResearchSummaryShape = {
   angle: string;
   villain: string | null;
@@ -20,6 +38,7 @@ export type ResearchSummaryShape = {
   quotes: string[];
   stats: string[];
   whyItResonated: string;
+  topics?: ResearchTopic[];
 };
 
 const SYSTEM_PROMPT = `You are a research analyst for a YouTube channel about Caitlin Clark and the Indiana Fever.
