@@ -53,9 +53,24 @@ ${FTL_VOICE_PROFILE}
 
 - Every stat, quote, date, and name must come from the RESEARCH BRIEF in the user prompt. Do not invent numbers. If the brief doesn't have a specific number, skip it — don't make one up.
 - If you use a quote, attribute it to the person who said it.
-- Target 1000-1200 words (7-8 minutes speaking). Tight is better than padded.
+- Target EXACTLY 1,200–1,400 words. Count your words before returning. Too short = incomplete story. Too long = padded filler. Hit the range.
 - Always pro-Caitlin-Clark perspective, but earned — backed by receipts, not vibes.
-- Your final output is the script text only. No preamble. No "Here's your script:". Start with the cold open.`;
+- Your final output is the script text only. No preamble. No "Here's your script:". Start with the cold open.
+
+=== WHAT BAD SCRIPTS LOOK LIKE — DO NOT DO THIS ===
+
+If you catch yourself writing any of the following, STOP and rewrite:
+
+❌ Long corporate paragraphs (5+ sentences wall-to-wall). Every paragraph should be 2-4 sentences. At least one single-sentence paragraph per section.
+❌ Passive, detached tone: "We are seeing...", "It is worth noting...", "One might argue..."
+❌ Hollow transitions: "Here's the thing", "Here's why that matters", "It's worth noting"
+❌ Zero stat stacks. Stats must be delivered as a rapid list, not buried in a sentence.
+❌ No first-person reactions. You must have 2-3 moments like "I honestly had to reread this.", "My jaw dropped.", "I'm still buzzing."
+❌ No two-word punches. You must have 2-4 standalone one-or-two word lines: "Real money.", "Yep.", "Not anymore."
+❌ Starting a paragraph with a rhetorical question
+❌ Ending without a hard callback or metaphor punch + the one sign-off line
+
+A script that doesn't use the five moves (first-person reactions, two-word punches, direct reader address, stat stacks, pop dialogue tags) is a failed script. Rewrite it.`;
 }
 
 export async function POST(request: Request) {
@@ -91,9 +106,21 @@ ${
   "(No specific research bundle matched this pitch. Rely on well-known public facts about Caitlin Clark / the Indiana Fever that you're highly confident on, and keep specifics minimal rather than inventing numbers.)"
 }
 
-Now write the complete script as continuous prose, top to bottom, no headers, no labels. Apply the voice profile — cold open one of the four modes, five mental beats, callback or metaphor close, sign-off line. End with one natural sign-off like "New videos every week on From The Logo. See you next time."`;
+Now write the complete script as continuous prose. No headers, no labels, no section markers.
 
-    const model = process.env.SCRIPT_MODEL || "gemini-2.5-pro";
+CHECKLIST — verify before returning:
+□ Word count is between 1,200 and 1,400 words
+□ Opens with one of the four cold-open modes — never a greeting
+□ At least one stat stack delivered as a rapid list with a "so what" frame after
+□ 2-3 first-person reaction beats ("I honestly...", "My jaw dropped...", "I'm still buzzing...")
+□ 2-4 two-word punch lines standing alone as their own sentence ("Real money.", "Yep.", "Not anymore.")
+□ Paragraphs are 2-4 sentences. At least one single-sentence paragraph.
+□ Closes with ONE callback or metaphor punch — not a summary
+□ Final line is the sign-off: "New videos every week on From The Logo. See you next time."
+
+Write it like a passionate fan who's done the research — not a journalist, not a press release. Rachel DeMita energy, FTL's faceless format.`;
+
+    const model = process.env.SCRIPT_MODEL || "gemini-3.1-pro-preview";
     const result = await callGeminiWithTools(userPrompt, systemPrompt, model, {
       maxOutputTokens: 16384,
     });
