@@ -26,13 +26,21 @@ Example:
 
 === NON-NEGOTIABLE RULES ===
 
-1. Title MUST include "Caitlin Clark" (or an opponent's name where Clark is the subject). This is THE Caitlin Clark channel.
-2. Each pitch must cite BOTH:
+1. Title MUST include "Caitlin Clark" or "Indiana Fever". This is THE Caitlin Clark/Fever channel.
+2. Clark and the Fever are ALWAYS the protagonist — the agent doing things, not the one things are done to.
+   ✅ "Indiana Fever Just Became the WNBA's Worst Nightmare"
+   ✅ "The Day Caitlin Clark Silenced Every Doubter"
+   ✅ "Caitlin Clark Just Broke the WNBA"
+   ❌ "The New York Liberty Just Became Caitlin Clark's Worst Nightmare" — Liberty is the hero, Clark is the victim
+   ❌ "Why the WNBA Is Turning Against Caitlin Clark" — Clark is under attack
+   ❌ "Caitlin Clark's Biggest Problem" — Clark is struggling, not dominating
+   The villain gets exposed or defeated by Clark/Fever. Clark/Fever are never the ones being threatened or defeated.
+3. Each pitch must cite BOTH:
    a) The specific template title it's adapted from (with channel + views)
    b) The specific current news story it's based on (with source)
-3. The pitch must have a named villain with a specific quote or specific action.
-4. The pitch must have a concrete vindication moment with stats or a specific play.
-5. Do NOT generate pitches for topics already in the "already covered" list.
+4. The pitch must have a named villain with a specific quote or specific action.
+5. The pitch must have a concrete vindication moment with stats or a specific play.
+6. Do NOT generate pitches for topics already in the "already covered" list.
 
 === OUTPUT FORMAT ===
 
@@ -250,7 +258,7 @@ Examples of template narrative logic:
 3. Find a current story from the YouTube coverage (prioritize high-view items) or Athlon that has the SAME narrative logic. **At least 7 of 10 pitches must be anchored to a specific YouTube item with its view count cited as proof of demand.**
 4. Check: does the news story's actual characters, events, and stakes match the template's story type? If it feels forced or aesthetic-only, reject.
 5. Verify the 4 elements: specific named villain with quote/action, concrete vindication moment with stats, proven viral framework, not already covered.
-6. The adapted title must include "Caitlin Clark" or frame her as the subject.
+6. The adapted title must include "Caitlin Clark" or "Indiana Fever" AND must frame them as the protagonist — the force doing something, not the one being threatened or victimized. If your title puts Clark/Fever in a passive or victim role, REWRITE it.
 7. Strict dedup: if similar to ANY accepted/rejected/pending pitch (same incident, villain, or angle), discard.
 
 **Vary template patterns.** Do not use 10 "The Day..." titles. Mix narrative types.
