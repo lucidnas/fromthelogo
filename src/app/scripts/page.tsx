@@ -171,7 +171,8 @@ export default function ScriptsPage() {
             return (
               <div
                 key={pitch.id}
-                className="p-5 rounded-xl bg-[#121217] border border-[#22222b] hover:border-purple-500/30 transition-colors"
+                className="p-5 rounded-xl bg-[#121217] border border-[#22222b] hover:border-purple-500/30 transition-colors cursor-pointer"
+                onClick={() => { setViewingScript(pitch); setViewMode("formatted"); }}
               >
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex-1 min-w-0">
@@ -187,14 +188,7 @@ export default function ScriptsPage() {
                     <h3 className="font-semibold text-white text-base leading-snug mb-2">{pitch.title}</h3>
                     <p className="text-gray-500 text-sm line-clamp-2">{pitch.hookLine}</p>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      onClick={() => { setViewingScript(pitch); setViewMode("formatted"); }}
-                      className="p-2 rounded-lg bg-[#22222b] hover:bg-purple-500/10 hover:text-purple-400 text-gray-400 transition-colors"
-                      title="View"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
+                  <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => downloadScript(pitch)}
                       className="p-2 rounded-lg bg-[#22222b] hover:bg-purple-500/10 hover:text-purple-400 text-gray-400 transition-colors"
@@ -205,7 +199,7 @@ export default function ScriptsPage() {
                     <Link
                       href={`/pitches`}
                       className="p-2 rounded-lg bg-[#22222b] hover:bg-purple-500/10 hover:text-purple-400 text-gray-400 transition-colors"
-                      title="Generate Voice"
+                      title="Go to Pitches"
                     >
                       <Mic className="w-4 h-4" />
                     </Link>
