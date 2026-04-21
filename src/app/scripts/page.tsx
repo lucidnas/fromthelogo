@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FileText, Download, Eye, Search, Loader2, Mic } from "lucide-react";
+import { FileText, Download, Search, Loader2, Mic, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 interface PitchWithScript {
@@ -43,6 +43,7 @@ export default function ScriptsPage() {
   const [loading, setLoading] = useState(true);
   const [viewingScript, setViewingScript] = useState<PitchWithScript | null>(null);
   const [viewMode, setViewMode] = useState<"formatted" | "raw">("formatted");
+  const [regenerating, setRegenerating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "accepted" | "rejected">("all");
 
@@ -63,6 +64,38 @@ export default function ScriptsPage() {
     }
     fetchScripts();
   }, []);
+
+  async function regenerateScript(pitch: PitchWithScript) {
+    setRegenerating(true);
+    try {
+      const res = await fetch("/api/generate-script", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: pitch.title,
+          hookLine: pitch.hookLine,
+          format: pitch.format,
+          angle: pitch.angle,
+          talkingPoints: [],
+        }),
+      });
+      if (!res.ok) { alert("Failed to generate script"); return; }
+      const data = await res.json();
+      const script = data.script;
+      await fetch(`/api/pitches/${pitch.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ generatedScript: script }),
+      });
+      const updated = { ...pitch, generatedScript: script };
+      setScripts((prev) => prev.map((s) => s.id === pitch.id ? updated : s));
+      setViewingScript(updated);
+    } catch {
+      alert("Failed to regenerate script");
+    } finally {
+      setRegenerating(false);
+    }
+  }
 
   function downloadScript(pitch: PitchWithScript) {
     if (!pitch.generatedScript) return;
@@ -247,6 +280,14 @@ export default function ScriptsPage() {
                   }`}
                 >
                   Raw
+                </button>
+                <button
+                  onClick={() => regenerateScript(viewingScript)}
+                  disabled={regenerating}
+                  className="px-3 py-1.5 rounded-md text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {regenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {regenerating ? "Generating..." : "Regenerate"}
                 </button>
                 <button
                   onClick={() => downloadScript(viewingScript)}
