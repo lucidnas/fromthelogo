@@ -89,12 +89,52 @@ Follow the FTL voice profile in `src/lib/voice-profile.ts`. Key requirements:
 
 Only use facts from the source transcripts. Do not fabricate stats, quotes, or names.
 
-### Step 6 — Generate VO
+### Step 5.5 — Roast the script (YouTube analysis)
+
+After writing and saving the script, run it through RoastMyVideo's script analyzer before generating VO. This gives a full YouTube-perspective review: hook strength, retention curve, viral potential, title suggestions, and actionable notes.
+
+```bash
+cd ~/code/roastmyvideo
+SCRIPT=$(cat ~/transcripts/script-SLUG.txt) bun -e "
+import { analyzeScript } from './src/utils/gemini';
+const result = await analyzeScript(process.env.SCRIPT, 'professional');
+console.log(JSON.stringify(result, null, 2));
+"
+```
+
+**Act on the output before moving to VO:**
+- `overallSentiment` must be `strong` or `fire` — if `decent` or below, revise
+- Fix any section flagged as `weak` or `bad`
+- Check `retentionCurve` for drop points and tighten those beats
+- Note title suggestions — they may be stronger than the working title
+
+Only proceed to VO once the overall sentiment is `strong` or `fire`.
+
+### Step 6 — Generate VO with SSML pauses
 
 Run `/ftl-vo "slug"` to generate ElevenLabs narration.
 
 - Voice: Australian Neutral (voice ID `DTLT09E2cxHF0DqjKVbc`)
-- Output: `/Volumes/SSK SSD/ftl/videos/{slug}/vo-alex.mp3`
+- Output: `/Volumes/SSK SSD/ftl/videos/{slug}/vo.mp3`
+
+**Always use SSML pauses.** Wrap the full text in `<speak>` tags and insert `<break time="Xs"/>` at cinematic moments so background music breathes. Standard pause placements:
+
+| Moment type | Break duration |
+|---|---|
+| Single-sentence punch line (standalone paragraph) | `1s` – `1.5s` |
+| Major reveal or stat drop | `1.5s` – `2s` |
+| "Let that land" / deliberate beat | `2s` – `2.5s` |
+| Section transition (pivot from one argument to next) | `1s` |
+
+**Chunking:** ElevenLabs has a ~5,000 character limit per request. Scripts over ~800 words must be split into 2 chunks at a natural paragraph break, generated separately, then stitched:
+
+```bash
+ffmpeg -y -i vo-chunk1.mp3 -i vo-chunk2.mp3 \
+  -filter_complex "[0:a][1:a]concat=n=2:v=0:a=1[out]" \
+  -map "[out]" vo.mp3
+```
+
+Save the final file to `/Volumes/SSK SSD/ftl/videos/{slug}/vo.mp3` and an archived timestamped copy alongside it.
 
 ### Step 7 — Build cue sheet
 
