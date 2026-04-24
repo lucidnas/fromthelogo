@@ -136,6 +136,49 @@ ffmpeg -y -i vo-chunk1.mp3 -i vo-chunk2.mp3 \
 
 Save the final file to `/Volumes/SSK SSD/ftl/videos/{slug}/vo.mp3` and an archived timestamped copy alongside it.
 
+### Step 6.5 — Source and validate all assets
+
+Before running the render, every asset referenced in the cue sheet must exist on disk. Run this validation:
+
+```bash
+python3 - << 'EOF'
+import json, os
+
+SLUG = "your-slug-here"
+SSD = "/Volumes/SSK SSD"
+
+with open(f"{SSD}/ftl/videos/{SLUG}/cue-sheet.json") as f:
+    cues = json.load(f)
+
+missing = []
+for cue in cues:
+    for key in ["clipPath", "imagePath"]:
+        path = cue.get(key)
+        if path and not os.path.exists(path):
+            missing.append(f"{cue['type']} @ {cue['startSecs']}s → {path}")
+
+if missing:
+    print(f"✗ {len(missing)} missing assets:")
+    for m in missing: print(f"  {m}")
+else:
+    print(f"✓ All {len(cues)} cues validated")
+EOF
+```
+
+**If assets are missing**, source them before rendering:
+
+- **B-roll clips** — download via `yt-dlp` and save to `/Volumes/SSK SSD/broll/aroll/{slug}/`:
+  ```bash
+  yt-dlp -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]" \
+    --merge-output-format mp4 \
+    -o "/Volumes/SSK SSD/broll/aroll/{slug}/%(title).50s.mp4" \
+    "YOUTUBE_URL"
+  ```
+- **Graphics / stat cards** — generate with the design tool or ask the user to provide them
+- **Illustrated scenes** — generate via `/ftl-thumbnail` or AI image tool
+
+Do not attempt to render with missing assets — Remotion will produce black frames silently.
+
 ### Step 7 — Build cue sheet
 
 Create `/Volumes/SSK SSD/ftl/videos/{slug}/cue-sheet.json` — a JSON array mapping timecodes to B-roll clips and graphics.
