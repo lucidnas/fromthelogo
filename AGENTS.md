@@ -89,12 +89,39 @@ Follow the FTL voice profile in `src/lib/voice-profile.ts`. Key requirements:
 
 Only use facts from the source transcripts. Do not fabricate stats, quotes, or names.
 
-### Step 6 — Generate and deploy
+### Step 6 — Generate VO
 
-Once the script is approved:
-1. Paste into the fromthelogo app at `/scripts` — hit Regenerate if needed
-2. Generate ElevenLabs audio via the script reader at port 4317
-3. Use the generated audio + B-roll for the final video
+Run `/ftl-vo "slug"` to generate ElevenLabs narration.
+
+- Voice: Australian Neutral (voice ID `DTLT09E2cxHF0DqjKVbc`)
+- Output: `/Volumes/SSK SSD/ftl/videos/{slug}/vo-alex.mp3`
+
+### Step 7 — Build cue sheet
+
+Create `/Volumes/SSK SSD/ftl/videos/{slug}/cue-sheet.json` — a JSON array mapping timecodes to B-roll clips and graphics.
+
+```json
+[
+  { "startSecs": 0,  "endSecs": 12, "type": "broll",     "clipPath": "/Volumes/SSK SSD/broll/training-camp/clark-warmup.mp4" },
+  { "startSecs": 12, "endSecs": 24, "type": "stat_card", "imagePath": "/Volumes/SSK SSD/ftl/videos/{slug}/graphics/stat-1.png" }
+]
+```
+
+Cue types: `broll`, `stat_card`, `headline`, `tweet`, `illustrated_scene`, `aroll`.
+All paths must be absolute SSD paths — `render.ts` converts them to HTTP URLs at runtime.
+
+B-roll library lives at `/Volumes/SSK SSD/broll/`.
+
+### Step 8 — Render
+
+Run `/ftl-render "slug"` to produce the final MP4.
+
+```bash
+cd /Users/abdul/code/fromthelogo/local/remotion
+bun run render.ts {slug}
+```
+
+Output: `/Volumes/SSK SSD/ftl/videos/{slug}/render/final.mp4`
 
 ---
 
