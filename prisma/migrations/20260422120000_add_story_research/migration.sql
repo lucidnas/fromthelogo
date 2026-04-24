@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS "StoryResearch" (
+    "id" SERIAL NOT NULL,
+    "title" TEXT NOT NULL,
+    "summary" TEXT NOT NULL,
+    "sources" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+    "score" INTEGER NOT NULL DEFAULT 0,
+    "status" TEXT NOT NULL DEFAULT 'new',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "StoryResearch_pkey" PRIMARY KEY ("id")
+);

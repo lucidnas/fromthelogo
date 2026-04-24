@@ -8,7 +8,33 @@ import {
   RefreshCw,
   X,
   ExternalLink,
+  Wand2,
+  Trash2,
+  Search,
+  Download,
 } from "lucide-react";
+
+interface GeneratedThumbnail {
+  id: number;
+  filename: string;
+  url: string;
+  slug: string;
+  title: string;
+  format: string;
+  model: "openai" | "gemini";
+  version: number;
+  createdAt: string;
+}
+
+interface ThumbnailGroup {
+  slug: string;
+  title: string;
+  formats: {
+    a: GeneratedThumbnail[];
+    b: GeneratedThumbnail[];
+    c: GeneratedThumbnail[];
+  };
+}
 
 interface VideoRecord {
   id: number;
@@ -346,6 +372,19 @@ export default function ThumbnailsPage() {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
+  const [groups, setGroups] = useState<ThumbnailGroup[]>([]);
+  const [generatedLoading, setGeneratedLoading] = useState(true);
+  const [generating, setGenerating] = useState<Set<string>>(new Set());
+  const [thumbSearch, setThumbSearch] = useState("");
+
+  const fetchGroups = () => {
+    fetch("/api/thumbnails/generated")
+      .then((r) => r.json())
+      .then((d) => setGroups(d.groups ?? []))
+      .catch(() => {})
+      .finally(() => setGeneratedLoading(false));
+  };
+
   useEffect(() => {
     fetch("/api/channel/stats")
       .then((r) => r.json())
@@ -361,6 +400,50 @@ export default function ThumbnailsPage() {
       .catch(() => {})
       .finally(() => setAnalysisLoading(false));
   }, []);
+
+  useEffect(() => { fetchGroups(); }, []);
+
+  const generate = async (slug: string, title: string, format: string, model: string) => {
+    const key = `${slug}-${format}-${model}`;
+    setGenerating((prev) => new Set(prev).add(key));
+    try {
+      const res = await fetch("/api/thumbnails/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, title, format, model }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Generation failed");
+      }
+      await fetchGroups();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Generation failed");
+    } finally {
+      setGenerating((prev) => { const s = new Set(prev); s.delete(key); return s; });
+    }
+  };
+
+  const generateAll = async (slug: string, title: string) => {
+    const combos: Array<[string, string]> = [
+      ["a", "openai"], ["a", "gemini"],
+      ["b", "openai"], ["b", "gemini"],
+      ["c", "openai"], ["c", "gemini"],
+    ];
+    await Promise.all(combos.map(([f, m]) => generate(slug, title, f, m)));
+  };
+
+  const deleteThumbnail = async (id: number) => {
+    await fetch(`/api/thumbnails/generated/${id}`, { method: "DELETE" });
+    setGroups((prev) => prev.map((g) => ({
+      ...g,
+      formats: {
+        a: g.formats.a.filter((t) => t.id !== id),
+        b: g.formats.b.filter((t) => t.id !== id),
+        c: g.formats.c.filter((t) => t.id !== id),
+      },
+    })).filter((g) => g.formats.a.length > 0 || g.formats.b.length > 0 || g.formats.c.length > 0));
+  };
 
   const tiers = useMemo(() => {
     if (!data?.videos) return null;
@@ -424,6 +507,56 @@ export default function ThumbnailsPage() {
           with AI-powered pattern detection.
         </p>
       </div>
+
+      {/* Generated Thumbnails */}
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <Wand2 className="w-5 h-5 text-purple-400" />
+            <h2 className="text-xl font-semibold text-white">Generated Thumbnails</h2>
+            {groups.length > 0 && <span className="text-xs text-gray-500">{groups.length} video{groups.length !== 1 ? "s" : ""}</span>}
+          </div>
+          <div className="flex items-center gap-3">
+            {groups.length > 1 && (
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
+                <input
+                  value={thumbSearch}
+                  onChange={(e) => setThumbSearch(e.target.value)}
+                  placeholder="Filter by title..."
+                  className="pl-8 pr-3 py-1.5 rounded-lg bg-[#121217] border border-[#22222b] text-xs text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 w-48"
+                />
+              </div>
+            )}
+            <span className="text-xs text-gray-500">gpt-image-2 vs Gemini 3.1 · 16:9</span>
+          </div>
+        </div>
+        {generatedLoading ? (
+          <div className="flex items-center gap-3 text-gray-400 py-8">
+            <Loader2 className="w-5 h-5 animate-spin text-purple-400" />
+            Loading...
+          </div>
+        ) : groups.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-[#2a2a35] bg-[#0d0d12] p-10 text-center text-gray-500 text-sm">
+            No generated thumbnails yet. Use the <code className="text-purple-400">/ftl-thumbnail</code> skill to generate your first one.
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {groups
+              .filter((g) => !thumbSearch || g.title.toLowerCase().includes(thumbSearch.toLowerCase()))
+              .map((group) => (
+                <GeneratedGroup
+                  key={group.slug}
+                  group={group}
+                  generating={generating}
+                  onGenerate={(format, model) => generate(group.slug, group.title, format, model)}
+                  onGenerateAll={() => generateAll(group.slug, group.title)}
+                  onDelete={deleteThumbnail}
+                />
+              ))}
+          </div>
+        )}
+      </section>
 
       {/* Top Performers Gallery */}
       <section className="mb-12">
@@ -617,6 +750,336 @@ function TierRow({
             <ThumbCard video={v} size="sm" onClick={() => onSelect(v)} />
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+const FORMAT_LABELS: Record<string, string> = {
+  a: "A · Pure Close-Up",
+  b: "B · Face Through Type",
+  c: "C · Split Screen",
+};
+
+function ModelCard({
+  thumb,
+  model,
+  history,
+  isGenerating,
+  onRegenerate,
+  onDelete,
+}: {
+  thumb: GeneratedThumbnail | undefined;
+  model: "openai" | "gemini";
+  history: GeneratedThumbnail[];
+  isGenerating: boolean;
+  onRegenerate: () => void;
+  onDelete: (id: number) => void;
+}) {
+  const [showHistory, setShowHistory] = useState(false);
+  const [preview, setPreview] = useState<GeneratedThumbnail | null>(null);
+  const [deleting, setDeleting] = useState<number | null>(null);
+
+  async function handleDelete(id: number, e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!confirm("Delete this thumbnail?")) return;
+    setDeleting(id);
+    await onDelete(id);
+    if (preview?.id === id) setPreview(null);
+    setDeleting(null);
+  }
+
+  function download(t: GeneratedThumbnail, e: React.MouseEvent) {
+    e.stopPropagation();
+    const ext = t.model === "gemini" ? "jpg" : "png";
+    const filename = `${t.slug}-${t.format}-${t.model}-v${t.version}.${ext}`;
+    if (t.url.startsWith("data:")) {
+      const [header, b64] = t.url.split(",");
+      const mime = header.split(":")[1].split(";")[0];
+      const bytes = atob(b64);
+      const arr = new Uint8Array(bytes.length);
+      for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+      const blob = new Blob([arr], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      const a = document.createElement("a");
+      a.href = t.url; a.download = filename; a.click();
+    }
+  }
+
+  const label = model === "openai" ? "GPT-Image-2" : "Gemini 3.1";
+  const badgeCls =
+    model === "openai"
+      ? "bg-green-500/20 border-green-500/40 text-green-300"
+      : "bg-blue-500/20 border-blue-500/40 text-blue-300";
+
+  return (
+    <>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${badgeCls}`}>
+            {label}
+          </span>
+          {thumb && (
+            <span className="text-[10px] text-gray-500">v{thumb.version}</span>
+          )}
+        </div>
+
+        {/* Thumbnail or empty */}
+        <div
+          className="relative aspect-video w-full rounded-lg overflow-hidden bg-[#0a0a10] border border-[#22222b] cursor-pointer group"
+          onClick={() => thumb && setPreview(thumb)}
+        >
+          {thumb ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={thumb.url}
+                alt={thumb.title}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+                <span className="opacity-0 group-hover:opacity-100 text-white text-xs font-semibold bg-black/60 px-3 py-1 rounded-full">
+                  View
+                </span>
+              </div>
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-600 text-xs">
+              Not generated
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onRegenerate}
+            disabled={isGenerating}
+            className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1a1a24] hover:bg-[#22222e] border border-[#2a2a35] text-gray-300 text-xs font-semibold transition-colors disabled:opacity-50"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Generating…
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-3 h-3" />
+                {thumb ? "Regenerate" : "Generate"}
+              </>
+            )}
+          </button>
+          {history.length > 1 && (
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className="px-2.5 py-1.5 rounded-lg bg-[#1a1a24] hover:bg-[#22222e] border border-[#2a2a35] text-gray-400 text-xs transition-colors"
+            >
+              {history.length - 1} older
+            </button>
+          )}
+          {thumb && (
+            <>
+              <button
+                onClick={(e) => download(thumb, e)}
+                className="p-1.5 rounded-lg bg-[#1a1a24] hover:bg-[#22222e] border border-[#2a2a35] text-gray-600 hover:text-gray-300 transition-colors"
+                title="Download"
+              >
+                <Download className="w-3 h-3" />
+              </button>
+              <button
+                onClick={(e) => handleDelete(thumb.id, e)}
+                disabled={deleting === thumb.id}
+                className="p-1.5 rounded-lg bg-[#1a1a24] hover:bg-red-500/10 border border-[#2a2a35] hover:border-red-500/30 text-gray-600 hover:text-red-400 transition-colors disabled:opacity-50"
+                title="Delete"
+              >
+                {deleting === thumb.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* History */}
+        {showHistory && history.length > 1 && (
+          <div className="space-y-2 pt-1">
+            {history.slice(1).map((h) => (
+              <div
+                key={h.id}
+                className="relative aspect-video w-full rounded overflow-hidden bg-[#0a0a10] border border-[#1a1a24] cursor-pointer opacity-60 hover:opacity-100 transition-opacity group"
+                onClick={() => setPreview(h)}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={h.url} alt={`v${h.version}`} className="w-full h-full object-cover" />
+                <span className="absolute top-1 right-1 px-1.5 py-0.5 rounded bg-black/70 text-[9px] text-gray-300 font-mono">
+                  v{h.version}
+                </span>
+                <div className="absolute top-1 left-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={(e) => download(h, e)}
+                    className="p-1 rounded bg-black/70 text-gray-400 hover:text-white"
+                    title="Download"
+                  >
+                    <Download className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={(e) => handleDelete(h.id, e)}
+                    disabled={deleting === h.id}
+                    className="p-1 rounded bg-black/70 text-gray-400 hover:text-red-400"
+                    title="Delete"
+                  >
+                    {deleting === h.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Preview modal */}
+      {preview && (
+        <div
+          onClick={() => setPreview(null)}
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-3xl bg-[#121217] border border-[#22222b] rounded-2xl overflow-hidden"
+          >
+            <button
+              onClick={() => setPreview(null)}
+              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/70 hover:bg-black text-gray-300 hover:text-white flex items-center justify-center border border-white/10"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="aspect-video w-full bg-black">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={preview.url} alt={preview.title} className="w-full h-full object-cover" />
+            </div>
+            <div className="p-4 flex items-center gap-2 flex-wrap">
+              <span className={`px-2.5 py-1 rounded text-xs font-bold border ${badgeCls}`}>{label}</span>
+              <span className="px-2.5 py-1 rounded bg-[#1a1a24] text-xs text-gray-400">
+                Format {preview.format.toUpperCase()}
+              </span>
+              <span className="px-2.5 py-1 rounded bg-[#1a1a24] text-xs text-gray-400 font-mono">
+                v{preview.version}
+              </span>
+              <span className="px-2.5 py-1 rounded bg-[#1a1a24] text-xs text-gray-400">
+                {new Date(preview.createdAt).toLocaleDateString()}
+              </span>
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  onClick={(e) => download(preview, e)}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#1a1a24] border border-[#2a2a35] text-gray-300 hover:text-white text-xs transition-colors"
+                >
+                  <Download className="w-3 h-3" /> Download
+                </button>
+                <button
+                  onClick={(e) => handleDelete(preview.id, e)}
+                  disabled={deleting === preview.id}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 text-xs transition-colors disabled:opacity-50"
+                >
+                  {deleting === preview.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function GeneratedGroup({
+  group,
+  generating,
+  onGenerate,
+  onGenerateAll,
+  onDelete,
+}: {
+  group: ThumbnailGroup;
+  generating: Set<string>;
+  onGenerate: (format: string, model: string) => void;
+  onGenerateAll: () => void;
+  onDelete: (id: number) => void;
+}) {
+  const [activeFormat, setActiveFormat] = useState<"a" | "b" | "c">("a");
+
+  const fmtData = group.formats[activeFormat];
+  const openaiHistory = fmtData.filter((t) => t.model === "openai");
+  const geminiHistory = fmtData.filter((t) => t.model === "gemini");
+
+  const isAnyGenerating = ["a", "b", "c"].some((f) =>
+    ["openai", "gemini"].some((m) => generating.has(`${group.slug}-${f}-${m}`))
+  );
+
+  return (
+    <div className="rounded-xl border border-[#22222b] bg-[#0d0d12] overflow-hidden">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-[#1a1a24]">
+        <h3 className="text-sm font-semibold text-white leading-snug">{group.title}</h3>
+        <button
+          onClick={onGenerateAll}
+          disabled={isAnyGenerating}
+          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600/20 border border-purple-500/40 hover:bg-purple-600/30 text-purple-200 text-xs font-semibold transition-colors disabled:opacity-50"
+        >
+          {isAnyGenerating ? (
+            <Loader2 className="w-3 h-3 animate-spin" />
+          ) : (
+            <Wand2 className="w-3 h-3" />
+          )}
+          Generate All 6
+        </button>
+      </div>
+
+      {/* Format tabs */}
+      <div className="flex border-b border-[#1a1a24]">
+        {(["a", "b", "c"] as const).map((f) => {
+          const count = group.formats[f].length;
+          return (
+            <button
+              key={f}
+              onClick={() => setActiveFormat(f)}
+              className={`flex-1 px-3 py-2.5 text-xs font-semibold transition-colors relative ${
+                activeFormat === f
+                  ? "text-purple-300 bg-purple-500/10"
+                  : "text-gray-500 hover:text-gray-300"
+              }`}
+            >
+              {FORMAT_LABELS[f]}
+              {count > 0 && (
+                <span className="ml-1.5 text-[10px] text-gray-500">({count})</span>
+              )}
+              {activeFormat === f && (
+                <span className="absolute bottom-0 inset-x-0 h-px bg-purple-500" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Model side-by-side */}
+      <div className="grid grid-cols-2 gap-4 p-5">
+        <ModelCard
+          thumb={openaiHistory[0]}
+          model="openai"
+          history={openaiHistory}
+          isGenerating={generating.has(`${group.slug}-${activeFormat}-openai`)}
+          onRegenerate={() => onGenerate(activeFormat, "openai")}
+          onDelete={onDelete}
+        />
+        <ModelCard
+          thumb={geminiHistory[0]}
+          model="gemini"
+          history={geminiHistory}
+          isGenerating={generating.has(`${group.slug}-${activeFormat}-gemini`)}
+          onRegenerate={() => onGenerate(activeFormat, "gemini")}
+          onDelete={onDelete}
+        />
       </div>
     </div>
   );

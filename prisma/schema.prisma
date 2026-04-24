@@ -8,18 +8,19 @@ datasource db {
 }
 
 model Video {
-  id               Int      @id @default(autoincrement())
+  id               Int        @id @default(autoincrement())
   title            String
-  thumbnailConcept String   @db.Text
-  script           String?  @db.Text
-  status           String   @default("idea")
+  thumbnailConcept String     @db.Text
+  script           String?    @db.Text
+  status           String     @default("idea")
   category         String
   tags             String[]
   estimatedLength  String?
-  hookLine         String?  @db.Text
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  hookLine         String?    @db.Text
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
   audios           Audio[]
+  audioJobs        AudioJob[]
 }
 
 model Pitch {
@@ -67,6 +68,19 @@ model Audio {
   createdAt   DateTime @default(now())
 }
 
+model AudioJob {
+  id        Int      @id @default(autoincrement())
+  videoId   Int
+  video     Video    @relation(fields: [videoId], references: [id])
+  voiceId   String
+  voiceName String
+  status    String   @default("pending")  // "pending" | "processing" | "done" | "failed"
+  audioId   Int?
+  error     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model ChannelStat {
   id          Int      @id @default(autoincrement())
   youtubeId   String   @unique
@@ -99,6 +113,35 @@ model TitleTemplate {
   subject       String   // "curry-warriors" | "nba-general" | "cc-wnba" | "other"
   pattern       String?  // extracted title pattern: "the-day" | "trash-talk" | "why-scared" | etc
   createdAt     DateTime @default(now())
+}
+
+// AI-generated thumbnail images for each video, tracked with version history.
+// Format: 'a' (Pure Close-Up), 'b' (Face Through Type), 'c' (Split Screen)
+// Model: 'openai' (gpt-image-2), 'gemini' (gemini-3.1-flash-image-preview)
+model GeneratedThumbnail {
+  id        Int      @id @default(autoincrement())
+  slug      String
+  title     String
+  format    String   // 'a' | 'b' | 'c'
+  model     String   // 'openai' | 'gemini'
+  imageUrl  String   // /thumbnails/generated/{slug}-{format}-{model}-v{N}.{ext}
+  version   Int
+  createdAt DateTime @default(now())
+
+  @@index([slug, format])
+}
+
+// Story research briefs pushed from local /ftl-research runs.
+// Each record is one video-ready story angle with supporting evidence.
+model StoryResearch {
+  id        Int      @id @default(autoincrement())
+  title     String   // working title / narrative angle
+  summary   String   @db.Text  // full research brief in markdown
+  sources   String[] // source URLs or channel names
+  score     Int      @default(0)  // story strength 0–100
+  status    String   @default("new")  // "new" | "scripted" | "dismissed"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Gemini-generated research summaries keyed by source URL. Stores the

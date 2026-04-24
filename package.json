@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "bunx prisma generate && next build",
     "postinstall": "prisma generate",
-    "start": "next start"
+    "start": "bunx prisma db push --accept-data-loss && next start"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.7.0",

@@ -3,13 +3,15 @@ import { NextRequest, NextResponse } from "next/server";
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Public endpoints: login page, auth API, cron (has its own secret)
+  // Public endpoints: login page, auth API, cron (has its own secret), static assets
   if (
     pathname === "/login" ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/cron") ||
     pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico"
+    pathname === "/favicon.ico" ||
+    pathname.startsWith("/thumbnails/") ||
+    pathname.startsWith("/audio/")
   ) {
     return NextResponse.next();
   }

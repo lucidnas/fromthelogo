@@ -76,7 +76,7 @@ A script that doesn't use the five moves (first-person reactions, two-word punch
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { title, hookLine, format, angle, talkingPoints } = body;
+    const { title, hookLine, format, angle, talkingPoints, sourceMaterial } = body;
 
     if (!title || !hookLine) {
       return NextResponse.json(
@@ -85,7 +85,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const researchBrief = await getResearchBriefForPitch(title);
+    const researchBrief = sourceMaterial || await getResearchBriefForPitch(title);
     const systemPrompt = buildSystemPrompt();
 
     const userPrompt = `Write the voiceover script for this pitch.

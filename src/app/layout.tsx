@@ -30,12 +30,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </Link>
               <div className="flex items-center gap-4">
                 <Link href="/" className="text-sm text-gray-400 hover:text-white transition-colors">Dashboard</Link>
-                <Link href="/analytics" className="text-sm text-gray-400 hover:text-white transition-colors">Analytics</Link>
-                <Link href="/thumbnails" className="text-sm text-gray-400 hover:text-white transition-colors">Thumbnails</Link>
-                <Link href="/calendar" className="text-sm text-gray-400 hover:text-white transition-colors">Calendar</Link>
-                <Link href="/pitches" className="text-sm text-gray-400 hover:text-white transition-colors">Daily Pitches</Link>
-                <Link href="/news" className="text-sm text-gray-400 hover:text-white transition-colors">News</Link>
+                <Link href="/research" className="text-sm text-gray-400 hover:text-white transition-colors">Research</Link>
                 <Link href="/scripts" className="text-sm text-gray-400 hover:text-white transition-colors">Scripts</Link>
+<Link href="/analytics" className="text-sm text-gray-400 hover:text-white transition-colors">Analytics</Link>
+                <Link href="/thumbnails" className="text-sm text-gray-400 hover:text-white transition-colors">Thumbnails</Link>
                 <LogoutButton />
               </div>
             </div>
