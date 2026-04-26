@@ -144,6 +144,29 @@ cat /tmp/yttranscript.en.vtt | grep -v '^WEBVTT' | grep -v '^NOTE' | grep -v '^$
 
 Save all transcripts to `~/transcripts/` with descriptive filenames.
 
+### The Two FTL Video Formats
+
+Every video must fit one of these two formats before any research or scripting begins. If it doesn't fit either — it's not a FTL video.
+
+**Format 1 — The Courtroom Drama** (ceiling: 1M+)
+Requires: Villain + Slight + Response. The audience arrives with a verdict; your job is to organize their existing belief into a satisfying case with receipts.
+- Villain named before the 30-second mark
+- The slight: a quote, a foul, a ranking, a bad call, a coach decision
+- The response: Clark or the Fever answers through basketball
+- Examples: "The Day Caitlin Clark DEMOLISHED her BIGGEST Rival" (2M), "The Day Sheryl Swoopes was EXPOSED as a LIAR" (1M)
+- Yellow word: DEMOLISHED, EXPOSED, HUMBLED, BACKFIRED, WRONG, DISRESPECTED
+
+**Format 2 — The Awe/Spectacle** (ceiling: 200K+)
+Requires: One genius/unmissable thing Clark did, framed as something you have to see. No villain needed — underestimation itself is the antagonist.
+- Opens with the play, skill, or moment
+- Frames it as historic, unprecedented, or unforgettable
+- Examples: "This Caitlin Clark Commercial is GENIUS" (217K), "This Caitlin Clark Play Deserves An AWARD" (204K), "This Caitlin Clark Skill is SPECTACULAR" (204K)
+- Yellow word: GENIUS, SPECTACULAR, UNREAL, INSANE, AWARD, DIFFERENT
+
+**Filter every idea before starting:** Ask "Is there a villain, a slight, and a response?" → Format 1. Ask "Is there one genius/unmissable moment?" → Format 2. Neither → not a FTL video.
+
+---
+
 ### Step 2 — Identify the title's narrative structure
 
 Every great NBA title tells a specific type of story. Before adapting it, identify what story it actually tells:
