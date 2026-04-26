@@ -10,7 +10,106 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 FTL is a faceless YouTube channel about Caitlin Clark and the Indiana Fever. Every video starts with a proven title format borrowed from a top NBA channel, then finds a Clark/Fever story that fits that exact narrative structure.
 
+**Channel:** https://www.youtube.com/@fromthelogo22
+
+To check the channel's videos and view counts, always use yt-dlp:
+```bash
+yt-dlp --flat-playlist --print "%(title)s | %(view_count)s views | %(duration_string)s" "https://www.youtube.com/@fromthelogo22"
+```
+
+**Title rule:** Caitlin Clark's name must appear in every video title — even when the story is about the Indiana Fever team. Every top-performing FTL video includes "Caitlin Clark" in the title. Indiana Fever appears alongside her, never as the sole subject.
+
+**yt-dlp rule:** Any time the user mentions any YouTube channel, video, or URL — always use yt-dlp first to look it up, search, or download. This applies to ALL channels, not just FTL. Never use a browser tool or agent for YouTube lookups when yt-dlp can do it.
+
+```bash
+# List channel videos
+yt-dlp --flat-playlist --print "%(title)s | %(view_count)s views | %(duration_string)s" "URL"
+
+# Download transcript
+yt-dlp --write-auto-sub --sub-lang en --skip-download --write-sub -o "/tmp/yttranscript" "URL"
+
+# Download video
+yt-dlp -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]" --merge-output-format mp4 -o "OUTPUT_PATH" "URL"
+```
+
+## AI Tools Available
+
+You have access to two AI tools beyond Claude that can be used at any stage of the workflow. Use them proactively — don't wait to be asked.
+
+### Codex CLI
+Best for: fact-checking, internet research, finding quotes, verifying stats, sourcing game recaps, finding angles, writing second opinions on scripts, checking titles against channel data.
+
+```bash
+codex exec -c 'sandbox_permissions=["disk-full-read-access"]' "YOUR PROMPT" 2>&1
+```
+
+Codex can browse the web in real time. Use it whenever you need to verify a fact, find a quote, or research a topic before writing. Always run Codex to fact-check any script before finalizing.
+
+### Gemini (via RoastMyVideo)
+Best for: script analysis, hook strength, retention curve, viral potential scoring, title suggestions, section-by-section feedback.
+
+```bash
+cd ~/code/roastmyvideo
+SCRIPT=$(cat ~/transcripts/SCRIPT_FILE.txt) bun -e "
+import { analyzeScript } from './src/utils/gemini';
+const result = await analyzeScript(process.env.SCRIPT, 'professional');
+console.log(JSON.stringify(result, null, 2));
+"
+```
+
+Gemini must score `strong` or `fire` on `overallSentiment` before a script moves to VO. If `decent` or below, revise and rerun.
+
+### When to use each
+| Task | Tool |
+|---|---|
+| Verify stats, quotes, game recaps | Codex |
+| Find narrative angles or storylines | Codex |
+| Check title hasn't been used on FTL | yt-dlp + Codex |
+| Script structure, hook, retention curve | Gemini |
+| Second opinion on script or opening | Both |
+| Video review (QC of rendered video) | Codex |
+| Thumbnail image generation | Gemini only (see Step 0) |
+
+---
+
 ## The Core Workflow
+
+**Every new video must follow this order. Do not skip ahead.**
+
+### Step 0 — Lock the title and thumbnail concept FIRST
+
+Before any research or scripting, the title and thumbnail concept must be fully decided.
+
+**Title rules:**
+- Caitlin Clark's name must appear in every title — even when the story is about the Indiana Fever team
+- The title format must be borrowed from a proven high-performing NBA/WNBA channel video (300K+ views)
+- Check `https://www.youtube.com/@fromthelogo22` with yt-dlp to confirm this topic hasn't been covered already
+
+**Thumbnail format — FTL Standard (Format D):**
+
+Every thumbnail follows this exact formula, proven by the "This Caitlin Clark Commercial is GENIUS" video:
+- **Clark's face close-up** fills the left 60% of the frame — face and upper chest only
+- **Dark background** — near-black with deep navy or teal bokeh blur
+- **One bold yellow word** on the right side, large heavy condensed sans-serif, color `#FFE84D`
+- **Zero clutter** — no speech bubbles, no split screens, no extra text, no graphic elements
+- **Expression** — smiling, laughing, or joyful. Head tilt optional. Eyes lit up. The expression carries the emotion.
+
+The only variable between videos is the **yellow word** (derived from the title) and the **specific expression**. Everything else stays the same.
+
+**Generating thumbnails:**
+Use Gemini only (not OpenAI) via `generate.py`. Write a brief for each expression variation you want to test.
+
+```bash
+python3 ~/.claude/skills/ftl-thumbnail/generate.py ~/transcripts/thumbnail-SLUG.txt gemini "Video Title"
+```
+
+Generate 2–3 expression variations (e.g. laughing, intense smirk, knowing smile) and serve them on port 4444 for review.
+
+Reference: `~/ftl-thumbnails/clark-reference/hires/` — use `press-2-smiling.jpg` and `press-5-celebration.jpg` as primary refs for smiling/laughing expressions.
+
+Only proceed to Step 1 once title and thumbnail concept are confirmed by the user.
+
+---
 
 ### Step 1 — Find proven NBA title formats
 
@@ -73,7 +172,7 @@ Each video should have one clear topic pulled from a specific source. Examples f
 
 ### Step 5 — Write the script
 
-Target: **1,200–1,400 words** (approx. 8 minutes at narration pace).
+Target: **1,200–1,400 words** (approx. 8 minutes at narration pace). Do not submit a script under 1,200 words — expand sections, deepen the stat context, or add a second villain beat until the count is met.
 
 Follow the FTL voice profile in `src/lib/voice-profile.ts`. Key requirements:
 
