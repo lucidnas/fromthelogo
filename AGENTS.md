@@ -84,6 +84,18 @@ Before any research or scripting, the title and thumbnail concept must be fully 
 - Caitlin Clark's name must appear in every title — even when the story is about the Indiana Fever team
 - The title format must be borrowed from a proven high-performing NBA/WNBA channel video (300K+ views)
 - Check `https://www.youtube.com/@fromthelogo22` with yt-dlp to confirm this topic hasn't been covered already
+- **The title must contain one standout word that becomes the yellow thumbnail overlay.** Pick that word first — then write the title around it. The word should be punchy, one concept, all caps energy: GENIUS, SECRETLY, EVERYTHING, EXPOSED, BACKFIRED, PROBLEM, AFRAID, NIGHTMARE. The title is written to make that word land.
+
+**Examples of title ↔ yellow word alignment:**
+| Yellow word | Title |
+|---|---|
+| GENIUS | This Caitlin Clark Commercial is GENIUS |
+| SECRETLY | Caitlin Clark's Offseason Secretly Changed Everything |
+| EXPOSED | The Day Sheryl Swoopes Was EXPOSED as a LIAR |
+| BACKFIRED | The WNBA Just Fined Sophie.. But it Backfired Spectacularly |
+| NIGHTMARE | The Day Caitlin Clark and The Indiana Fever Became The WNBA's Worst Nightmare |
+
+The yellow word is the hook that stops the scroll. The title explains it. They are one system — design them together.
 
 **Thumbnail format — FTL Standard (Format D):**
 
