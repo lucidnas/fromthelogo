@@ -8,7 +8,29 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # From The Logo — Content Creation Process
 
-FTL is a faceless YouTube channel about Caitlin Clark and the Indiana Fever. Every video starts with a proven title format borrowed from a top NBA channel, then finds a Clark/Fever story that fits that exact narrative structure.
+FTL is a faceless YouTube channel covering the WNBA every day from the Caitlin Clark and Indiana Fever perspective. Every story — trades, games, league decisions, rival teams, drama — gets filtered through one question: **what does this mean for Caitlin Clark?**
+
+**Channel positioning:** FTL is Rachel DeMita's coverage — but faceless. Same topics, same fan-first energy, same daily cadence. The difference is there's no face, no parasocial personality. The narrator is just a passionate Clark fan telling you what happened today and what it means for her. Conversational, direct, opinionated — not cinematic or documentary-style.
+
+**Three formats, by performance priority:**
+
+| Format | Cadence | Length | Purpose | Track record |
+|---|---|---|---|---|
+| **Refs / Fines / Villain Reaction** | Whenever a fine, foul, tech, or league decision drops | 5–8 min | Stitch real quotes + clips around a "league did X → it backfired" frame | 5 of channel's top videos: 343K, 220K, 211K, 130K, 108K |
+| **Clark Moment Celebration** | Whenever a clip-worthy CC play, ad, or skill drops | 4–6 min | One play / commercial / skill hyped with a single awe word (GENIUS, AWARD, SPECTACULAR, PURE ART) | 4 winners: 217K, 204K, 204K, 179K |
+| **Game Recap (villain-response framing)** | Game day or next morning | 5–8 min | Present-tense play-by-play, refs/rival as villain, CC/Fever as response | 152K, 94K, 69K, 61K |
+| **FTL Documentary** | Use sparingly (~1 per month max) | 8–10 min | Cinematic deep-dive. Full pipeline. **Underperforms** vs. the three formats above — recent docs landed at 490 and 698 views. | Reserve for genuinely big narrative moments only |
+
+**Hard rule:** default to one of the top three formats. Only do a Documentary when the story genuinely demands the long-form treatment — not as a weekly cadence.
+
+**The Clark Lens — mandatory editorial filter:**
+Every story must be told through Clark's perspective, even when she's not the subject.
+- A rival team signs a player → what does it mean for Clark's path to a title?
+- The league makes a ruling → how does it affect Clark's ability to play her game?
+- A teammate has a breakout game → what does it prove about the system Clark is building?
+- A competitor wins a game → what does that mean for Indiana's standing?
+
+If a story has no connection to Clark or the Fever — it is not an FTL story.
 
 **Channel:** https://www.youtube.com/@fromthelogo22
 
@@ -72,7 +94,61 @@ Gemini must score `strong` or `fire` on `overallSentiment` before a script moves
 
 ---
 
-## The Core Workflow
+## FTL Daily Take — Fast Pipeline
+
+For daily coverage. Target: same day or next morning. Total production time: under 1 hour.
+
+**The Clark Perspective Rule:** Every Daily Take must answer "what does this mean for Caitlin Clark?" — even if the story is about another player, team, or league decision. She is always the lens.
+
+**Structure (3 acts, 400–500 words):**
+
+1. **The News** (1 paragraph) — what happened today. One sentence. No preamble.
+2. **The Evidence** (2–3 paragraphs) — the quote, the stat, the clip. Prove it. Not opinions — receipts.
+3. **The Verdict** (1 sentence) — close like a gavel. One line that the audience will screenshot.
+
+**The FTL Daily Voice:**
+Sharp, punchy, and relentlessly forward-moving. The urgency of a breaking news desk with the specificity of a film room. Takes from Rachel DeMita's pulse on fan culture and Mick Talks Hoops' cold analytical rigor — but strips away Rachel's parasocial venting and Mick's livestream rambling. The narrator is not a friend, not a personality — it's an insider briefing Clark fans on what happened today and what it means for her.
+
+**Voice rules:**
+- Open with a cold declarative thesis — the take, not the setup. Never a greeting.
+- Short, punchy, declarative sentences. No "I think." No filler.
+- Frame stakes around fan expectations and Clark's trajectory — not personal anecdotes.
+- Back opinions with actual numbers, quotes, or specifics (salary cap math, stat lines, real quotes).
+- One standalone reaction line in the middle ("Read that again." "Nobody is talking about this." "That's the whole story.")
+- Close on what it means for Clark — one line, no summary.
+- No sign-off on Daily Takes.
+
+**Sample Daily Take voice (use as reference):**
+> The Indiana Fever have a massive math problem, and running it back simply isn't an option. Despite the front office quietly adding Kelsey Mitchell back to the 2026 roster, the salary cap reality paints a brutal picture. With Caitlin Clark locked in and Aliyah Boston commanding a max extension, a supermax for Mitchell drains the war room dry. If Indiana cores Mitchell, they are left filling out half their roster with veteran minimums — sacrificing depth pieces like Sophie Cunningham or Lexie Hull to the open market. While fans want the chemistry of last year's playoff run, the Fever's front office is staring down a financial cliff. To build a true dynasty around Clark, somebody from the core has to go.
+
+**Title format for Daily Takes:**
+Same rules as Documentary — Clark's name in the title, yellow word, villain-first or Clark-positive framing. Shorter titles work better for daily: "Clark's Injury Report Just Changed Everything" or "The WNBA Just Made A Massive Mistake."
+
+**Thumbnail for Daily Takes:**
+Format D only. One Gemini variation. No iteration — first good image ships.
+
+**Production pipeline:**
+```
+1. Story identified → Clark perspective angle locked (5 min)
+2. Script written — 400–500 words (20 min)
+3. Fact-checked with Codex (5 min)
+4. Thumbnail generated — one Format D variation (10 min)
+5. VO generated — ElevenLabs, single chunk under 5000 chars (5 min)
+6. Render — minimal, no heavy B-roll (10 min)
+```
+
+**Daily Take topics to cover:**
+- Game recaps (same night or next morning)
+- Trades, signings, waivers — what it means for Clark
+- Injury reports — Clark's or key Fever players
+- WNBA league decisions, rule changes, fines
+- Rival team news filtered through Clark's championship path
+- Reactions to other creators (Rachel DeMita, Hoop Reports) — when they get it wrong or miss the real story
+- Clark quotes or press conferences from that day
+
+---
+
+## FTL Documentary — Full Pipeline
 
 **Every new video must follow this order. Do not skip ahead.**
 
