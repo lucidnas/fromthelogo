@@ -12,16 +12,21 @@ FTL is a faceless YouTube channel covering the WNBA every day from the Caitlin C
 
 **Channel positioning:** FTL is Rachel DeMita's coverage — but faceless. Same topics, same fan-first energy, same daily cadence. The difference is there's no face, no parasocial personality. The narrator is just a passionate Clark fan telling you what happened today and what it means for her. Conversational, direct, opinionated — not cinematic or documentary-style.
 
-**Three formats, by performance priority:**
+**Primary format: Clark Celebration.** This is the channel's identity. Every research session, every script idea, every thumbnail brief starts here. The "THIS Caitlin Clark ___ is ___" pattern is what builds loyal subscribers and consistent views — it's also what the Shorts strategy is already doing, and the views are confirming it.
 
-| Format | Cadence | Length | Purpose | Track record |
+| Format | Priority | Cadence | Length | Track record |
 |---|---|---|---|---|
-| **Refs / Fines / Villain Reaction** | Whenever a fine, foul, tech, or league decision drops | 5–8 min | Stitch real quotes + clips around a "league did X → it backfired" frame | 5 of channel's top videos: 343K, 220K, 211K, 130K, 108K |
-| **Clark Moment Celebration** | Whenever a clip-worthy CC play, ad, or skill drops | 4–6 min | One play / commercial / skill hyped with a single awe word (GENIUS, AWARD, SPECTACULAR, PURE ART) | 4 winners: 217K, 204K, 204K, 179K |
-| **Game Recap (villain-response framing)** | Game day or next morning | 5–8 min | Present-tense play-by-play, refs/rival as villain, CC/Fever as response | 152K, 94K, 69K, 61K |
-| **FTL Documentary** | Use sparingly (~1 per month max) | 8–10 min | Cinematic deep-dive. Full pipeline. **Underperforms** vs. the three formats above — recent docs landed at 490 and 698 views. | Reserve for genuinely big narrative moments only |
+| **Clark Celebration** ← default | Primary | Multiple per week — whenever a clip-worthy CC play, ad, skill, dribble, or pass surfaces | 4–6 min | 217K, 204K, 204K, 179K, 94K, 43K, 38K, 15K floor — consistent and loyal |
+| **Refs / Fines / Villain Reaction** | Opportunistic only | When a real fine, tech, foul, or league decision actually drops | 5–8 min | 343K, 220K, 211K, 130K, 108K — high ceiling, but only when there's a real artifact to react to |
+| **Game Recap (villain-response framing)** | Opportunistic only | Game day or next morning, only for noteworthy games | 5–8 min | 152K, 94K, 69K, 61K |
+| **FTL Documentary** | Rare | ~1 per month max, only for genuinely big narrative moments | 8–10 min | Recent docs landed at 490 and 698 views — underperforms |
 
-**Hard rule:** default to one of the top three formats. Only do a Documentary when the story genuinely demands the long-form treatment — not as a weekly cadence.
+**Operating rule:**
+1. Research sessions default to Clark Celebration angles — find the clip, the play, the commercial, the skill, the moment that deserves an awe word.
+2. Refs/fines/game-recap videos are reactive only. Do NOT go looking for them. If a real Sophie fine, Clark tech, or signature win happens that day, drop the Celebration plan and cover it. Otherwise, stay on Celebration.
+3. The "THIS Caitlin Clark ___ is ___" title pattern is the channel's most reliable hook. Use it freely — GENIUS, AWARD, SPECTACULAR, PURE ART, NEXT LEVEL, INSANE, UNREAL, DIFFERENT.
+
+**Yellow word library for Celebration format:** GENIUS, SPECTACULAR, UNREAL, INSANE, AWARD, DIFFERENT, ART, NEXT LEVEL, ELITE, MASTERFUL.
 
 **The Clark Lens — mandatory editorial filter:**
 Every story must be told through Clark's perspective, even when she's not the subject.
