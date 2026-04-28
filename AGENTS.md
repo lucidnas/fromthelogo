@@ -28,8 +28,9 @@ FTL is a faceless YouTube channel covering the WNBA every day from the Caitlin C
 
 **Yellow word library for Celebration format:** GENIUS, SPECTACULAR, UNREAL, INSANE, AWARD, DIFFERENT, ART, NEXT LEVEL, ELITE, MASTERFUL.
 
-**Required reading before any Celebration video:**
-- `research/celebration-format-playbook.md` — the spine every winner uses (cold open with clip line, compilation listicle structure, game audio + reaction quips, one pop-culture comparison, 1,200–1,400 words, no documentary tone). Must be re-read before scripting.
+**Required reading before any script (any format):**
+- `research/hooks-library.md` — the 7 hook templates pulled from every 50K+ video on the channel. **Do not invent a new hook.** Pick a template, slot in today's facts. Source transcripts live in `~/transcripts/audience-research/` and `~/transcripts/ftl-own/`.
+- `research/celebration-format-playbook.md` — the spine every Celebration winner uses (compilation listicle, game audio + reaction quips, one pop-culture comparison, 1,200–1,400 words, no documentary tone). Re-read before scripting.
 - `research/celebration-ideas/` — dated research files with current angles. Pick from here or generate a new file before writing.
 
 **Generating new celebration research:**
