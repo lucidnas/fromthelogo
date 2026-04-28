@@ -28,6 +28,13 @@ FTL is a faceless YouTube channel covering the WNBA every day from the Caitlin C
 
 **Yellow word library for Celebration format:** GENIUS, SPECTACULAR, UNREAL, INSANE, AWARD, DIFFERENT, ART, NEXT LEVEL, ELITE, MASTERFUL.
 
+**Required reading before any Celebration video:**
+- `research/celebration-format-playbook.md` — the spine every winner uses (cold open with clip line, compilation listicle structure, game audio + reaction quips, one pop-culture comparison, 1,200–1,400 words, no documentary tone). Must be re-read before scripting.
+- `research/celebration-ideas/` — dated research files with current angles. Pick from here or generate a new file before writing.
+
+**Generating new celebration research:**
+Use Codex to find current celebration-worthy moments. Save to `research/celebration-ideas/YYYY-MM-DD-celebration-angles.md`. Each angle must include the moment, footage URL, yellow word, and proposed title in the "THIS Caitlin Clark ___ is ___" format.
+
 **The Clark Lens — mandatory editorial filter:**
 Every story must be told through Clark's perspective, even when she's not the subject.
 - A rival team signs a player → what does it mean for Clark's path to a title?
