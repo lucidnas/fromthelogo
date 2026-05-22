@@ -1,0 +1,41 @@
+{
+  "account": "IndianaFever",
+  "mode": "timeline",
+  "query": "",
+  "matchAny": [
+    "caitlin clark",
+    "clark",
+    "cc",
+    "seattle",
+    "storm",
+    "assist",
+    "dime",
+    "three",
+    "triple",
+    "highlights"
+  ],
+  "discoveryUrl": "https://nitter.tiekoetter.com/IndianaFever",
+  "found": [
+    {
+      "username": "IndianaFever",
+      "statusId": "2057269028561830022",
+      "xUrl": "https://x.com/IndianaFever/status/2057269028561830022/video/1",
+      "text": "triple. triple. triple. triple. Lexie Hull drains her fourth three of the night 👏",
+      "date": "May 21, 2026 · 1:15 AM UTC"
+    },
+    {
+      "username": "IndianaFever",
+      "statusId": "2057263282088493505",
+      "xUrl": "https://x.com/IndianaFever/status/2057263282088493505/video/1",
+      "text": "Lexie Hull knocks down the sidestep triple 🔥",
+      "date": "May 21, 2026 · 12:52 AM UTC"
+    },
+    {
+      "username": "IndianaFever",
+      "statusId": "2057260890194419946",
+      "xUrl": "https://x.com/IndianaFever/status/2057260890194419946/video/1",
+      "text": "ALIYAH. BOSTON. AB with the block & the triple 💥💥💥",
+      "date": "May 21, 2026 · 12:43 AM UTC"
+    }
+  ]
+}

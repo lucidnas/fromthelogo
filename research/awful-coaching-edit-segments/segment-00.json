@@ -1,0 +1,201 @@
+{
+  "segmentStartSecs": 0,
+  "segmentSummary": "The segment uses a pattern of live basketball play, followed by freeze frames with circles and arrows to highlight specific player movements and defensive errors, all while a voiceover explains Caitlin Clark's skill and the opposing team's mistakes, concluding with the successful play.",
+  "events": [
+    {
+      "startSecs": 0,
+      "endSecs": 4,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "hook",
+      "editMove": "cut",
+      "retentionPurpose": "Introduce the topic and player, establish context.",
+      "ftlReplication": "Start with live game footage, full court view."
+    },
+    {
+      "startSecs": 4,
+      "endSecs": 9,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "two blue circles highlighting defenders",
+      "voFunction": "explains mistake",
+      "editMove": "freeze",
+      "retentionPurpose": "Highlight specific defensive errors and set up Clark's advantage.",
+      "ftlReplication": "Freeze frame, add two blue circles to highlight specific players."
+    },
+    {
+      "startSecs": 9,
+      "endSecs": 15,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains Clark read",
+      "editMove": "cut",
+      "retentionPurpose": "Show Clark's offensive prowess from a distance.",
+      "ftlReplication": "Resume live play, full court view."
+    },
+    {
+      "startSecs": 15,
+      "endSecs": 17,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "payoff",
+      "editMove": "hold",
+      "retentionPurpose": "Show the successful outcome of the play.",
+      "ftlReplication": "Continue live play to show basket."
+    },
+    {
+      "startSecs": 17,
+      "endSecs": 19,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "transition",
+      "editMove": "cut",
+      "retentionPurpose": "Transition to the next play, introduce new focus.",
+      "ftlReplication": "Cut to new live game footage, full court view."
+    },
+    {
+      "startSecs": 19,
+      "endSecs": 22,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "one blue circle highlighting Clark and defender",
+      "voFunction": "points at defender",
+      "editMove": "freeze",
+      "retentionPurpose": "Highlight the initial defensive setup against Clark.",
+      "ftlReplication": "Freeze frame, add one blue circle to highlight specific players."
+    },
+    {
+      "startSecs": 22,
+      "endSecs": 29,
+      "visualState": "live broadcast",
+      "cameraOr Crop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains Clark read",
+      "editMove": "cut",
+      "retentionPurpose": "Show Clark's move to create space.",
+      "ftlReplication": "Resume live play, full court view."
+    },
+    {
+      "startSecs": 29,
+      "endSecs": 31,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "one blue arrow showing Clark's path",
+      "voFunction": "explains Clark read",
+      "editMove": "freeze",
+      "retentionPurpose": "Illustrate Clark's intended movement and defender's reaction.",
+      "ftlReplication": "Freeze frame, add one blue arrow to show player movement."
+    },
+    {
+      "startSecs": 31,
+      "endSecs": 36,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains Clark read",
+      "editMove": "cut",
+      "retentionPurpose": "Show Clark's spin move and continued drive.",
+      "ftlReplication": "Resume live play, full court view."
+    },
+    {
+      "startSecs": 36,
+      "endSecs": 40,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "payoff",
+      "editMove": "hold",
+      "retentionPurpose": "Show the successful outcome of the play.",
+      "ftlReplication": "Continue live play to show basket."
+    },
+    {
+      "startSecs": 40,
+      "endSecs": 45,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "transition",
+      "editMove": "cut",
+      "retentionPurpose": "Transition to the next play, introduce new defensive lapse.",
+      "ftlReplication": "Cut to new live game footage, full court view."
+    },
+    {
+      "startSecs": 45,
+      "endSecs": 48,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "two blue circles highlighting defenders",
+      "voFunction": "explains mistake",
+      "editMove": "freeze",
+      "retentionPurpose": "Highlight specific defensive errors in transition.",
+      "ftlReplication": "Freeze frame, add two blue circles to highlight specific players."
+    },
+    {
+      "startSecs": 48,
+      "endSecs": 52,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains Clark read",
+      "editMove": "cut",
+      "retentionPurpose": "Show Clark initiating a fast break.",
+      "ftlReplication": "Resume live play, full court view."
+    },
+    {
+      "startSecs": 52,
+      "endSecs": 55,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "one blue arrow showing Clark's path",
+      "voFunction": "explains Clark read",
+      "editMove": "freeze",
+      "retentionPurpose": "Illustrate Clark's speed and direction in transition.",
+      "ftlReplication": "Freeze frame, add one blue arrow to show player movement."
+    },
+    {
+      "startSecs": 55,
+      "endSecs": 59,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "two blue circles highlighting defenders",
+      "voFunction": "explains mistake",
+      "editMove": "cut",
+      "retentionPurpose": "Show the numbers advantage created by Clark's speed.",
+      "ftlReplication": "Resume live play, add two blue circles to highlight specific players."
+    },
+    {
+      "startSecs": 59,
+      "endSecs": 103,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "payoff",
+      "editMove": "cut",
+      "retentionPurpose": "Show the successful outcome of the fast break.",
+      "ftlReplication": "Resume live play, full court view, to show basket."
+    },
+    {
+      "startSecs": 103,
+      "endSecs": 104,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "transition",
+      "editMove": "hold",
+      "retentionPurpose": "Set up for the next segment.",
+      "ftlReplication": "Continue live play."
+    }
+  ],
+  "observedPattern": "The repeatable edit pattern is: live game footage (often showing the start of a play or transition) -> freeze frame with blue circles/arrows highlighting specific players or movements (while voiceover explains the setup/mistake/read) -> resume live game footage (showing the conclusion of the highlighted action, often a score).",
+  "notesForAutomation": [
+    "Implement freeze frames at key moments where a specific player's action or defensive error is being explained.",
+    "Use blue circles to highlight individual players or small groups of players during freeze frames.",
+    "Use blue arrows to indicate player movement or intended path during freeze frames.",
+    "Ensure overlays (circles/arrows) appear precisely at the start of the freeze frame and disappear when live play resumes.",
+    "Align voiceover explanations with the visual cues provided by freeze frames and overlays."
+  ]
+}

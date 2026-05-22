@@ -1,0 +1,35 @@
+{
+  "account": "seattlestorm",
+  "mode": "timeline",
+  "query": "",
+  "matchAny": [
+    "caitlin clark",
+    "clark",
+    "cc",
+    "seattle",
+    "storm",
+    "three",
+    "triple",
+    "dime",
+    "assist",
+    "bucket",
+    "logo"
+  ],
+  "discoveryUrl": "https://nitter.tiekoetter.com/seattlestorm",
+  "found": [
+    {
+      "username": "seattlestorm",
+      "statusId": "2056149139625283656",
+      "xUrl": "https://x.com/seattlestorm/status/2056149139625283656/video/1",
+      "text": "Back-to-back buckets from T 🪣",
+      "date": "May 17, 2026 · 11:05 PM UTC"
+    },
+    {
+      "username": "seattlestorm",
+      "statusId": "2056116957024280863",
+      "xUrl": "https://x.com/seattlestorm/status/2056116957024280863/video/1",
+      "text": "Sunday style, Storm edition ⛈️ @AlaskaAir | Arrivals",
+      "date": "May 17, 2026 · 8:57 PM UTC"
+    }
+  ]
+}

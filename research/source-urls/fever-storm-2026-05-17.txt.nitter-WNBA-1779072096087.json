@@ -1,0 +1,63 @@
+{
+  "account": "WNBA",
+  "mode": "timeline",
+  "query": "",
+  "matchAny": [
+    "caitlin clark",
+    "clark",
+    "cc",
+    "seattle",
+    "storm",
+    "three",
+    "triple",
+    "dime",
+    "assist",
+    "bucket",
+    "logo"
+  ],
+  "discoveryUrl": "https://nitter.tiekoetter.com/WNBA",
+  "found": [
+    {
+      "username": "WNBA",
+      "statusId": "2056201167433089259",
+      "xUrl": "https://x.com/WNBA/status/2056201167433089259/video/1",
+      "text": "Caitlin Clark did it all in the Fever’s home win 👏 Clark finished with 21 PTS, 10 AST and 7 REB while adding to her record for the most career games with 20+ PTS and 10+ AST in WNBA history (12).",
+      "date": "May 18, 2026 · 2:32 AM UTC"
+    },
+    {
+      "username": "WNBA",
+      "statusId": "2056190586470723729",
+      "xUrl": "https://x.com/WNBA/status/2056190586470723729/video/1",
+      "text": "Caitlin Clark stuffed the stat sheet in the Fever’s home win 🔥 Clark finished with 21 PTS, 10 AST and 7 REB while recording the 12th game of her career with 20+ PTS and 10+ AST, the most such games in WNBA history! #WNBASeason30",
+      "date": "May 18, 2026 · 1:50 AM UTC"
+    },
+    {
+      "username": "WNBA",
+      "statusId": "2056190344585257137",
+      "xUrl": "https://x.com/WNBA/status/2056190344585257137/video/1",
+      "text": "Another record for CC 📚 Tonight, Caitlin Clark recorded the 12th game of her career with 20+ PTS and 10+ AST, extending her record for the most such games in WNBA history! 21 PTS | 10 AST | 7 REB #WNBASeason30",
+      "date": "May 18, 2026 · 1:49 AM UTC"
+    },
+    {
+      "username": "WNBA",
+      "statusId": "2056179978824208759",
+      "xUrl": "https://x.com/WNBA/status/2056179978824208759/video/1",
+      "text": "The rook is fearless 😤 Gabriela Jaquez cashes in the triple with no hesitation! CHI-MIN | League Pass Tap to watch: wnba.com/how-to-watch-game-r…",
+      "date": "May 18, 2026 · 1:08 AM UTC"
+    },
+    {
+      "username": "WNBA",
+      "statusId": "2056178606850609625",
+      "xUrl": "https://x.com/WNBA/status/2056178606850609625/video/1",
+      "text": "Moving up the ranks 👏 With her 2nd three in the 4Q, Kayla McBride passed Katie Douglas for 6th on the WNBA’s all-time threes made list!",
+      "date": "May 18, 2026 · 1:02 AM UTC"
+    },
+    {
+      "username": "WNBA",
+      "statusId": "2056177868611141678",
+      "xUrl": "https://x.com/WNBA/status/2056177868611141678/video/1",
+      "text": "Call Rachel Banham if you need bucket 📲 She launches her second triple of the game to extend the @chicagosky lead! CHI-MIN | League Pass Tap to watch: wnba.com/how-to-watch-game-r…",
+      "date": "May 18, 2026 · 12:59 AM UTC"
+    }
+  ]
+}

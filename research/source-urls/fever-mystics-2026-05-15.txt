@@ -1,0 +1,39 @@
+# Indiana Fever vs Washington Mystics, May 15 2026
+# Caitlin Clark / game highlight source list.
+# Add X/Twitter/pic.twitter.com URLs here as discovered.
+
+official | WNBA | https://www.youtube.com/watch?v=i40kSB3tKGA
+official | Indiana Fever | https://www.youtube.com/watch?v=C2D8zbYbdMo
+media | ESPN | https://www.youtube.com/watch?v=uNOwyu-FRvg
+media | WNBA on NBC | https://www.youtube.com/watch?v=FWk7iWExktk
+archive | WNBA Highlight Moment | https://www.youtube.com/watch?v=8mUmrW1dTvk
+
+# X/Twitter discovered via nitter.tiekoetter.com search, May 17 2026
+official | Indiana Fever | https://x.com/IndianaFever/status/2055464588091556020/video/1
+media | ClutchPoints | https://x.com/ClutchPoints/status/2055465082524676411/video/1
+fan | CourtsideBuzzX | https://x.com/CourtsideBuzzX/status/2055466584055898496/video/1
+fan | AidanDoc__ | https://x.com/AidanDoc__/status/2055466458897945060/video/1
+fan | sluggahjells | https://x.com/sluggahjells/status/2055465160903438708/video/1
+fan | TFIO | https://x.com/_T_F_I_O_/status/2055467824928161952/video/1
+fan | JJVibe | https://x.com/JJVibe/status/2055716102836306265/video/1
+fan | 22CCnews | https://x.com/22CCnews/status/2055631100047745207/video/1
+
+# Nitter discovery: IndianaFever | timeline | match-any: caitlin clark, cc, washington, triple, ot, dime, kelz, entertained | 2026-05-17T05:16:46.470Z
+
+# Nitter discovery: IndianaFever | timeline | match-any: caitlin clark, washington, triple, ot, dime, kelz, entertained, all tied | 2026-05-17T05:17:37.723Z
+official | IndianaFever | https://x.com/IndianaFever/status/2055692642130739650/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2055646637058314608/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2055473737516847314/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2055468193372627183/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2055466984842674251/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2055466269793538072/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2055465353732341931/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2055462960080826635/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2055460538952425557/video/1
+
+# Nitter discovery: IndianaFever | timeline | match-any: caitlin clark, clark, cc, washington, triple, three, dime, assist, ot | 2026-05-17T21:07:55.264Z
+official | IndianaFever | https://x.com/IndianaFever/status/2056115242577375344/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056114475132969256/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056113152824066110/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056112265066086757/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056110803892199856/video/1

@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+
+      /* B-roll */
+      .broll-video { width: 100%; height: 100%; object-fit: cover; transform-origin: center center; }
+      .edl-video { will-change: transform; }
+      .edl-overlay { position: absolute; left: 74px; top: auto; bottom: 72px; width: 1280px; opacity: 0; pointer-events: none; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; z-index: 20; transform-origin: left bottom; }
+      .edl-overlay.scorebug-cover { left: 420px; top: auto; bottom: 18px; width: 1080px; min-height: 148px; padding: 16px 42px 20px; box-sizing: border-box; text-align: center; background: linear-gradient(90deg, rgba(1,11,31,0) 0%, rgba(1,11,31,0.98) 12%, rgba(1,11,31,0.98) 88%, rgba(1,11,31,0) 100%); }
+      .edl-overlay.scorebug-cover .edl-kicker { margin-bottom: 8px; font-size: 20px; }
+      .edl-overlay.scorebug-cover .edl-title { margin: 0 auto; max-width: 930px; font-size: 50px; padding: 14px 20px 16px; border-left-width: 0; border-bottom: 6px solid #ffe000; }
+      .edl-overlay.scorebug-cover .edl-stack { justify-content: center; margin: 9px auto 0; max-width: 930px; }
+      .edl-overlay.scorebug-cover .edl-stack span { font-size: 24px; padding: 8px 12px; }
+      .edl-kicker { display: inline-block; background: #c8102e; color: #fff; font-size: 24px; font-weight: 950; letter-spacing: 0.08em; padding: 10px 18px; border-radius: 5px 5px 0 0; margin-bottom: 0; box-shadow: 0 14px 34px rgba(0,0,0,0.5); text-transform: uppercase; }
+      .edl-title { display: block; width: fit-content; max-width: 1260px; background: linear-gradient(90deg, rgba(1,11,31,0.96), rgba(1,11,31,0.78)); color: #ffe000; font-family: "Archivo Black", "League Gothic", system-ui, -apple-system, sans-serif; font-size: 82px; font-weight: 950; line-height: 0.94; letter-spacing: 0; padding: 20px 28px 24px; border-left: 12px solid #ffe000; border-bottom: 8px solid rgba(255,224,0,0.95); text-transform: uppercase; text-shadow: 0 5px 0 rgba(0,0,0,0.55); box-shadow: 0 24px 58px rgba(0,0,0,0.58); }
+      .edl-stack { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; max-width: 1260px; }
+      .edl-stack span { display: inline-block; background: rgba(255,255,255,0.94); color: #010b1f; font-size: 34px; font-weight: 950; letter-spacing: 0; padding: 10px 16px; border-radius: 5px; box-shadow: 0 14px 30px rgba(0,0,0,0.36); text-transform: uppercase; }
+      .image-full-wrap,
+      .image-overlay-wrap {
+        position: absolute;
+        inset: 0;
+        background: #010b1f;
+        opacity: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 25;
+      }
+      .image-full-wrap img,
+      .image-overlay-wrap img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: top center;
+        transform-origin: top center;
+        will-change: transform;
+      }
+      .freeze-frame-wrap {
+        position: absolute;
+        inset: 0;
+        background: #000;
+        opacity: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 16;
+      }
+      .freeze-frame-image {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        will-change: transform;
+      }
+      .freeze-frame-label {
+        position: absolute;
+        left: 74px;
+        bottom: 78px;
+        min-width: 760px;
+        max-width: 1320px;
+        text-align: center;
+        background: linear-gradient(90deg, rgba(1,11,31,0.95), rgba(1,11,31,0.82));
+        color: #ffe000;
+        font-family: "Archivo Black", "League Gothic", system-ui, -apple-system, sans-serif;
+        border-bottom: 10px solid #ffe000;
+        font-size: 92px;
+        line-height: 0.95;
+        font-weight: 950;
+        padding: 20px 30px 25px;
+        text-transform: uppercase;
+        text-shadow: 0 5px 0 rgba(0,0,0,0.58);
+        box-shadow: 0 24px 58px rgba(0,0,0,0.6);
+        opacity: 0;
+        transform-origin: left bottom;
+      }
+      .montage-overlay { left: 300px; top: auto; bottom: 52px; width: 1320px; min-width: 1320px; text-align: center; }
+      .montage-overlay .edl-kicker { background: #010b1f; color: #fff; font-size: 26px; padding: 10px 18px; }
+      .montage-overlay .edl-title { margin: 0 auto; max-width: 1320px; font-size: 108px; background: rgba(200,16,46,0.94); color: #fff; border-left-width: 0; border-bottom: 11px solid #ffe000; padding: 22px 34px 26px; }
+      .film-graphic { position: absolute; z-index: 18; opacity: 0; pointer-events: none; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .film-ring { border: 8px solid var(--film-color); border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 0 4px rgba(0,0,0,0.45), 0 0 28px rgba(255,224,0,0.35); }
+      .film-label-inline { position: absolute; left: 50%; top: calc(100% + 10px); transform: translateX(-50%); white-space: nowrap; background: rgba(1,11,31,0.9); color: #fff; border-left: 5px solid var(--film-color); font-size: 22px; font-weight: 950; padding: 8px 12px; text-transform: uppercase; box-shadow: 0 10px 24px rgba(0,0,0,0.42); }
+      .film-callout { transform: translate(-50%, -50%); background: rgba(1,11,31,0.88); color: #fff; border: 3px solid var(--film-color); border-left-width: 9px; font-size: 32px; line-height: 1; font-weight: 950; padding: 12px 16px; text-transform: uppercase; box-shadow: 0 14px 34px rgba(0,0,0,0.5); white-space: nowrap; }
+      .film-arrow-wrap { height: 0; transform-origin: 0 0; }
+      .film-arrow-line { height: 8px; width: 100%; background: var(--film-color); border-radius: 999px; box-shadow: 0 0 0 3px rgba(0,0,0,0.42); transform-origin: 0 50%; }
+      .film-arrow-head { position: absolute; right: -2px; top: -12px; width: 0; height: 0; border-top: 16px solid transparent; border-bottom: 16px solid transparent; border-left: 28px solid var(--film-color); filter: drop-shadow(0 0 3px rgba(0,0,0,0.6)); }
+      .film-arrow-label { position: absolute; left: 50%; top: -54px; transform: translateX(-50%) rotate(var(--arrow-label-rotation)); transform-origin: center center; background: rgba(200,16,46,0.92); color: #fff; font-size: 22px; font-weight: 950; padding: 8px 12px; text-transform: uppercase; white-space: nowrap; box-shadow: 0 10px 24px rgba(0,0,0,0.42); }
+      .film-svg { inset: 0; width: 100%; height: 100%; }
+      .film-line { stroke-width: 0.6; stroke-dasharray: 2.2 1.4; filter: drop-shadow(0 0 0.3px rgba(0,0,0,0.9)); }
+
+      /* ── FTL Palette: Indiana Fever (gold #ffe000, red #c8102e, navy #010b1f) ── */
+
+      /* Stat card */
+      .stat-bg { position: absolute; inset: 0; background: linear-gradient(160deg, #010b1f 0%, #021530 100%); }
+      /* Gold accent bar — swept in via scaleX in GSAP */
+      .stat-accent { width: 100px; height: 6px; background: #ffe000; border-radius: 3px; transform-origin: left center; transform: scaleX(0); margin-bottom: 36px; }
+      /* Content zone — flex, left-anchored, proper padding */
+      .stat-content { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 0 200px; box-sizing: border-box; }
+      .stat-number { font-size: 148px; font-weight: 900; color: #fff; letter-spacing: -5px; font-family: system-ui; line-height: 1; opacity: 0; margin-bottom: 28px; }
+      .stat-label { font-size: 32px; font-weight: 700; color: #ffe000; letter-spacing: 0.14em; text-transform: uppercase; font-family: system-ui; opacity: 0; }
+      .stat-bar-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #c8102e 0%, #ffe000 50%, #002d62 100%); }
+
+      /* Headline */
+      /* Content zone — flex, left-anchored */
+      .hl-content { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 0 200px 0 160px; box-sizing: border-box; }
+      .hl-source { display: inline-block; background: #c8102e; color: #fff; font-size: 20px; font-weight: 800; letter-spacing: 0.1em; padding: 8px 24px; border-radius: 4px; text-transform: uppercase; font-family: system-ui; opacity: 0; margin-bottom: 28px; }
+      .hl-text { font-size: 68px; font-weight: 800; color: #fff; line-height: 1.18; letter-spacing: -1px; font-family: system-ui; opacity: 0; max-width: 1400px; margin-bottom: 40px; }
+      .hl-line { height: 4px; width: 0; background: linear-gradient(90deg, #c8102e 0%, #ffe000 60%, transparent 100%); border-radius: 2px; max-width: 1400px; }
+      .hl-panel { position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: linear-gradient(180deg, #c8102e 0%, #ffe000 100%); }
+      .hl-bar-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #c8102e 0%, #ffe000 50%, #002d62 100%); }
+
+      /* Tweet */
+      .tweet-card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 860px; background: #16181c; border-radius: 20px; padding: 36px 40px; box-shadow: 0 0 100px rgba(0,0,0,0.9); }
+      .tweet-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+      .tweet-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #1d9bf0, #0a4f8a); flex-shrink: 0; }
+      .tweet-name { font-size: 20px; font-weight: 700; color: #e7e9ea; font-family: system-ui; }
+      .tweet-x { margin-left: auto; font-size: 26px; color: #e7e9ea; }
+      .tweet-body { font-size: 30px; color: #e7e9ea; line-height: 1.55; font-family: system-ui; }
+      .tweet-footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #2f3336; font-size: 16px; color: #71767b; font-family: system-ui; }
+    </style>
+  </head>
+  <body>
+    <div id="root"
+         data-composition-id="ftl-clip-first-fever-storm-2026-05-17-beat-14"
+         data-start="0"
+         data-duration="62.090"
+         data-width="1920"
+         data-height="1080">
+
+      <!-- VO Audio -->
+      <audio id="vo-audio" class="clip" src="assets/vo.mp3"
+             data-start="0" data-duration="62.090" data-track-index="0"></audio>
+
+      
+
+      
+    <!-- EDL clip 0: beat 14 opening take -->
+    <div data-layout-allow-overflow style="position:absolute;inset:0;overflow:hidden;">
+      <video id="edl-video-0" class="clip broll-video edl-video"
+             data-start="0.000" data-duration="7.540" data-track-index="1"
+             data-volume="0"
+             
+             src="assets/edl-0-22-x-IndianaFever-2056181137643343873.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+    </div>
+    
+    <div id="edl-overlay-0" class="clip edl-overlay"
+         data-start="0.000" data-duration="7.540" data-track-index="1001">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">WHY SHE IS DIFFERENT</div>
+      
+    </div>
+    
+    
+
+    <!-- EDL clip 1: beat 14 stat receipt -->
+    <div data-layout-allow-overflow style="position:absolute;inset:0;overflow:hidden;">
+      <video id="edl-video-1" class="clip broll-video edl-video"
+             data-start="7.540" data-duration="14.192" data-track-index="2"
+             data-volume="0"
+             
+             src="assets/edl-1-10-x-WNBA-2056181396826173440.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+    </div>
+    
+    <div id="edl-overlay-1" class="clip edl-overlay"
+         data-start="7.540" data-duration="14.192" data-track-index="1002">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">21 PTS / 10 AST / 7 REB</div>
+      <div class="edl-stack"><span>MOST 20+10 GAMES EVER</span></div>
+    </div>
+    
+    
+
+    <!-- EDL clip 2: beat 14 why special -->
+    <div data-layout-allow-overflow style="position:absolute;inset:0;overflow:hidden;">
+      <video id="edl-video-2" class="clip broll-video edl-video"
+             data-start="21.732" data-duration="13.305" data-track-index="3"
+             data-volume="0"
+             
+             src="assets/edl-2-23-x-IndianaFever-2056174825983410177.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+    </div>
+    
+    <div id="edl-overlay-2" class="clip edl-overlay"
+         data-start="21.732" data-duration="13.305" data-track-index="1003">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">BIGGER THAN THE NUMBERS</div>
+      
+    </div>
+    
+    
+
+    <!-- EDL clip 3: beat 14 orbit -->
+    <div data-layout-allow-overflow style="position:absolute;inset:0;overflow:hidden;">
+      <video id="edl-video-3" class="clip broll-video edl-video"
+             data-start="35.037" data-duration="12.418" data-track-index="4"
+             data-volume="0"
+             
+             src="assets/edl-3-01-x-IndianaFever-2056114656662409216.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+    </div>
+    
+    <div id="edl-overlay-3" class="clip edl-overlay"
+         data-start="35.037" data-duration="12.418" data-track-index="1004">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">THE GAME ORBITS AROUND HER</div>
+      
+    </div>
+    
+    
+
+    <!-- EDL clip 4: beat 14 close -->
+    <div data-layout-allow-overflow style="position:absolute;inset:0;overflow:hidden;">
+      <video id="edl-video-4" class="clip broll-video edl-video"
+             data-start="47.455" data-duration="14.635" data-track-index="5"
+             data-volume="0"
+             
+             src="assets/edl-4-22-x-IndianaFever-2056181137643343873.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+    </div>
+    
+    <div id="edl-overlay-4" class="clip edl-overlay"
+         data-start="47.455" data-duration="14.635" data-track-index="1005">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">NOBODY WANTS THIS PROBLEM</div>
+      
+    </div>
+    
+    
+
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+  tl.fromTo("#edl-video-0", { scale: 1 }, { scale: 1.035, duration: 7.54, ease: "none" }, 0);
+  tl.fromTo("#edl-overlay-0", { opacity: 0, y: 86, scale: 0.92 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.34, ease: "back.out(1.45)" }, 0.04);
+  tl.to("#edl-overlay-0", { opacity: 0, y: -18, duration: 0.18, ease: "power2.in" }, 7.32);
+  tl.set("#edl-overlay-0", { opacity: 0 }, 7.54);
+  tl.fromTo("#edl-video-1", { scale: 1 }, { scale: 1.035, duration: 14.192, ease: "none" }, 7.54);
+  tl.fromTo("#edl-overlay-1", { opacity: 0, x: -160, scale: 0.94 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.42, ease: "expo.out" }, 7.58);
+  tl.to("#edl-overlay-1", { opacity: 0, y: -18, duration: 0.18, ease: "power2.in" }, 21.512);
+  tl.set("#edl-overlay-1", { opacity: 0 }, 21.732);
+  tl.fromTo("#edl-video-2", { scale: 1 }, { scale: 1.035, duration: 13.305, ease: "none" }, 21.732);
+  tl.fromTo("#edl-overlay-2", { opacity: 0, x: 120, y: 24, scale: 0.96 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.28, ease: "power4.out" }, 21.772);
+  tl.to("#edl-overlay-2", { opacity: 0, y: -18, duration: 0.18, ease: "power2.in" }, 34.817);
+  tl.set("#edl-overlay-2", { opacity: 0 }, 35.037);
+  tl.fromTo("#edl-video-3", { scale: 1 }, { scale: 1.035, duration: 12.418, ease: "none" }, 35.037);
+  tl.fromTo("#edl-overlay-3", { opacity: 0, y: 86, scale: 0.92 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.34, ease: "back.out(1.45)" }, 35.077);
+  tl.to("#edl-overlay-3", { opacity: 0, y: -18, duration: 0.18, ease: "power2.in" }, 47.235);
+  tl.set("#edl-overlay-3", { opacity: 0 }, 47.455);
+  tl.fromTo("#edl-video-4", { scale: 1 }, { scale: 1.035, duration: 14.635000000000005, ease: "none" }, 47.455);
+  tl.fromTo("#edl-overlay-4", { opacity: 0, x: -160, scale: 0.94 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.42, ease: "expo.out" }, 47.495);
+  tl.to("#edl-overlay-4", { opacity: 0, y: -18, duration: 0.18, ease: "power2.in" }, 61.870000000000005);
+  tl.set("#edl-overlay-4", { opacity: 0 }, 62.09);
+
+      window.__timelines["ftl-clip-first-fever-storm-2026-05-17-beat-14"] = tl;
+    </script>
+  </body>
+</html>

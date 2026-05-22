@@ -1,0 +1,101 @@
+{
+  "segmentStartSecs": 120,
+  "segmentSummary": "This segment repeatedly freezes the video to highlight player movements and defensive errors with visual overlays, followed by playing the action live to demonstrate the play's outcome.",
+  "events": [
+    {
+      "startSecs": 0,
+      "endSecs": 10,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue arrows showing player movement, blue circle around a player",
+      "voFunction": "explains Clark read",
+      "editMove": "freeze",
+      "retentionPurpose": "highlights strategic offensive movement and defensive reaction",
+      "ftlReplication": "freeze frame, add arrows for player movement, circle a specific player"
+    },
+    {
+      "startSecs": 10,
+      "endSecs": 17,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "payoff",
+      "editMove": "cut",
+      "retentionPurpose": "shows the successful execution of the play in real-time",
+      "ftlReplication": "play live"
+    },
+    {
+      "startSecs": 17,
+      "endSecs": 28,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue circle around a player",
+      "voFunction": "explains mistake",
+      "editMove": "freeze",
+      "retentionPurpose": "highlights a subtle defensive error in transition",
+      "ftlReplication": "freeze frame, add circle around a specific player"
+    },
+    {
+      "startSecs": 28,
+      "endSecs": 35,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue circle around a player",
+      "voFunction": "explains Clark read",
+      "editMove": "freeze",
+      "retentionPurpose": "emphasizes Caitlin Clark's court vision and decision-making",
+      "ftlReplication": "freeze frame, add circle around a specific player"
+    },
+    {
+      "startSecs": 35,
+      "endSecs": 41,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "payoff",
+      "editMove": "cut",
+      "retentionPurpose": "demonstrates the successful full-court pass and layup",
+      "ftlReplication": "play live"
+    },
+    {
+      "startSecs": 41,
+      "endSecs": 48,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue circle around players",
+      "voFunction": "explains mistake",
+      "editMove": "freeze",
+      "retentionPurpose": "points out defensive misdirection and positioning",
+      "ftlReplication": "freeze frame, add circle around specific players"
+    },
+    {
+      "startSecs": 48,
+      "endSecs": 55,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue arrow showing player movement, blue circle around a player",
+      "voFunction": "explains Clark read",
+      "editMove": "freeze",
+      "retentionPurpose": "illustrates Caitlin Clark's dribble move and angle creation",
+      "ftlReplication": "freeze frame, add arrow for player movement, circle a specific player"
+    },
+    {
+      "startSecs": 55,
+      "endSecs": 59,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "payoff",
+      "editMove": "cut",
+      "retentionPurpose": "shows the defender being off balance and the resulting open shot",
+      "ftlReplication": "play live"
+    }
+  ],
+  "observedPattern": "The repeatable edit pattern involves a freeze frame with visual overlays (circles/arrows) to explain a strategic point or mistake, followed by a cut to live broadcast to show the immediate consequence or payoff of that action.",
+  "notesForAutomation": [
+    "Identify voiceover cues (e.g., 'lock her eyes', 'backpedaling', 'leaning towards the screen', 'head up the floor') to trigger freeze frames.",
+    "Automatically add circles around players or areas of focus mentioned in the voiceover.",
+    "Automatically add arrows to illustrate player movement or intended paths as described by the voiceover.",
+    "Ensure a smooth cut from the freeze frame back to the live broadcast to show the play's resolution."
+  ]
+}

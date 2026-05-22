@@ -1,0 +1,145 @@
+{
+  "segmentStartSecs": 240,
+  "segmentSummary": "The segment analyzes two basketball plays, using a combination of freeze frames with circles and arrows, and slow-motion replays with arrows, to highlight player movements, defensive errors, and offensive reads, followed by live broadcast commentary.",
+  "events": [
+    {
+      "startSecs": 240,
+      "endSecs": 243,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue circle around Aaliyah Boston and two defenders, blue arrow pointing from Boston to the top of the key",
+      "voFunction": "explains initial setup",
+      "editMove": "freeze",
+      "retentionPurpose": "highlights defensive strategy",
+      "ftlReplication": "Freeze on initial double team, add circle and arrow."
+    },
+    {
+      "startSecs": 243,
+      "endSecs": 244,
+      "visualState": "replay",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue arrow showing pass from Boston to Clark",
+      "voFunction": "explains the pass out",
+      "editMove": "slowdown",
+      "retentionPurpose": "shows immediate reaction to double team",
+      "ftlReplication": "Slow motion replay of the pass, add arrow."
+    },
+    {
+      "startSecs": 244,
+      "endSecs": 248,
+      "visualState": "replay",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue arrow showing Boston's movement to repost, two blue arrows showing Mercury rotation",
+      "voFunction": "explains player movement and defensive adjustments",
+      "editMove": "slowdown",
+      "retentionPurpose": "illustrates player movement and defensive adjustments",
+      "ftlReplication": "Slow motion replay of Boston's repost and Mercury's rotation, add arrows."
+    },
+    {
+      "startSecs": 248,
+      "endSecs": 253,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue circle around Aaliyah Boston and defender",
+      "voFunction": "explains Clark's read and Boston's position",
+      "editMove": "freeze",
+      "retentionPurpose": "highlights potential pass option",
+      "ftlReplication": "Freeze on Boston's post seal, add circle."
+    },
+    {
+      "startSecs": 253,
+      "endSecs": 260,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue circle around Aaliyah Boston and defender, two blue circles around other Fever players, blue arrow showing pass from Clark to the corner",
+      "voFunction": "explains defensive confusion and new option",
+      "editMove": "freeze",
+      "retentionPurpose": "shows open player due to defensive error",
+      "ftlReplication": "Freeze on defensive confusion, add circles and arrow for skip pass."
+    },
+    {
+      "startSecs": 260,
+      "endSecs": 266,
+      "visualState": "replay",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue circle around Aaliyah Boston and defender, two blue circles around other Fever players",
+      "voFunction": "payoff",
+      "editMove": "slowdown",
+      "retentionPurpose": "shows the result of the play",
+      "ftlReplication": "Slow motion replay of the shot, with circles persisting."
+    },
+    {
+      "startSecs": 266,
+      "endSecs": 275,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "commentary",
+      "editMove": "cut",
+      "retentionPurpose": "general commentary and transition",
+      "ftlReplication": "Live broadcast of the shot and immediate aftermath."
+    },
+    {
+      "startSecs": 275,
+      "endSecs": 280,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "hook",
+      "editMove": "cut",
+      "retentionPurpose": "sets up the next play",
+      "ftlReplication": "Live broadcast, general commentary."
+    },
+    {
+      "startSecs": 280,
+      "endSecs": 284,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue circle around Clark and defender, blue arrow showing defender's movement",
+      "voFunction": "explains defender's initial move",
+      "editMove": "freeze",
+      "retentionPurpose": "highlights defensive action",
+      "ftlReplication": "Freeze on defender crowding, add circle and arrow."
+    },
+    {
+      "startSecs": 284,
+      "endSecs": 290,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue arrow showing defender stepping back, blue arrow showing Clark's drive",
+      "voFunction": "explains defender's mistake and Clark's read",
+      "editMove": "freeze",
+      "retentionPurpose": "shows Clark's quick reaction",
+      "ftlReplication": "Freeze on defender stepping back and Clark's drive, add arrows."
+    },
+    {
+      "startSecs": 290,
+      "endSecs": 294,
+      "visualState": "replay",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "blue arrow showing defender playing off back foot, blue arrow showing Clark's drive",
+      "voFunction": "explains Clark's move",
+      "editMove": "slowdown",
+      "retentionPurpose": "illustrates the blow-by",
+      "ftlReplication": "Slow motion replay of blow-by, add arrows."
+    },
+    {
+      "startSecs": 294,
+      "endSecs": 302,
+      "visualState": "replay",
+      "cameraOrCrop": "full court",
+      "visibleOverlays": "none visible",
+      "voFunction": "payoff",
+      "editMove": "slowdown",
+      "retentionPurpose": "shows the result of the play",
+      "ftlReplication": "Slow motion replay of the shot."
+    }
+  ],
+  "observedPattern": "The editing pattern generally follows: (Live broadcast hook) -> Freeze frame with circles/arrows for setup/mistake -> Slow motion replay with arrows for action -> (Optional: another freeze frame with circles/arrows for further analysis) -> Slow motion replay of the payoff shot -> (Live broadcast commentary).",
+  "notesForAutomation": [
+    "Overlays (circles, arrows) are often introduced during freeze frames and sometimes persist into slow-motion replays.",
+    "Voiceover function directly correlates with the visual state and overlays, guiding the viewer's attention.",
+    "The primary edit moves are 'freeze' and 'slowdown' (replay), used to dissect specific moments.",
+    "The 'cameraOrCrop' is consistently 'full court' for these examples, allowing for broad tactical analysis."
+  ]
+}

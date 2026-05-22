@@ -26,6 +26,14 @@ Last updated: 2026-04-28 — based on review of all 8 celebration videos on the 
 
 ## Spine — How Every Winner Is Structured
 
+### Game footage update: clip-led first
+
+For game-based Celebration videos, use `research/clip-led-clark-celebration-playbook.md` as the operating spine.
+
+The video is not a recap of whether Indiana won or lost. It is a positive breakdown of Caitlin Clark's best plays. If Clark performs great, the video is viable. The structure is footage first: play on screen → defensive mistake → Clark read → Clark punishment → reaction/payoff → next play.
+
+This lets FTL cover wins, strong losses, archived games, and offseason compilations without depending on the final score.
+
 ### 1. Cold open with a clip line, not a thesis
 Game-call audio, a quote, an ad line. Never "Today we're talking about…"
 

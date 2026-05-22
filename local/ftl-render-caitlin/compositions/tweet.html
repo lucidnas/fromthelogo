@@ -1,0 +1,63 @@
+<!--
+  FTL Tweet Card — X/Twitter dark mode style
+-->
+<div id="tweet" data-composition-id="tweet"
+     data-start="0" data-duration="6" data-width="1920" data-height="1080">
+
+  <style>
+    #tw-bg { position: absolute; inset: 0; background: #000; }
+    #tw-card {
+      position: absolute;
+      width: 860px;
+      background: #16181c;
+      border-radius: 20px;
+      padding: 36px 40px;
+      box-shadow: 0 0 100px rgba(0,0,0,0.9);
+      opacity: 0;
+    }
+    #tw-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    #tw-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, #1d9bf0, #0a4f8a);
+      flex-shrink: 0;
+    }
+    #tw-name { font-size: 20px; font-weight: 700; color: #e7e9ea; font-family: system-ui; }
+    #tw-handle { font-size: 17px; color: #71767b; font-family: system-ui; }
+    #tw-x { margin-left: auto; font-size: 26px; color: #e7e9ea; }
+    #tw-body {
+      font-size: 30px; color: #e7e9ea; line-height: 1.55;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    #tw-footer {
+      margin-top: 20px; padding-top: 20px;
+      border-top: 1px solid #2f3336;
+      font-size: 16px; color: #71767b;
+      font-family: system-ui;
+    }
+  </style>
+
+  <div id="tw-bg" class="clip" data-start="0" data-duration="6" data-track-index="0"></div>
+  <div id="tw-wrap" class="clip" data-start="0" data-duration="6" data-track-index="1"
+       style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+  <div id="tw-card">
+    <div id="tw-header">
+      <div id="tw-avatar"></div>
+      <div>
+        <div id="tw-name">Reporter</div>
+        <div id="tw-handle">@reporter</div>
+      </div>
+      <div id="tw-x">𝕏</div>
+    </div>
+    <div id="tw-body">"She shouldn't be getting these calls. It's embarrassing."</div>
+    <div id="tw-footer">🔁 2.4K &nbsp;&nbsp; ❤️ 18.7K</div>
+  </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    window.__timelines = window.__timelines || {};
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#tw-card", { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 0);
+    window.__timelines["tweet"] = tl;
+  </script>
+</div>

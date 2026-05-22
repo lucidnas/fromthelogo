@@ -1,0 +1,54 @@
+{
+  "account": "IndianaFever",
+  "mode": "timeline",
+  "query": "",
+  "matchAny": [
+    "caitlin clark",
+    "clark",
+    "cc",
+    "washington",
+    "triple",
+    "three",
+    "dime",
+    "assist",
+    "ot"
+  ],
+  "discoveryUrl": "https://nitter.tiekoetter.com/IndianaFever",
+  "found": [
+    {
+      "username": "IndianaFever",
+      "statusId": "2055692642130739650",
+      "xUrl": "https://x.com/IndianaFever/status/2055692642130739650/video/1",
+      "text": "all 7⃣ Caitlin Clark triples against Washington. it's the third time she’s hit a career-high seven threes in a game.",
+      "date": "May 16, 2026 · 4:51 PM UTC"
+    },
+    {
+      "username": "IndianaFever",
+      "statusId": "2055646637058314608",
+      "xUrl": "https://x.com/IndianaFever/status/2055646637058314608/video/1",
+      "text": "the triple to tie it and send us to OT. Caitlin Clark’s seven threes last night ties a career high in a game, the third time she's done it.",
+      "date": "May 16, 2026 · 1:48 PM UTC"
+    },
+    {
+      "username": "IndianaFever",
+      "statusId": "2055473737516847314",
+      "xUrl": "https://x.com/IndianaFever/status/2055473737516847314/video/1",
+      "text": "Caitlin Clark tonight vs. Washington.",
+      "date": "May 16, 2026 · 2:21 AM UTC"
+    },
+    {
+      "username": "IndianaFever",
+      "statusId": "2055468193372627183",
+      "xUrl": "https://x.com/IndianaFever/status/2055468193372627183/video/1",
+      "text": "OT KELZ 😮‍💨 a huge triple from Kelsey Mitchell in the extra frame.",
+      "date": "May 16, 2026 · 1:59 AM UTC"
+    },
+    {
+      "username": "IndianaFever",
+      "statusId": "2055466984842674251",
+      "xUrl": "https://x.com/IndianaFever/status/2055466984842674251/video/1",
+      "text": "ARE YOU NOT ENTERTAINED 🥶",
+      "date": "May 16, 2026 · 1:54 AM UTC"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+# fever-storm-2026-05-17
+# Game/source clip list.
+# Format: type | account | URL
+
+# Nitter discovery: IndianaFever | timeline | match-any: caitlin clark, clark, cc, seattle, storm, three, triple, dime, assist, bucket, logo | 2026-05-18T02:41:34.901Z
+official | IndianaFever | https://x.com/IndianaFever/status/2056115242577375344/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056114475132969256/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056113152824066110/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056112265066086757/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056110803892199856/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056104327505133707/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2055755170286375356/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2055692642130739650/video/1
+
+# Nitter discovery: WNBA | timeline | match-any: caitlin clark, clark, cc, seattle, storm, three, triple, dime, assist, bucket, logo | 2026-05-18T02:41:36.083Z
+official | WNBA | https://x.com/WNBA/status/2056201167433089259/video/1
+official | WNBA | https://x.com/WNBA/status/2056190586470723729/video/1
+official | WNBA | https://x.com/WNBA/status/2056190344585257137/video/1
+official | WNBA | https://x.com/WNBA/status/2056179978824208759/video/1
+official | WNBA | https://x.com/WNBA/status/2056178606850609625/video/1
+official | WNBA | https://x.com/WNBA/status/2056177868611141678/video/1
+
+# Nitter discovery: seattlestorm | timeline | match-any: caitlin clark, clark, cc, seattle, storm, three, triple, dime, assist, bucket, logo | 2026-05-18T02:41:37.292Z
+official | seattlestorm | https://x.com/seattlestorm/status/2056149139625283656/video/1
+official | seattlestorm | https://x.com/seattlestorm/status/2056116957024280863/video/1
+
+# Manual seed URLs, 2026-05-18T02:42:45.712Z
+seed | manual | https://www.youtube.com/watch?v=u_ev7-QG1SE
+seed | manual | https://www.youtube.com/watch?v=QzjRG8ovFLo
+seed | manual | https://www.youtube.com/watch?v=rtL-9M6iStQ
+seed | manual | https://www.youtube.com/watch?v=hFIojc86JBo
+
+# Nitter discovery: IndianaFever | timeline | match-any: caitlin clark, clark, cc, seattle, storm, three, triple, dime, assist, bucket, logo | 2026-05-18T02:42:46.356Z
+official | IndianaFever | https://x.com/IndianaFever/status/2056190584746881415/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056181353561944443/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056175089607983391/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056174234515263659/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056165514460700753/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056163851545063868/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2056161316167938319/video/1
+
+# Nitter discovery: IndianaFever | timeline | match-any: caitlin clark, clark, cc, seattle, storm, assist, dime, three, triple, highlights | 2026-05-21T06:22:01.817Z
+official | IndianaFever | https://x.com/IndianaFever/status/2057269028561830022/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2057263282088493505/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2057260890194419946/video/1

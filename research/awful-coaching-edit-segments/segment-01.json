@@ -1,0 +1,213 @@
+{
+  "segmentStartSecs": 60,
+  "segmentSummary": "The segment analyzes three basketball plays, each starting with a live broadcast, followed by freeze frames with overlays and slow-motion replays to detail Caitlin Clark's strategic movements and the defensive errors, concluding with the live shot.",
+  "events": [
+    {
+      "startSecs": 0.0,
+      "endSecs": 2.5,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "none visible",
+      "voFunction": "hook",
+      "editMove": "cut",
+      "retentionPurpose": "introduce the play and the general defensive challenge"
+    },
+    {
+      "startSecs": 2.5,
+      "endSecs": 5.5,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "light blue circle around Caitlin Clark, light blue arrow showing her path",
+      "voFunction": "explains Clark read",
+      "editMove": "freeze",
+      "retentionPurpose": "highlight Caitlin Clark's initial movement and positioning"
+    },
+    {
+      "startSecs": 5.5,
+      "endSecs": 8.5,
+      "visualState": "replay",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains mistake",
+      "editMove": "slowdown",
+      "retentionPurpose": "show the play unfolding in slow motion, emphasizing defensive lapse"
+    },
+    {
+      "startSecs": 8.5,
+      "endSecs": 12.0,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "light blue circle around two defenders, light blue arrow showing ball movement",
+      "voFunction": "explains mistake",
+      "editMove": "freeze",
+      "retentionPurpose": "pinpoint the confused positioning of the defenders"
+    },
+    {
+      "startSecs": 12.0,
+      "endSecs": 14.0,
+      "visualState": "replay",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains Clark read",
+      "editMove": "slowdown",
+      "retentionPurpose": "show Caitlin Clark continuing to trail the play"
+    },
+    {
+      "startSecs": 14.0,
+      "endSecs": 16.5,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "two light blue circles around two defenders",
+      "voFunction": "explains mistake",
+      "editMove": "freeze",
+      "retentionPurpose": "reiterate the defenders' poor positioning in the paint"
+    },
+    {
+      "startSecs": 16.5,
+      "endSecs": 19.5,
+      "visualState": "replay",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains Clark read",
+      "editMove": "slowdown",
+      "retentionPurpose": "show Caitlin Clark getting into open shooting position"
+    },
+    {
+      "startSecs": 19.5,
+      "endSecs": 22.5,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "none visible",
+      "voFunction": "payoff",
+      "editMove": "none visible",
+      "retentionPurpose": "show the successful outcome of the play (the shot)"
+    },
+    {
+      "startSecs": 22.5,
+      "endSecs": 23.5,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "none visible",
+      "voFunction": "hook",
+      "editMove": "cut",
+      "retentionPurpose": "transition to the next play analysis"
+    },
+    {
+      "startSecs": 23.5,
+      "endSecs": 26.5,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "light blue circle around Caitlin Clark and defender, light blue arrow showing her path",
+      "voFunction": "explains Clark read",
+      "editMove": "freeze",
+      "retentionPurpose": "highlight Caitlin Clark's setup move against the defender"
+    },
+    {
+      "startSecs": 26.5,
+      "endSecs": 29.5,
+      "visualState": "replay",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains Clark read",
+      "editMove": "slowdown",
+      "retentionPurpose": "show the initial movement of Caitlin Clark"
+    },
+    {
+      "startSecs": 29.5,
+      "endSecs": 32.5,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "light blue circle around Caitlin Clark and defender, light blue arrow showing fake movement",
+      "voFunction": "explains Clark read",
+      "editMove": "freeze",
+      "retentionPurpose": "emphasize the deceptive fake move by Caitlin Clark"
+    },
+    {
+      "startSecs": 32.5,
+      "endSecs": 36.5,
+      "visualState": "replay",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains mistake",
+      "editMove": "slowdown",
+      "retentionPurpose": "show the defender reacting to the fake move"
+    },
+    {
+      "startSecs": 36.5,
+      "endSecs": 40.5,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "light blue circle around Caitlin Clark and defender, light blue arrow showing fake movement",
+      "voFunction": "explains Clark read",
+      "editMove": "freeze",
+      "retentionPurpose": "reinforce the fake and the defender's misdirection"
+    },
+    {
+      "startSecs": 40.5,
+      "endSecs": 43.5,
+      "visualState": "replay",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains Clark read",
+      "editMove": "slowdown",
+      "retentionPurpose": "show Caitlin Clark moving off the screen for the shot"
+    },
+    {
+      "startSecs": 43.5,
+      "endSecs": 46.5,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "light blue circle around Caitlin Clark and defender, light blue arrow showing movement",
+      "voFunction": "payoff",
+      "editMove": "freeze",
+      "retentionPurpose": "highlight the open catch-and-shoot opportunity"
+    },
+    {
+      "startSecs": 46.5,
+      "endSecs": 48.5,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "none visible",
+      "voFunction": "payoff",
+      "editMove": "none visible",
+      "retentionPurpose": "show the successful outcome of the play (the shot)"
+    },
+    {
+      "startSecs": 48.5,
+      "endSecs": 51.5,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "none visible",
+      "voFunction": "hook",
+      "editMove": "cut",
+      "retentionPurpose": "transition to the final play analysis with a general statement"
+    },
+    {
+      "startSecs": 51.5,
+      "endSecs": 54.0,
+      "visualState": "freeze/hold",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "light blue circle around Caitlin Clark",
+      "voFunction": "explains Clark read",
+      "editMove": "freeze",
+      "retentionPurpose": "highlight Caitlin Clark's awareness and quickness in transition"
+    },
+    {
+      "startSecs": 54.0,
+      "endSecs": 59.0,
+      "visualState": "replay",
+      "cameraOrCrop": "full court, scoreboard visible",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains Clark read",
+      "editMove": "slowdown",
+      "retentionPurpose": "show Caitlin Clark quickly advancing the ball up the court"
+    }
+  ],
+  "observedPattern": "The editing follows a consistent pattern for each play: 1. A brief live broadcast introduces the play or transitions between plays. 2. A freeze frame with light blue circles and arrows highlights specific players or movements being discussed by the voiceover. 3. A slow-motion replay shows the highlighted action unfolding. This freeze-and-slow-motion sequence may repeat to detail different aspects of the same play. 4. The segment concludes with a live broadcast of the final action (usually the shot) as the 'payoff'.",
+  "notesForAutomation": [
+    "Overlays (circles, arrows) are exclusively used during freeze frames and are consistently light blue.",
+    "The camera perspective remains full court with the scoreboard visible throughout the segment.",
+    "The 'editMove' is 'cut' for initial play introductions, 'freeze' for detailed analysis with overlays, and 'slowdown' for showing action in detail.",
+    "Voiceover functions 'hook' and 'payoff' typically align with live broadcast segments, while 'explains Clark read' and 'explains mistake' align with freeze frames and slow-motion replays."
+  ]
+}

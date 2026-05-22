@@ -1,0 +1,179 @@
+{
+  "segmentStartSecs": 180,
+  "segmentSummary": "The segment features a commentator analyzing multiple basketball plays from a full-court perspective, using graphic overlays like arrows and circles to highlight player movements and defensive strategies.",
+  "events": [
+    {
+      "startSecs": 180,
+      "endSecs": 182,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "blue arrow pointing from player to lane",
+      "voFunction": "explains play",
+      "editMove": "hold",
+      "retentionPurpose": "highlights initial player movement",
+      "ftlReplication": "Show full court game footage with scoreboard and commentator PiP. Add blue arrow overlay indicating player drive."
+    },
+    {
+      "startSecs": 182,
+      "endSecs": 186,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains play",
+      "editMove": "hold",
+      "retentionPurpose": "shows the setup for the step-back jumper",
+      "ftlReplication": "Continue full court game footage. Remove arrow overlay."
+    },
+    {
+      "startSecs": 186,
+      "endSecs": 187,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "none visible",
+      "voFunction": "payoff",
+      "editMove": "hold",
+      "retentionPurpose": "shows the successful shot",
+      "ftlReplication": "Continue full court game footage, showing shot completion."
+    },
+    {
+      "startSecs": 187,
+      "endSecs": 189,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "none visible",
+      "voFunction": "hook",
+      "editMove": "hold",
+      "retentionPurpose": "introduces the next play for analysis",
+      "ftlReplication": "Cut to next full court game footage. No overlays."
+    },
+    {
+      "startSecs": 189,
+      "endSecs": 193,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains mistake",
+      "editMove": "hold",
+      "retentionPurpose": "highlights defensive error in screen coverage",
+      "ftlReplication": "Continue full court game footage. No overlays."
+    },
+    {
+      "startSecs": 193,
+      "endSecs": 199,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains mistake",
+      "editMove": "hold",
+      "retentionPurpose": "emphasizes the consequence of poor screen defense",
+      "ftlReplication": "Continue full court game footage. No overlays."
+    },
+    {
+      "startSecs": 199,
+      "endSecs": 204,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "blue arrow pointing from player to screen",
+      "voFunction": "explains mistake",
+      "editMove": "hold",
+      "retentionPurpose": "visually points out the defensive misstep",
+      "ftlReplication": "Continue full court game footage. Add blue arrow overlay showing player movement around screen."
+    },
+    {
+      "startSecs": 204,
+      "endSecs": 208,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "none visible",
+      "voFunction": "payoff",
+      "editMove": "hold",
+      "retentionPurpose": "shows the successful three-point shot as a result of the mistake",
+      "ftlReplication": "Continue full court game footage, showing shot completion. Remove arrow overlay."
+    },
+    {
+      "startSecs": 208,
+      "endSecs": 210,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "none visible",
+      "voFunction": "hook",
+      "editMove": "hold",
+      "retentionPurpose": "introduces the next play for analysis",
+      "ftlReplication": "Cut to next full court game footage. No overlays."
+    },
+    {
+      "startSecs": 210,
+      "endSecs": 215,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "blue arrow pointing from player to basket",
+      "voFunction": "explains Clark read",
+      "editMove": "hold",
+      "retentionPurpose": "highlights the initial movement and read of the pick-and-roll",
+      "ftlReplication": "Continue full court game footage. Add blue arrow overlay showing player movement."
+    },
+    {
+      "startSecs": 215,
+      "endSecs": 220,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "blue circle around two defenders",
+      "voFunction": "points at defender",
+      "editMove": "hold",
+      "retentionPurpose": "draws attention to the defensive positioning and help-side",
+      "ftlReplication": "Continue full court game footage. Remove arrow. Add blue circle overlay around defenders."
+    },
+    {
+      "startSecs": 220,
+      "endSecs": 225,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains Clark read",
+      "editMove": "hold",
+      "retentionPurpose": "explains the precision required for the pass",
+      "ftlReplication": "Continue full court game footage. Remove circle overlay."
+    },
+    {
+      "startSecs": 225,
+      "endSecs": 230,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "none visible",
+      "voFunction": "explains Clark read",
+      "editMove": "hold",
+      "retentionPurpose": "further details the passing angle and timing",
+      "ftlReplication": "Continue full court game footage. No overlays."
+    },
+    {
+      "startSecs": 230,
+      "endSecs": 235,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "blue arrow pointing from player to basket",
+      "voFunction": "payoff",
+      "editMove": "hold",
+      "retentionPurpose": "shows the perfect pass and easy layup",
+      "ftlReplication": "Continue full court game footage. Add blue arrow overlay showing pass trajectory. Show layup completion."
+    },
+    {
+      "startSecs": 235,
+      "endSecs": 238,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible, commentator picture-in-picture",
+      "visibleOverlays": "blue circle around two defenders",
+      "voFunction": "hook",
+      "editMove": "hold",
+      "retentionPurpose": "introduces the next play for analysis",
+      "ftlReplication": "Cut to next full court game footage. Add blue circle overlay around defenders."
+    }
+  ],
+  "observedPattern": "The pattern involves showing a basketball play, often with a commentator's voiceover explaining the action, followed by the introduction of graphic overlays (arrows or circles) to emphasize specific player movements or defensive positions, and then the removal of these overlays as the play concludes or the focus shifts.",
+  "notesForAutomation": [
+    "Maintain full court view with scoreboard and commentator picture-in-picture throughout analysis segments.",
+    "Synchronize graphic overlay appearance/disappearance with commentator's verbal cues.",
+    "Use blue arrows to indicate player movement paths or passing lanes.",
+    "Use blue circles to highlight specific players or defensive groupings.",
+    "Ensure overlays are transient, appearing only when relevant to the current voiceover explanation."
+  ]
+}

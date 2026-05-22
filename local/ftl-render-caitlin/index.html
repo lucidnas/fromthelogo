@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+
+      /* B-roll */
+      .broll-video { width: 100%; height: 100%; object-fit: cover; transform-origin: center center; }
+      .edl-video { will-change: transform; }
+      .edl-overlay { position: absolute; left: 56px; top: 50px; width: 900px; opacity: 0; pointer-events: none; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; z-index: 20; }
+      .edl-kicker { display: inline-block; background: #c8102e; color: #fff; font-size: 18px; font-weight: 900; letter-spacing: 0.08em; padding: 8px 14px; border-radius: 4px; margin-bottom: 10px; box-shadow: 0 10px 26px rgba(0,0,0,0.45); }
+      .edl-title { display: block; width: fit-content; max-width: 900px; background: rgba(1,11,31,0.82); color: #ffe000; font-size: 46px; font-weight: 950; line-height: 1.02; letter-spacing: 0; padding: 14px 18px 16px; border-left: 7px solid #ffe000; text-transform: uppercase; box-shadow: 0 18px 42px rgba(0,0,0,0.5); }
+      .edl-stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; max-width: 1120px; }
+      .edl-stack span { display: inline-block; background: rgba(255,255,255,0.92); color: #010b1f; font-size: 24px; font-weight: 900; letter-spacing: 0; padding: 8px 12px; border-radius: 4px; box-shadow: 0 10px 22px rgba(0,0,0,0.32); }
+      .montage-overlay { left: 48px; top: auto; bottom: 62px; }
+      .montage-overlay .edl-kicker { background: #010b1f; color: #fff; }
+      .montage-overlay .edl-title { font-size: 54px; background: rgba(200,16,46,0.9); color: #fff; border-left-color: #ffe000; }
+
+      /* ── FTL Palette: Indiana Fever (gold #ffe000, red #c8102e, navy #010b1f) ── */
+
+      /* Stat card */
+      .stat-bg { position: absolute; inset: 0; background: linear-gradient(160deg, #010b1f 0%, #021530 100%); }
+      /* Gold accent bar — swept in via scaleX in GSAP */
+      .stat-accent { width: 100px; height: 6px; background: #ffe000; border-radius: 3px; transform-origin: left center; transform: scaleX(0); margin-bottom: 36px; }
+      /* Content zone — flex, left-anchored, proper padding */
+      .stat-content { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 0 200px; box-sizing: border-box; }
+      .stat-number { font-size: 148px; font-weight: 900; color: #fff; letter-spacing: -5px; font-family: system-ui; line-height: 1; opacity: 0; margin-bottom: 28px; }
+      .stat-label { font-size: 32px; font-weight: 700; color: #ffe000; letter-spacing: 0.14em; text-transform: uppercase; font-family: system-ui; opacity: 0; }
+      .stat-bar-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #c8102e 0%, #ffe000 50%, #002d62 100%); }
+
+      /* Headline */
+      /* Content zone — flex, left-anchored */
+      .hl-content { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 0 200px 0 160px; box-sizing: border-box; }
+      .hl-source { display: inline-block; background: #c8102e; color: #fff; font-size: 20px; font-weight: 800; letter-spacing: 0.1em; padding: 8px 24px; border-radius: 4px; text-transform: uppercase; font-family: system-ui; opacity: 0; margin-bottom: 28px; }
+      .hl-text { font-size: 68px; font-weight: 800; color: #fff; line-height: 1.18; letter-spacing: -1px; font-family: system-ui; opacity: 0; max-width: 1400px; margin-bottom: 40px; }
+      .hl-line { height: 4px; width: 0; background: linear-gradient(90deg, #c8102e 0%, #ffe000 60%, transparent 100%); border-radius: 2px; max-width: 1400px; }
+      .hl-panel { position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: linear-gradient(180deg, #c8102e 0%, #ffe000 100%); }
+      .hl-bar-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #c8102e 0%, #ffe000 50%, #002d62 100%); }
+
+      /* Tweet */
+      .tweet-card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 860px; background: #16181c; border-radius: 20px; padding: 36px 40px; box-shadow: 0 0 100px rgba(0,0,0,0.9); }
+      .tweet-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+      .tweet-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #1d9bf0, #0a4f8a); flex-shrink: 0; }
+      .tweet-name { font-size: 20px; font-weight: 700; color: #e7e9ea; font-family: system-ui; }
+      .tweet-x { margin-left: auto; font-size: 26px; color: #e7e9ea; }
+      .tweet-body { font-size: 30px; color: #e7e9ea; line-height: 1.55; font-family: system-ui; }
+      .tweet-footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #2f3336; font-size: 16px; color: #71767b; font-family: system-ui; }
+    </style>
+  </head>
+  <body>
+    <div id="root"
+         data-composition-id="ftl-caitlin-clark-1000-wnba-point-genius"
+         data-start="0"
+         data-duration="486.569"
+         data-width="1920"
+         data-height="1080">
+
+      <!-- VO Audio -->
+      <audio id="vo-audio" class="clip" src="assets/vo.mp3"
+             data-start="0" data-duration="486.569" data-track-index="0"></audio>
+
+      
+    <!-- EDL clip 0: Cold open: Clark beats buzzer for 1,000 -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-0" class="clip broll-video edl-video"
+             data-start="0.000" data-duration="5.680" data-track-index="1"
+             data-volume="0"
+             
+             src="assets/edl-0-thousand-live-official.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-0" class="clip edl-overlay"
+         data-start="0.000" data-duration="5.680" data-track-index="1001">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">THE 1000TH POINT</div>
+      <div class="edl-stack"><span>FTL FILM ROOM</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 1: Run it back / milestone context -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-1" class="clip broll-video edl-video"
+             data-start="5.680" data-duration="12.720" data-track-index="2"
+             data-volume="0"
+             
+             src="assets/edl-1-thousand-replay-slow.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-1" class="clip edl-overlay"
+         data-start="5.680" data-duration="12.720" data-track-index="1002">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">RUN IT BACK</div>
+      <div class="edl-stack"><span>1,000 POINTS · 54 GAMES</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 2: Thesis: genius is setup -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-2" class="clip broll-video edl-video"
+             data-start="18.400" data-duration="6.520" data-track-index="3"
+             data-volume="0"
+             
+             src="assets/edl-2-thousand-replay-baseline.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-2" class="clip edl-overlay"
+         data-start="18.400" data-duration="6.520" data-track-index="1003">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">THE SETUP</div>
+      
+    </div>
+    </div>
+
+    <!-- EDL clip 3: Dallas has seen too many versions -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-3" class="clip broll-video edl-video"
+             data-start="24.920" data-duration="8.480" data-track-index="4"
+             data-volume="0"
+             
+             src="assets/edl-3-thousand-live-highlight.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-3" class="clip edl-overlay"
+         data-start="24.920" data-duration="8.480" data-track-index="1004">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">DALLAS HAS SEEN TOO MUCH</div>
+      
+    </div>
+    </div>
+
+    <!-- EDL split montage 4.0: DRIVE -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-4-0" class="clip broll-video edl-video montage-video"
+             data-start="33.400" data-duration="2.850" data-track-index="41"
+             data-volume="0"
+             src="assets/edl-4-0-first-layup-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      <div id="edl-overlay-4-0" class="clip edl-overlay montage-overlay"
+           data-start="33.400" data-duration="2.850" data-track-index="1041">
+        <div class="edl-kicker">RAPID READ</div>
+        <div class="edl-title">DRIVE</div>
+      </div>
+    </div>
+
+    <!-- EDL split montage 4.1: RANGE -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-4-1" class="clip broll-video edl-video montage-video"
+             data-start="36.250" data-duration="2.850" data-track-index="42"
+             data-volume="0"
+             src="assets/edl-4-1-first-three-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      <div id="edl-overlay-4-1" class="clip edl-overlay montage-overlay"
+           data-start="36.250" data-duration="2.850" data-track-index="1042">
+        <div class="edl-kicker">RAPID READ</div>
+        <div class="edl-title">RANGE</div>
+      </div>
+    </div>
+
+    <!-- EDL split montage 4.2: LOGO PRESSURE -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-4-2" class="clip broll-video edl-video montage-video"
+             data-start="39.100" data-duration="2.850" data-track-index="43"
+             data-volume="0"
+             src="assets/edl-4-2-twenty-nine-three-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      <div id="edl-overlay-4-2" class="clip edl-overlay montage-overlay"
+           data-start="39.100" data-duration="2.850" data-track-index="1043">
+        <div class="edl-kicker">RAPID READ</div>
+        <div class="edl-title">LOGO PRESSURE</div>
+      </div>
+    </div>
+
+    <!-- EDL split montage 4.3: PASS -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-4-3" class="clip broll-video edl-video montage-video"
+             data-start="41.950" data-duration="2.850" data-track-index="44"
+             data-volume="0"
+             src="assets/edl-4-3-boston-assist-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      <div id="edl-overlay-4-3" class="clip edl-overlay montage-overlay"
+           data-start="41.950" data-duration="2.850" data-track-index="1044">
+        <div class="edl-kicker">RAPID READ</div>
+        <div class="edl-title">PASS</div>
+      </div>
+    </div>
+
+    <!-- EDL clip 5: Simple thing Dallas cannot protect -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-5" class="clip broll-video edl-video"
+             data-start="45.080" data-duration="12.880" data-track-index="6"
+             data-volume="0"
+             
+             src="assets/edl-5-thousand-replay-slow.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-5" class="clip edl-overlay"
+         data-start="45.080" data-duration="12.880" data-track-index="1006">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">FOUR FEET</div>
+      <div class="edl-stack"><span>SIMPLE &gt; SPECTACULAR</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 6: First bucket setup -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-6" class="clip broll-video edl-video"
+             data-start="57.960" data-duration="9.960" data-track-index="7"
+             data-volume="0"
+             
+             src="assets/edl-6-first-layup-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-6" class="clip edl-overlay"
+         data-start="57.960" data-duration="9.960" data-track-index="1007">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">FIRST BUCKET - DOWNHILL</div>
+      
+    </div>
+    </div>
+
+    <!-- EDL clip 7: Not loud, just the clean lane -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-7" class="clip broll-video edl-video"
+             data-start="67.920" data-duration="8.400" data-track-index="8"
+             data-volume="0"
+             
+             src="assets/edl-7-first-layup-finish.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-7" class="clip edl-overlay"
+         data-start="67.920" data-duration="8.400" data-track-index="1008">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">CLEAN LANE</div>
+      
+    </div>
+    </div>
+
+    <!-- EDL clip 8: Why first bucket matters -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-8" class="clip broll-video edl-video"
+             data-start="76.320" data-duration="13.680" data-track-index="9"
+             data-volume="0"
+             
+             src="assets/edl-8-first-layup-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-8" class="clip edl-overlay"
+         data-start="76.320" data-duration="13.680" data-track-index="1009">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">DEFENSE LEANS HIGH</div>
+      
+    </div>
+    </div>
+
+    <!-- EDL clip 9: Guard ghost of logo / warning label -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-9" class="clip broll-video edl-video"
+             data-start="90.000" data-duration="14.920" data-track-index="10"
+             data-volume="0"
+             
+             src="assets/edl-9-first-layup-finish.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-9" class="clip edl-overlay"
+         data-start="90.000" data-duration="14.920" data-track-index="1010">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">WARNING LABEL</div>
+      
+    </div>
+    </div>
+
+    <!-- EDL clip 10: Coverage dilemma -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-10" class="clip broll-video edl-video"
+             data-start="104.920" data-duration="22.680" data-track-index="11"
+             data-volume="0"
+             
+             src="assets/edl-10-first-layup-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-10" class="clip edl-overlay"
+         data-start="104.920" data-duration="22.680" data-track-index="1011">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">BACK UP = JUMPER</div>
+      <div class="edl-stack"><span>CLIMB HIGH = LANE</span><span>HELP = PASS</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 11: Third quarter stakes / is she back? -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-11" class="clip broll-video edl-video"
+             data-start="127.600" data-duration="17.440" data-track-index="12"
+             data-volume="0"
+             
+             src="assets/edl-11-first-three-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-11" class="clip edl-overlay"
+         data-start="127.600" data-duration="17.440" data-track-index="1012">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">3RD QUARTER · INDIANA CHASING</div>
+      
+    </div>
+    </div>
+
+    <!-- EDL clip 12: 26-foot answer -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-12" class="clip broll-video edl-video"
+             data-start="145.040" data-duration="10.960" data-track-index="13"
+             data-volume="0"
+             
+             src="assets/edl-12-first-three-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-12" class="clip edl-overlay"
+         data-start="145.040" data-duration="10.960" data-track-index="1013">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">26 FEET</div>
+      <div class="edl-stack"><span>BANG</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 13: Geometry changes -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-13" class="clip broll-video edl-video"
+             data-start="156.000" data-duration="19.000" data-track-index="14"
+             data-volume="0"
+             
+             src="assets/edl-13-first-three-reaction.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-13" class="clip edl-overlay"
+         data-start="156.000" data-duration="19.000" data-track-index="1014">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">THE FLOOR GETS LONGER</div>
+      
+    </div>
+    </div>
+
+    <!-- EDL clip 14: 29-foot stretch -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-14" class="clip broll-video edl-video"
+             data-start="175.000" data-duration="11.000" data-track-index="15"
+             data-volume="0"
+             
+             src="assets/edl-14-twenty-nine-three-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-14" class="clip edl-overlay"
+         data-start="175.000" data-duration="11.000" data-track-index="1015">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">29 FEET</div>
+      
+    </div>
+    </div>
+
+    <!-- EDL clip 15: Stress and pickup point -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-15" class="clip broll-video edl-video"
+             data-start="186.000" data-duration="25.200" data-track-index="16"
+             data-volume="0"
+             
+             src="assets/edl-15-twenty-nine-three-extended.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-15" class="clip edl-overlay"
+         data-start="186.000" data-duration="25.200" data-track-index="1016">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">PICKUP POINT</div>
+      <div class="edl-stack"><span>HELP LEANS EARLY</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 16: Box score vs video damage -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-16" class="clip broll-video edl-video"
+             data-start="211.200" data-duration="16.640" data-track-index="17"
+             data-volume="0"
+             
+             src="assets/edl-16-twenty-nine-three-extended.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-16" class="clip edl-overlay"
+         data-start="211.200" data-duration="16.640" data-track-index="1017">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">BOX SCORE: 2 THREES</div>
+      <div class="edl-stack"><span>VIDEO: DEFENSE MOVES</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 17: Boston pass live -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-17" class="clip broll-video edl-video"
+             data-start="227.840" data-duration="10.680" data-track-index="18"
+             data-volume="0"
+             
+             src="assets/edl-17-boston-assist-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-17" class="clip edl-overlay"
+         data-start="227.840" data-duration="10.680" data-track-index="1018">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">CLARK + BOSTON</div>
+      
+    </div>
+    </div>
+
+    <!-- EDL clip 18: Replay gives real story -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-18" class="clip broll-video edl-video"
+             data-start="238.520" data-duration="10.880" data-track-index="19"
+             data-volume="0"
+             
+             src="assets/edl-18-boston-assist-replay.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-18" class="clip edl-overlay"
+         data-start="238.520" data-duration="10.880" data-track-index="1019">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">TWO DEFENDERS WATCH CLARK</div>
+      
+    </div>
+    </div>
+
+    <!-- EDL clip 19: Two-player problem -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-19" class="clip broll-video edl-video"
+             data-start="249.400" data-duration="24.080" data-track-index="20"
+             data-volume="0"
+             
+             src="assets/edl-19-boston-assist-replay-slow.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-19" class="clip edl-overlay"
+         data-start="249.400" data-duration="24.080" data-track-index="1020">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">BOSTON IS FREE</div>
+      <div class="edl-stack"><span>TWO-PLAYER PROBLEM</span><span>REAL CHEMISTRY</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 20: Milestone possession setup -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-20" class="clip broll-video edl-video"
+             data-start="273.480" data-duration="17.240" data-track-index="21"
+             data-volume="0"
+             
+             src="assets/edl-20-thousand-live-official.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-20" class="clip edl-overlay"
+         data-start="273.480" data-duration="17.240" data-track-index="1021">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">NOW THE MILESTONE MAKES SENSE</div>
+      
+    </div>
+    </div>
+
+    <!-- EDL clip 21: 17.6 seconds / 998 -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-21" class="clip broll-video edl-video"
+             data-start="290.720" data-duration="13.960" data-track-index="22"
+             data-volume="0"
+             
+             src="assets/edl-21-thousand-live-highlight.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-21" class="clip edl-overlay"
+         data-start="290.720" data-duration="13.960" data-track-index="1022">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">17.6 SECONDS</div>
+      <div class="edl-stack"><span>998 POINTS</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 22: Stars get loud / movie trailer version -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-22" class="clip broll-video edl-video"
+             data-start="304.680" data-duration="20.840" data-track-index="23"
+             data-volume="0"
+             
+             src="assets/edl-22-thousand-live-official.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-22" class="clip edl-overlay"
+         data-start="304.680" data-duration="20.840" data-track-index="1023">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">THE MOVIE TRAILER SHOT</div>
+      <div class="edl-stack"><span>NOT THE RIGHT PLAY</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 23: Mature thing: turn corner, spin, finish -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-23" class="clip broll-video edl-video"
+             data-start="325.520" data-duration="17.560" data-track-index="24"
+             data-volume="0"
+             
+             src="assets/edl-23-thousand-replay-baseline.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-23" class="clip edl-overlay"
+         data-start="325.520" data-duration="17.560" data-track-index="1024">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">RIGHT BASKETBALL PLAY</div>
+      <div class="edl-stack"><span>FOUR FEET</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 24: Refusing own logo -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-24" class="clip broll-video edl-video"
+             data-start="343.080" data-duration="16.920" data-track-index="25"
+             data-volume="0"
+             
+             src="assets/edl-24-thousand-replay-slow.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-24" class="clip edl-overlay"
+         data-start="343.080" data-duration="16.920" data-track-index="1025">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">SHE NEEDED THE BUCKET</div>
+      
+    </div>
+    </div>
+
+    <!-- EDL clip 25: Grown-up basketball / steal this decision -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-25" class="clip broll-video edl-video"
+             data-start="360.000" data-duration="14.880" data-track-index="26"
+             data-volume="0"
+             
+             src="assets/edl-25-thousand-replay-baseline.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-25" class="clip edl-overlay"
+         data-start="360.000" data-duration="14.880" data-track-index="1026">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">DECISION</div>
+      <div class="edl-stack"><span>PATIENCE</span><span>DISCIPLINE</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 26: Steph Curry comparison -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-26" class="clip broll-video edl-video"
+             data-start="374.880" data-duration="24.800" data-track-index="27"
+             data-volume="0"
+             
+             src="assets/edl-26-twenty-nine-three-extended.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-26" class="clip edl-overlay"
+         data-start="374.880" data-duration="24.800" data-track-index="1027">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">FEAR OF RANGE</div>
+      <div class="edl-stack"><span>CREATES EASY POINTS</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 27: Threat -&gt; lane -&gt; history -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-27" class="clip broll-video edl-video"
+             data-start="399.680" data-duration="7.640" data-track-index="28"
+             data-volume="0"
+             
+             src="assets/edl-27-thousand-replay-slow.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-27" class="clip edl-overlay"
+         data-start="399.680" data-duration="7.640" data-track-index="1028">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">THREAT</div>
+      <div class="edl-stack"><span>LANE</span><span>HISTORY</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 28: Not perfect night / loss context -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-28" class="clip broll-video edl-video"
+             data-start="407.320" data-duration="22.920" data-track-index="29"
+             data-volume="0"
+             
+             src="assets/edl-28-boston-assist-replay.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-28" class="clip edl-overlay"
+         data-start="407.320" data-duration="22.920" data-track-index="1029">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">NOT A PERFECT NIGHT</div>
+      <div class="edl-stack"><span>DAL 107 · IND 104</span></div>
+    </div>
+    </div>
+
+    <!-- EDL clip 29: Stat line and dangerous loss -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-29" class="clip broll-video edl-video"
+             data-start="430.240" data-duration="24.480" data-track-index="30"
+             data-volume="0"
+             
+             src="assets/edl-29-thousand-live-highlight.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-29" class="clip edl-overlay"
+         data-start="430.240" data-duration="24.480" data-track-index="1030">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">CLARK: 20 PTS · 7 AST · 5 REB</div>
+      <div class="edl-stack"><span>MITCHELL: 30</span><span>BOSTON: 23</span><span>DANGEROUS LOSS</span></div>
+    </div>
+    </div>
+
+    <!-- EDL split montage 30.0: DOWNHILL -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-30-0" class="clip broll-video edl-video montage-video"
+             data-start="454.720" data-duration="2.680" data-track-index="301"
+             data-volume="0"
+             src="assets/edl-30-0-first-layup-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      <div id="edl-overlay-30-0" class="clip edl-overlay montage-overlay"
+           data-start="454.720" data-duration="2.680" data-track-index="1301">
+        <div class="edl-kicker">RAPID READ</div>
+        <div class="edl-title">DOWNHILL</div>
+      </div>
+    </div>
+
+    <!-- EDL split montage 30.1: 26 FEET -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-30-1" class="clip broll-video edl-video montage-video"
+             data-start="457.400" data-duration="2.680" data-track-index="302"
+             data-volume="0"
+             src="assets/edl-30-1-first-three-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      <div id="edl-overlay-30-1" class="clip edl-overlay montage-overlay"
+           data-start="457.400" data-duration="2.680" data-track-index="1302">
+        <div class="edl-kicker">RAPID READ</div>
+        <div class="edl-title">26 FEET</div>
+      </div>
+    </div>
+
+    <!-- EDL split montage 30.2: 29 FEET -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-30-2" class="clip broll-video edl-video montage-video"
+             data-start="460.080" data-duration="2.680" data-track-index="303"
+             data-volume="0"
+             src="assets/edl-30-2-twenty-nine-three-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      <div id="edl-overlay-30-2" class="clip edl-overlay montage-overlay"
+           data-start="460.080" data-duration="2.680" data-track-index="1303">
+        <div class="edl-kicker">RAPID READ</div>
+        <div class="edl-title">29 FEET</div>
+      </div>
+    </div>
+
+    <!-- EDL split montage 30.3: BOSTON -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-30-3" class="clip broll-video edl-video montage-video"
+             data-start="462.760" data-duration="2.680" data-track-index="304"
+             data-volume="0"
+             src="assets/edl-30-3-boston-assist-live.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      <div id="edl-overlay-30-3" class="clip edl-overlay montage-overlay"
+           data-start="462.760" data-duration="2.680" data-track-index="1304">
+        <div class="edl-kicker">RAPID READ</div>
+        <div class="edl-title">BOSTON</div>
+      </div>
+    </div>
+
+    <!-- EDL split montage 30.4: FOUR FEET -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-30-4" class="clip broll-video edl-video montage-video"
+             data-start="465.440" data-duration="2.680" data-track-index="305"
+             data-volume="0"
+             src="assets/edl-30-4-thousand-replay-slow.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      <div id="edl-overlay-30-4" class="clip edl-overlay montage-overlay"
+           data-start="465.440" data-duration="2.680" data-track-index="1305">
+        <div class="edl-kicker">RAPID READ</div>
+        <div class="edl-title">FOUR FEET</div>
+      </div>
+    </div>
+
+    <!-- EDL clip 31: Final thesis and sign-off -->
+    <div style="position:absolute;inset:0;overflow:hidden;background:#000;">
+      <video id="edl-video-31" class="clip broll-video edl-video"
+             data-start="468.120" data-duration="17.920" data-track-index="32"
+             data-volume="0"
+             
+             src="assets/edl-31-thousand-replay-slow.mp4" muted playsinline
+             style="width:100%;height:100%;object-fit:cover;"></video>
+      
+    <div id="edl-overlay-31" class="clip edl-overlay"
+         data-start="468.120" data-duration="17.920" data-track-index="1032">
+      <div class="edl-kicker">FTL FILM ROOM</div>
+      <div class="edl-title">THE GENIUS WAS HOW SHE GOT IT</div>
+      <div class="edl-stack"><span>FROM THE LOGO</span></div>
+    </div>
+    </div>
+
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+  tl.fromTo("#edl-video-0", { scale: 1 }, { scale: 1.035, duration: 5.68, ease: "none" }, 0);
+  tl.fromTo("#edl-overlay-0", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 0.15);
+  tl.to("#edl-overlay-0", { opacity: 0, duration: 0.25, ease: "power2.in" }, 5.2299999999999995);
+  tl.fromTo("#edl-video-1", { scale: 1 }, { scale: 1.08, duration: 12.719999999999999, ease: "none" }, 5.68);
+  tl.fromTo("#edl-overlay-1", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 5.83);
+  tl.to("#edl-overlay-1", { opacity: 0, duration: 0.25, ease: "power2.in" }, 17.95);
+  tl.fromTo("#edl-video-2", { scale: 1 }, { scale: 1.035, duration: 6.520000000000003, ease: "none" }, 18.4);
+  tl.fromTo("#edl-overlay-2", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 18.549999999999997);
+  tl.to("#edl-overlay-2", { opacity: 0, duration: 0.25, ease: "power2.in" }, 24.470000000000002);
+  tl.fromTo("#edl-video-3", { scale: 1 }, { scale: 1.04, duration: 8.479999999999997, ease: "none" }, 24.92);
+  tl.fromTo("#edl-overlay-3", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 25.07);
+  tl.to("#edl-overlay-3", { opacity: 0, duration: 0.25, ease: "power2.in" }, 32.949999999999996);
+  tl.fromTo("#edl-video-4-0", { scale: 1.02 }, { scale: 1.09, duration: 2.8499999999999996, ease: "none" }, 33.4);
+  tl.fromTo("#edl-overlay-4-0", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 33.449999999999996);
+  tl.fromTo("#edl-video-4-1", { scale: 1.02 }, { scale: 1.09, duration: 2.8499999999999996, ease: "none" }, 36.25);
+  tl.fromTo("#edl-overlay-4-1", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 36.3);
+  tl.fromTo("#edl-video-4-2", { scale: 1.02 }, { scale: 1.09, duration: 2.8499999999999996, ease: "none" }, 39.099999999999994);
+  tl.fromTo("#edl-overlay-4-2", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 39.14999999999999);
+  tl.fromTo("#edl-video-4-3", { scale: 1.02 }, { scale: 1.09, duration: 2.8499999999999996, ease: "none" }, 41.949999999999996);
+  tl.fromTo("#edl-overlay-4-3", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 41.99999999999999);
+  tl.fromTo("#edl-video-5", { scale: 1 }, { scale: 1.035, duration: 12.880000000000003, ease: "none" }, 45.08);
+  tl.fromTo("#edl-overlay-5", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 45.23);
+  tl.to("#edl-overlay-5", { opacity: 0, duration: 0.25, ease: "power2.in" }, 57.51);
+  tl.fromTo("#edl-video-6", { scale: 1 }, { scale: 1.035, duration: 9.96, ease: "none" }, 57.96);
+  tl.fromTo("#edl-overlay-6", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 58.11);
+  tl.to("#edl-overlay-6", { opacity: 0, duration: 0.25, ease: "power2.in" }, 67.47);
+  tl.fromTo("#edl-video-7", { scale: 1 }, { scale: 1.12, duration: 8.399999999999991, ease: "none" }, 67.92);
+  tl.fromTo("#edl-overlay-7", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 68.07000000000001);
+  tl.to("#edl-overlay-7", { opacity: 0, duration: 0.25, ease: "power2.in" }, 75.86999999999999);
+  tl.fromTo("#edl-video-8", { scale: 1 }, { scale: 1.035, duration: 13.680000000000007, ease: "none" }, 76.32);
+  tl.fromTo("#edl-overlay-8", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 76.47);
+  tl.to("#edl-overlay-8", { opacity: 0, duration: 0.25, ease: "power2.in" }, 89.55);
+  tl.fromTo("#edl-video-9", { scale: 1 }, { scale: 1.035, duration: 14.920000000000002, ease: "none" }, 90);
+  tl.fromTo("#edl-overlay-9", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 90.15);
+  tl.to("#edl-overlay-9", { opacity: 0, duration: 0.25, ease: "power2.in" }, 104.47);
+  tl.fromTo("#edl-video-10", { scale: 1 }, { scale: 1.035, duration: 22.679999999999993, ease: "none" }, 104.92);
+  tl.fromTo("#edl-overlay-10", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 105.07000000000001);
+  tl.to("#edl-overlay-10", { opacity: 0, duration: 0.25, ease: "power2.in" }, 127.14999999999999);
+  tl.fromTo("#edl-video-11", { scale: 1 }, { scale: 1.035, duration: 17.439999999999998, ease: "none" }, 127.6);
+  tl.fromTo("#edl-overlay-11", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 127.75);
+  tl.to("#edl-overlay-11", { opacity: 0, duration: 0.25, ease: "power2.in" }, 144.59);
+  tl.fromTo("#edl-video-12", { scale: 1 }, { scale: 1.035, duration: 10.960000000000008, ease: "none" }, 145.04);
+  tl.fromTo("#edl-overlay-12", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 145.19);
+  tl.to("#edl-overlay-12", { opacity: 0, duration: 0.25, ease: "power2.in" }, 155.55);
+  tl.fromTo("#edl-video-13", { scale: 1 }, { scale: 1.035, duration: 19, ease: "none" }, 156);
+  tl.fromTo("#edl-overlay-13", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 156.15);
+  tl.to("#edl-overlay-13", { opacity: 0, duration: 0.25, ease: "power2.in" }, 174.55);
+  tl.fromTo("#edl-video-14", { scale: 1 }, { scale: 1.035, duration: 11, ease: "none" }, 175);
+  tl.fromTo("#edl-overlay-14", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 175.15);
+  tl.to("#edl-overlay-14", { opacity: 0, duration: 0.25, ease: "power2.in" }, 185.55);
+  tl.fromTo("#edl-video-15", { scale: 1 }, { scale: 1.035, duration: 25.19999999999999, ease: "none" }, 186);
+  tl.fromTo("#edl-overlay-15", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 186.15);
+  tl.to("#edl-overlay-15", { opacity: 0, duration: 0.25, ease: "power2.in" }, 210.75);
+  tl.fromTo("#edl-video-16", { scale: 1 }, { scale: 1.035, duration: 16.640000000000015, ease: "none" }, 211.2);
+  tl.fromTo("#edl-overlay-16", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 211.35);
+  tl.to("#edl-overlay-16", { opacity: 0, duration: 0.25, ease: "power2.in" }, 227.39000000000001);
+  tl.fromTo("#edl-video-17", { scale: 1 }, { scale: 1.035, duration: 10.680000000000007, ease: "none" }, 227.84);
+  tl.fromTo("#edl-overlay-17", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 227.99);
+  tl.to("#edl-overlay-17", { opacity: 0, duration: 0.25, ease: "power2.in" }, 238.07000000000002);
+  tl.fromTo("#edl-video-18", { scale: 1 }, { scale: 1.035, duration: 10.879999999999995, ease: "none" }, 238.52);
+  tl.fromTo("#edl-overlay-18", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 238.67000000000002);
+  tl.to("#edl-overlay-18", { opacity: 0, duration: 0.25, ease: "power2.in" }, 248.95000000000002);
+  tl.fromTo("#edl-video-19", { scale: 1 }, { scale: 1.035, duration: 24.080000000000013, ease: "none" }, 249.4);
+  tl.fromTo("#edl-overlay-19", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 249.55);
+  tl.to("#edl-overlay-19", { opacity: 0, duration: 0.25, ease: "power2.in" }, 273.03000000000003);
+  tl.fromTo("#edl-video-20", { scale: 1 }, { scale: 1.06, duration: 17.24000000000001, ease: "none" }, 273.48);
+  tl.fromTo("#edl-overlay-20", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 273.63);
+  tl.to("#edl-overlay-20", { opacity: 0, duration: 0.25, ease: "power2.in" }, 290.27000000000004);
+  tl.fromTo("#edl-video-21", { scale: 1 }, { scale: 1.035, duration: 13.95999999999998, ease: "none" }, 290.72);
+  tl.fromTo("#edl-overlay-21", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 290.87);
+  tl.to("#edl-overlay-21", { opacity: 0, duration: 0.25, ease: "power2.in" }, 304.23);
+  tl.fromTo("#edl-video-22", { scale: 1 }, { scale: 1.035, duration: 20.839999999999975, ease: "none" }, 304.68);
+  tl.fromTo("#edl-overlay-22", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 304.83);
+  tl.to("#edl-overlay-22", { opacity: 0, duration: 0.25, ease: "power2.in" }, 325.07);
+  tl.fromTo("#edl-video-23", { scale: 1 }, { scale: 1.035, duration: 17.560000000000002, ease: "none" }, 325.52);
+  tl.fromTo("#edl-overlay-23", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 325.66999999999996);
+  tl.to("#edl-overlay-23", { opacity: 0, duration: 0.25, ease: "power2.in" }, 342.63);
+  tl.fromTo("#edl-video-24", { scale: 1 }, { scale: 1.035, duration: 16.920000000000016, ease: "none" }, 343.08);
+  tl.fromTo("#edl-overlay-24", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 343.22999999999996);
+  tl.to("#edl-overlay-24", { opacity: 0, duration: 0.25, ease: "power2.in" }, 359.55);
+  tl.fromTo("#edl-video-25", { scale: 1 }, { scale: 1.035, duration: 14.879999999999995, ease: "none" }, 360);
+  tl.fromTo("#edl-overlay-25", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 360.15);
+  tl.to("#edl-overlay-25", { opacity: 0, duration: 0.25, ease: "power2.in" }, 374.43);
+  tl.fromTo("#edl-video-26", { scale: 1 }, { scale: 1.035, duration: 24.80000000000001, ease: "none" }, 374.88);
+  tl.fromTo("#edl-overlay-26", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 375.03);
+  tl.to("#edl-overlay-26", { opacity: 0, duration: 0.25, ease: "power2.in" }, 399.23);
+  tl.fromTo("#edl-video-27", { scale: 1 }, { scale: 1.035, duration: 7.639999999999986, ease: "none" }, 399.68);
+  tl.fromTo("#edl-overlay-27", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 399.83);
+  tl.to("#edl-overlay-27", { opacity: 0, duration: 0.25, ease: "power2.in" }, 406.87);
+  tl.fromTo("#edl-video-28", { scale: 1 }, { scale: 1.035, duration: 22.920000000000016, ease: "none" }, 407.32);
+  tl.fromTo("#edl-overlay-28", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 407.46999999999997);
+  tl.to("#edl-overlay-28", { opacity: 0, duration: 0.25, ease: "power2.in" }, 429.79);
+  tl.fromTo("#edl-video-29", { scale: 1 }, { scale: 1.035, duration: 24.480000000000018, ease: "none" }, 430.24);
+  tl.fromTo("#edl-overlay-29", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 430.39);
+  tl.to("#edl-overlay-29", { opacity: 0, duration: 0.25, ease: "power2.in" }, 454.27000000000004);
+  tl.fromTo("#edl-video-30-0", { scale: 1.02 }, { scale: 1.09, duration: 2.6799999999999953, ease: "none" }, 454.72);
+  tl.fromTo("#edl-overlay-30-0", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 454.77000000000004);
+  tl.fromTo("#edl-video-30-1", { scale: 1.02 }, { scale: 1.09, duration: 2.6799999999999953, ease: "none" }, 457.40000000000003);
+  tl.fromTo("#edl-overlay-30-1", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 457.45000000000005);
+  tl.fromTo("#edl-video-30-2", { scale: 1.02 }, { scale: 1.09, duration: 2.6799999999999953, ease: "none" }, 460.08000000000004);
+  tl.fromTo("#edl-overlay-30-2", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 460.13000000000005);
+  tl.fromTo("#edl-video-30-3", { scale: 1.02 }, { scale: 1.09, duration: 2.6799999999999953, ease: "none" }, 462.76);
+  tl.fromTo("#edl-overlay-30-3", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 462.81);
+  tl.fromTo("#edl-video-30-4", { scale: 1.02 }, { scale: 1.09, duration: 2.6799999999999953, ease: "none" }, 465.44);
+  tl.fromTo("#edl-overlay-30-4", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.12, ease: "power2.out" }, 465.49);
+  tl.fromTo("#edl-video-31", { scale: 1 }, { scale: 1.035, duration: 17.920000000000016, ease: "none" }, 468.12);
+  tl.fromTo("#edl-overlay-31", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.22, ease: "power2.out" }, 468.27);
+  tl.to("#edl-overlay-31", { opacity: 0, duration: 0.25, ease: "power2.in" }, 485.59000000000003);
+
+      window.__timelines["ftl-caitlin-clark-1000-wnba-point-genius"] = tl;
+    </script>
+  </body>
+</html>

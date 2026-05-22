@@ -1,0 +1,46 @@
+{
+  "account": "nosyone4",
+  "mode": "timeline",
+  "query": "",
+  "matchAny": [
+    "caitlin clark",
+    "clark",
+    "cc",
+    "seattle",
+    "storm",
+    "fever",
+    "finger",
+    "wag",
+    "hiedeman",
+    "mutombo",
+    "troll",
+    "assist",
+    "three",
+    "bucket",
+    "dime"
+  ],
+  "discoveryUrl": "https://nitter.tiekoetter.com/nosyone4",
+  "found": [
+    {
+      "username": "FeverStats",
+      "statusId": "2056881382207389988",
+      "xUrl": "https://x.com/FeverStats/status/2056881382207389988/video/1",
+      "text": "Caitlin Clark is the only player this season that ranks top 5 in both PPG & APG.",
+      "date": "May 19, 2026 · 11:35 PM UTC"
+    },
+    {
+      "username": "PostMovesShow",
+      "statusId": "2056833391429881920",
+      "xUrl": "https://x.com/PostMovesShow/status/2056833391429881920/video/1",
+      "text": "Toes will get the views up 🤣 @CaitlinClark22 joins @aa_boston and @Candace_Parker on the latest episode! Drops TOMORROW, 8am PT/11am ET!",
+      "date": "May 19, 2026 · 8:24 PM UTC"
+    },
+    {
+      "username": "wrldofastargrl",
+      "statusId": "2056775628049854823",
+      "xUrl": "https://x.com/wrldofastargrl/status/2056775628049854823/video/1",
+      "text": "Lmfaoooo I’m crying MHA don’t know CC be listening to lil baby/meek mill/bossman dlow and shit 😭😭😭😭😭😭",
+      "date": "May 19, 2026 · 4:34 PM UTC"
+    }
+  ]
+}

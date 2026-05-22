@@ -1,0 +1,151 @@
+<!--
+  FTL Headline Card — ESPN-style broadcast headline
+  Design reference: DESIGN.md
+  Indiana Fever brand palette: navy bg, gold accent, red badge
+
+  Data:
+    hl-source: outlet/speaker name  e.g. "ESPN" or "COACH STEPHANIE WHITE"
+    hl-text:   headline text        e.g. ""She has game pace, game timing...""
+-->
+<div id="headline" data-composition-id="headline"
+     data-start="0" data-duration="6" data-width="1920" data-height="1080">
+
+  <style>
+    /* ── Palette (from DESIGN.md) ──────────────────────────────────────────── */
+    #headline {
+      --bg-deep:  #010b1f;
+      --gold:     #ffe000;
+      --red:      #c8102e;
+      --navy:     #002d62;
+      --fg:       #ffffff;
+      --fg-muted: #9aadca;
+    }
+
+    /* ── Background ─────────────────────────────────────────────────────────── */
+    #hl-bg {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-deep);
+    }
+
+    /* Left edge panel — visual anchor */
+    #hl-panel {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 8px;
+      background: linear-gradient(180deg, var(--red) 0%, var(--gold) 100%);
+    }
+
+    /* Ghost word — structural depth */
+    #hl-ghost {
+      position: absolute;
+      bottom: -80px; right: -20px;
+      font-size: 440px;
+      font-weight: 900;
+      color: rgba(255,199,44,0.03);
+      font-family: system-ui, -apple-system, sans-serif;
+      letter-spacing: -18px;
+      line-height: 1;
+      user-select: none;
+    }
+
+    /* ── Content zone — flex, not absolute coords ──────────────────────────── */
+    #hl-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0 200px 0 160px;
+      box-sizing: border-box;
+    }
+
+    /* Source badge — red pill, broadcast style */
+    #hl-source {
+      display: inline-block;
+      background: var(--red);
+      color: #fff;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 8px 24px;
+      border-radius: 4px;
+      margin-bottom: 28px;
+      opacity: 0;
+    }
+
+    /* Headline text — large, left-anchored */
+    #hl-text {
+      font-size: 68px;
+      font-weight: 800;
+      color: var(--fg);
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.18;
+      letter-spacing: -1px;
+      max-width: 1400px;
+      opacity: 0;
+      margin-bottom: 40px;
+    }
+
+    /* Structural rule — sweeps across */
+    #hl-rule {
+      height: 4px;
+      width: 0;
+      background: linear-gradient(90deg, var(--red) 0%, var(--gold) 60%, transparent 100%);
+      border-radius: 2px;
+      max-width: 1400px;
+    }
+
+    /* Bottom stripe */
+    #hl-stripe {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--red) 0%, var(--gold) 50%, var(--navy) 100%);
+    }
+  </style>
+
+  <!-- Layer 0: background -->
+  <div id="hl-bg" class="clip" data-start="0" data-duration="6" data-track-index="0">
+    <div id="hl-panel"></div>
+    <div id="hl-ghost">NEWS</div>
+  </div>
+
+  <!-- Layer 1: content -->
+  <div id="hl-content" class="clip" data-start="0" data-duration="6" data-track-index="1">
+    <div id="hl-source">ESPN</div>
+    <div id="hl-text">"She has game pace, game timing. We have an advantage."</div>
+    <div id="hl-rule"></div>
+  </div>
+
+  <!-- Layer 2: bottom stripe -->
+  <div id="hl-stripe" class="clip" data-start="0" data-duration="6" data-track-index="2"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    window.__timelines = window.__timelines || {};
+    const tl = gsap.timeline({ paused: true });
+
+    // 1. Source badge snaps in from left
+    tl.fromTo("#hl-source",
+      { opacity: 0, x: -20 },
+      { opacity: 1, x: 0, duration: 0.28, ease: "power4.out" },
+      0.12
+    );
+
+    // 2. Headline text slides up — different ease from badge
+    tl.fromTo("#hl-text",
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.42, ease: "expo.out" },
+      0.28
+    );
+
+    // 3. Rule sweeps across — structural reveal, last
+    tl.to("#hl-rule", { width: "100%", duration: 0.5, ease: "power3.out" }, 0.62);
+
+    window.__timelines["headline"] = tl;
+  </script>
+</div>

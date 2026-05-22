@@ -45,8 +45,32 @@ next-env.d.ts
 
 # local-only — not part of the deployed app
 /local/app/.next/
-/local/remotion/node_modules/
+/local/.next/
+/local/node_modules/
+/local/remotion/
+/local/ftl-render/.[!.]*/
+/local/ftl-render/.thumbnails/
+/local/ftl-render/assets
+/local/ftl-render/.agents/
+/local/ftl-render/skills/
+/local/ftl-render-caitlin/assets
+/local/ftl-render-caitlin/skills/
+/local/public/ssd/
 /runs/
 /public/thumbnails/
 /src/index.ts
 /src/server.ts
+
+# generated media / clip outputs
+output/
+*.mp4
+*.mov
+*.m4v
+*.mp3
+*.wav
+*.m4a
+*.aac
+*.jpg
+*.jpeg
+*.png
+*.webp

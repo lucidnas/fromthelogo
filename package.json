@@ -9,6 +9,7 @@
     "start": "bunx prisma db push --accept-data-loss && next start"
   },
   "dependencies": {
+    "@google/genai": "^2.4.0",
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "framer-motion": "^12.38.0",

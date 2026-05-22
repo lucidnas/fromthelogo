@@ -1,0 +1,124 @@
+{
+  "segmentStartSecs": 300,
+  "segmentSummary": "The segment uses a combination of live broadcast, freeze frames, and animated arrows to dissect Caitlin Clark's high basketball IQ plays, focusing on her reads of defensive movements and subsequent offensive execution.",
+  "events": [
+    {
+      "startSecs": 300,
+      "endSecs": 307,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible (PHX 77, IND 87, 4th 3:43)",
+      "visibleOverlays": "blue circle around Caitlin Clark",
+      "voFunction": "explains Clark read",
+      "editMove": "hold",
+      "retentionPurpose": "Highlights Clark's initial read of the defense and high basketball IQ.",
+      "ftlReplication": "Hold on live broadcast, full court, circle Caitlin Clark."
+    },
+    {
+      "startSecs": 307,
+      "endSecs": 312,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible (PHX 77, IND 87, 4th 3:43 -> 3:40)",
+      "visibleOverlays": "blue circle around Caitlin Clark",
+      "voFunction": "explains Clark read",
+      "editMove": "hold",
+      "retentionPurpose": "Shows Clark's strategic call for a screen to manipulate the defender.",
+      "ftlReplication": "Hold on live broadcast, full court, circle Caitlin Clark."
+    },
+    {
+      "startSecs": 312,
+      "endSecs": 316,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible (PHX 77, IND 87, 4th 3:40 -> 3:39)",
+      "visibleOverlays": "blue circle around Aliyah Boston",
+      "voFunction": "explains Clark read",
+      "editMove": "hold",
+      "retentionPurpose": "Highlights the screen setter's role in the play's setup.",
+      "ftlReplication": "Hold on live broadcast, full court, circle Aliyah Boston."
+    },
+    {
+      "startSecs": 316,
+      "endSecs": 321,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible (PHX 77, IND 87, 4th 3:39 -> 3:36)",
+      "visibleOverlays": "blue arrow showing defender's lean, blue arrow showing Clark's path",
+      "voFunction": "explains Clark read",
+      "editMove": "playback with arrows",
+      "retentionPurpose": "Illustrates the play's execution and Clark's decision-making in real-time.",
+      "ftlReplication": "Play live broadcast, full court, add arrows for defender's lean and Clark's path."
+    },
+    {
+      "startSecs": 321,
+      "endSecs": 322,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible (PHX 77, IND 87, 4th 3:36 -> 3:35)",
+      "visibleOverlays": "none visible",
+      "voFunction": "payoff",
+      "editMove": "playback",
+      "retentionPurpose": "Shows the successful completion of the play.",
+      "ftlReplication": "Play live broadcast, full court."
+    },
+    {
+      "startSecs": 322,
+      "endSecs": 327,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible (PHX 87, IND 94, 4th 58.4 -> 57.9)",
+      "visibleOverlays": "blue arrow showing Clark's path",
+      "voFunction": "explains Clark read",
+      "editMove": "playback with arrow",
+      "retentionPurpose": "Introduces the next play, highlighting Clark's offensive skill and initial move.",
+      "ftlReplication": "Play live broadcast, full court, add arrow for Clark's path."
+    },
+    {
+      "startSecs": 327,
+      "endSecs": 332,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible (PHX 87, IND 94, 4th 57.9 -> 57.0)",
+      "visibleOverlays": "blue arrow showing Clark's path",
+      "voFunction": "explains Clark read",
+      "editMove": "hold with arrow",
+      "retentionPurpose": "Emphasizes Clark's acceleration and exploitation of the defender's position.",
+      "ftlReplication": "Hold on live broadcast, full court, add arrow for Clark's path."
+    },
+    {
+      "startSecs": 332,
+      "endSecs": 337,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible (PHX 87, IND 94, 4th 57.0 -> 56.0)",
+      "visibleOverlays": "blue arrow showing Clark's path",
+      "voFunction": "explains Clark read",
+      "editMove": "playback with arrow",
+      "retentionPurpose": "Shows the immediate consequence of Clark's move against the defender.",
+      "ftlReplication": "Play live broadcast, full court, add arrow for Clark's path."
+    },
+    {
+      "startSecs": 337,
+      "endSecs": 342,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible (PHX 87, IND 94, 4th 56.0 -> 55.0)",
+      "visibleOverlays": "blue arrow showing Clark's path, blue arrow showing defender's collapse",
+      "voFunction": "explains Clark read",
+      "editMove": "hold with arrows",
+      "retentionPurpose": "Illustrates the defensive reaction and its implications for creating open teammates.",
+      "ftlReplication": "Hold on live broadcast, full court, add arrows for Clark's path and defender's collapse."
+    },
+    {
+      "startSecs": 342,
+      "endSecs": 347,
+      "visualState": "live broadcast",
+      "cameraOrCrop": "full court, scoreboard visible (PHX 87, IND 94, 4th 55.0 -> 54.0)",
+      "visibleOverlays": "none visible",
+      "voFunction": "payoff",
+      "editMove": "playback",
+      "retentionPurpose": "Shows the successful outcome of the play, resulting in an easy score.",
+      "ftlReplication": "Play live broadcast, full court."
+    }
+  ],
+  "observedPattern": "The editor introduces a play, then uses freeze frames or slow-motion with graphical overlays (circles, arrows) to highlight specific player actions or defensive reactions, followed by a short playback of the action to demonstrate the outcome, repeating this analysis for multiple key moments within a play or across different plays.",
+  "notesForAutomation": [
+    "Identify key player actions (e.g., calling for screen, setting screen, driving) and defensive reactions (e.g., peeking, leaning, collapsing).",
+    "Implement freeze frames or slow-motion at critical decision points or moments of defensive vulnerability.",
+    "Utilize circles to highlight specific players and arrows to illustrate movement paths or defensive shifts.",
+    "Ensure the scoreboard is consistently visible for game context.",
+    "Synchronize voiceover explanations with the visual overlays and playback segments."
+  ]
+}
