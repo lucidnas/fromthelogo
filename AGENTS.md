@@ -28,10 +28,48 @@ FTL is a faceless YouTube channel covering the WNBA every day from the Caitlin C
 
 **Yellow word library for Celebration format:** GENIUS, SPECTACULAR, UNREAL, INSANE, AWARD, DIFFERENT, ART, NEXT LEVEL, ELITE, MASTERFUL.
 
+## Clip-First Celebration Formula
+
+This is the default formula for Caitlin Clark game/play breakdowns and the generic template for any other player we want to hype.
+
+**Rule:** selected plays drive the video. The VO does not invent a story first and then hunt for footage. Every analysis beat must come from a verified play row in a selected-play manifest.
+
+Use the `ftl-clip-first-celebration` Codex skill when available.
+
+Core sequence:
+
+```bash
+node tools/ftl-clip-first-formula.mjs init --slug "game-or-topic-slug" --title "This Caitlin Clark Game Was SPECTACULAR"
+node tools/ftl-clip-first-formula.mjs validate --manifest "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/game-or-topic-slug/selected-play-manifest-v1.json"
+node tools/ftl-clip-first-formula.mjs export-vo --manifest "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/game-or-topic-slug/selected-play-manifest-v1.json" --out "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/game-or-topic-slug/vo-draft-v1.md"
+ELEVENLABS_VOICE_ID=jyskLvwz58RBB27YwdcR node tools/generate-elevenlabs-vo-with-pauses.mjs "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/game-or-topic-slug/vo-draft-v1.md" "/Volumes/SSK SSD/ftl/videos/clip-first-game-or-topic-slug/vo.mp3"
+node tools/ftl-clip-first-formula.mjs build-edit --manifest "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/game-or-topic-slug/selected-play-manifest-v1.json" --video-slug "clip-first-game-or-topic-slug"
+```
+
+Each play beat must include: source clip, source timestamps, Gemini 3.1 Pro visual read, official play-by-play/stat validation when available, the player's read, the defensive mistake, the payoff, freeze-frame source times, big text callouts, and approved VO.
+
+Beat rhythm:
+
+```text
+show the play
+-> freeze the key moment
+-> explain the read
+-> play the payoff
+-> land a simple hype takeaway
+-> next play
+```
+
+Add a final ~60 second commentary beat after the play analysis. This beat can use any strong player b-roll because it is opinion/commentary, not possession analysis. It must still include real receipts from the game: box score, official post, postgame quote, milestone, or play-by-play stat. For Clark videos, this final beat should explain why she is special, why the game orbits around her, and why Indiana becomes dangerous when she controls the floor.
+
+**VO:** ElevenLabs Johnny is the production voice for this formula. Voice ID: `jyskLvwz58RBB27YwdcR`. The tonality should remain consistent across videos: calm, clear, fan-smart, positive, simple, and hype without sounding like a sports announcer.
+
+**Visuals:** Use Hyperframes only. Use text callouts and freeze-frame labels by default. Do not use arrows/circles unless coordinates are manually verified on the exact frozen frame. Moving clips should change every 5-10 seconds unless a freeze-frame teaching moment is intentional.
+
 **Required reading before any script (any format):**
 - `research/script-writing-rules.md` — **canonical script doctrine.** Hook = 5–10s. Open loops + mini-hooks mandatory at every chapter break. One CTA per script. Show-don't-tell — visuals are central, narration is secondary. First-person "I" for opinions. Includes pre-flight checklist that must pass before VO. Read this FIRST.
 - `research/hooks-library.md` — the 7 hook templates pulled from every 50K+ video on the channel. **Do not invent a new hook.** Pick a template, slot in today's facts. Source transcripts live in `~/transcripts/audience-research/` and `~/transcripts/ftl-own/`.
 - `research/celebration-format-playbook.md` — the spine every Celebration winner uses (compilation listicle, game audio + reaction quips, one pop-culture comparison, 1,200–1,400 words, no documentary tone). Re-read before scripting.
+- `research/hyperframes-video-process.md` — current FTL video production workflow for Gemini shot maps, verified clip cutting, Johnny VO, Hyperframes film-room graphics, and fair-use-oriented rendering.
 - `research/celebration-ideas/` — dated research files with current angles. Pick from here or generate a new file before writing.
 
 **Generating new celebration research:**
@@ -131,6 +169,7 @@ Sharp, punchy, and relentlessly forward-moving. The urgency of a breaking news d
 - One standalone reaction line in the middle ("Read that again." "Nobody is talking about this." "That's the whole story.")
 - Close on what it means for Clark — one line, no summary.
 - No sign-off on Daily Takes.
+- Use casual basketball language, not editorial or production language. Say "that bucket," "that moment," "watching it back," "this play," "the read," or "the possession" instead of phrases like "the milestone clip," "the sequence," "this section," or "the footage." FTL should sound like a sharp Clark fan breaking down hoops, not an editor describing assets.
 
 **Sample Daily Take voice (use as reference):**
 > The Indiana Fever have a massive math problem, and running it back simply isn't an option. Despite the front office quietly adding Kelsey Mitchell back to the 2026 roster, the salary cap reality paints a brutal picture. With Caitlin Clark locked in and Aliyah Boston commanding a max extension, a supermax for Mitchell drains the war room dry. If Indiana cores Mitchell, they are left filling out half their roster with veteran minimums — sacrificing depth pieces like Sophie Cunningham or Lexie Hull to the open market. While fans want the chemistry of last year's playoff run, the Fever's front office is staring down a financial cliff. To build a true dynasty around Clark, somebody from the core has to go.
@@ -147,7 +186,7 @@ Format D only. One Gemini variation. No iteration — first good image ships.
 2. Script written — 400–500 words (20 min)
 3. Fact-checked with Codex (5 min)
 4. Thumbnail generated — one Format D variation (10 min)
-5. VO generated — ElevenLabs, single chunk under 5000 chars (5 min)
+5. VO generated — ElevenLabs Johnny, single chunk when possible (5 min)
 6. Render — minimal, no heavy B-roll (10 min)
 ```
 
@@ -306,6 +345,7 @@ Follow the FTL voice profile in `src/lib/voice-profile.ts`. Key requirements:
 - **Stat stacks** — deliver numbers as a rapid list, not buried in prose. Always follow with a "so what" frame.
 - **2–3 first-person reactions** — "I honestly had to reread this.", "My jaw dropped.", "I'm still buzzing."
 - **2–4 two-word punches** — standalone lines: "Real money.", "Yep.", "Wrong read."
+- **Casual basketball speak** — analysis should still feel like a fan who knows hoops. Avoid editorial/production terms like "clip," "sequence," "segment," "visual," "asset," or "B-roll" in VO unless quoting someone. Use "play," "bucket," "read," "possession," "watch it back," "look at this," and "that moment."
 - **One villain beat** — a specific person, quote, or action that Clark/Fever respond to
 - **One vindication moment** — a concrete stat, play, or contract that earns the title
 - **Close** — callback or metaphor punch. Not a summary. One line.
@@ -334,14 +374,24 @@ console.log(JSON.stringify(result, null, 2));
 
 Only proceed to VO once the overall sentiment is `strong` or `fire`.
 
-### Step 6 — Generate VO with SSML pauses
+### Step 6 — Generate VO with ElevenLabs Johnny
 
-Run `/ftl-vo "slug"` to generate ElevenLabs narration.
+ElevenLabs Johnny is the default VO provider for FTL videos. Do not use Gemini TTS for production narration.
 
-- Voice: Australian Neutral (voice ID `DTLT09E2cxHF0DqjKVbc`)
+- Voice: `Johnny`
+- Voice ID: `jyskLvwz58RBB27YwdcR`
 - Output: `/Volumes/SSK SSD/ftl/videos/{slug}/vo.mp3`
 
-**Always use SSML pauses.** Wrap the full text in `<speak>` tags and insert `<break time="Xs"/>` at cinematic moments so background music breathes. Standard pause placements:
+Generate short beat/section VO with:
+
+```bash
+ELEVENLABS_VOICE_ID=jyskLvwz58RBB27YwdcR \
+node tools/generate-elevenlabs-vo-single.mjs \
+  ~/transcripts/script-SLUG.txt \
+  "/Volumes/SSK SSD/ftl/videos/{slug}/vo.mp3"
+```
+
+Use natural-language delivery notes and bracketed audio tags sparingly. Insert pause tags only where the edit needs breathing room. Standard pause placements:
 
 | Moment type | Break duration |
 |---|---|
@@ -350,15 +400,16 @@ Run `/ftl-vo "slug"` to generate ElevenLabs narration.
 | "Let that land" / deliberate beat | `2s` – `2.5s` |
 | Section transition (pivot from one argument to next) | `1s` |
 
-**Chunking:** ElevenLabs has a ~5,000 character limit per request. Scripts over ~800 words must be split into 2 chunks at a natural paragraph break, generated separately, then stitched:
+**Chunking:** For full scripts or pause-heavy scripts, use the ElevenLabs pause-aware generator and stitch with ffmpeg filter concat.
 
 ```bash
-ffmpeg -y -i vo-chunk1.mp3 -i vo-chunk2.mp3 \
-  -filter_complex "[0:a][1:a]concat=n=2:v=0:a=1[out]" \
-  -map "[out]" vo.mp3
+ELEVENLABS_VOICE_ID=jyskLvwz58RBB27YwdcR \
+node tools/generate-elevenlabs-vo-with-pauses.mjs \
+  ~/transcripts/script-SLUG.txt \
+  "/Volumes/SSK SSD/ftl/videos/{slug}/vo.mp3"
 ```
 
-Save the final file to `/Volumes/SSK SSD/ftl/videos/{slug}/vo.mp3` and an archived timestamped copy alongside it.
+Save the final file to `/Volumes/SSK SSD/ftl/videos/{slug}/vo.mp3` and keep any archived/generated chunks alongside it.
 
 ### Step 6.5 — Source and validate all assets
 
@@ -401,7 +452,7 @@ EOF
 - **Graphics / stat cards** — generate with the design tool or ask the user to provide them
 - **Illustrated scenes** — generate via `/ftl-thumbnail` or AI image tool
 
-Do not attempt to render with missing assets — Remotion will produce black frames silently.
+Do not attempt to render with missing assets — Hyperframes can render blank or stale media if an asset path is wrong.
 
 ### Step 7 — Build cue sheet
 
@@ -415,17 +466,37 @@ Create `/Volumes/SSK SSD/ftl/videos/{slug}/cue-sheet.json` — a JSON array mapp
 ```
 
 Cue types: `broll`, `stat_card`, `headline`, `tweet`, `illustrated_scene`, `aroll`.
-All paths must be absolute SSD paths — `render.ts` converts them to HTTP URLs at runtime.
+All paths must be absolute SSD paths — the Hyperframes builder symlinks them into `local/ftl-render/assets/` at build time.
 
 B-roll library lives at `/Volumes/SSK SSD/broll/`.
 
 ### Step 8 — Render
 
-Run `/ftl-render "slug"` to produce the final MP4.
+FTL videos must render through Hyperframes. Do not use Remotion for FTL production renders, previews, cue-sheet wiring, or edit-script wiring.
+
+Render complex videos section by section, then stitch the approved sections. Do not render the full timeline just to review one change.
+
+Section workflow:
+1. Split the edit into named sections, usually `S01`, `S02`, etc., with exact start/end times.
+2. Generate a section-only render input with `tools/create-section-render-input.mjs`.
+3. Build the section with `FTL_FLAT_BACKGROUND=1`.
+4. Render the section with Hyperframes at one worker for review stability.
+5. QC the section in browser/QuickTime and with contact sheets.
+6. Enforce visual cadence: moving clips should change every 5-10 seconds unless the edit is intentionally holding a freeze frame, still image, graphic board, or overlay-heavy analysis pause.
+7. Prefer alternate angles before repeating a play: live angle, replay, baseline/slow angle, social angle, then freeze-frame/graphics if no new angle exists.
+8. Use `tools/render-hyperframes-clean.mjs` for every Hyperframes render so Puppeteer/Chrome workers are cleaned up after completion or failure.
+9. Only after a section is approved, add its MP4 to `render/sections/concat.txt`.
+10. Stitch approved sections with ffmpeg concat, then add the low music bed.
+
+Example section render:
 
 ```bash
-cd /Users/abdul/code/fromthelogo/local/remotion
-bun run render.ts {slug}
+cd /Users/abdul/code/fromthelogo/local/ftl-render
+node ../../tools/create-section-render-input.mjs {slug} S01 0 49
+FTL_FLAT_BACKGROUND=1 bun run build.ts {slug}-section-S01
+npx hyperframes lint
+node ../../tools/render-hyperframes-clean.mjs --quality draft --workers 1 \
+  --output "/Volumes/SSK SSD/ftl/videos/{slug}/render/sections/S01-hook.mp4"
 ```
 
 Output: `/Volumes/SSK SSD/ftl/videos/{slug}/render/final.mp4`
