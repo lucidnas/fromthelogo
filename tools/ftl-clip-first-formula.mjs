@@ -309,10 +309,12 @@ function buildEdit() {
       ? Math.max(0.1, clipDuration ?? (Number(play.sourceOut) - Number(play.sourceIn)))
       : Math.max(0.1, Number(play.sourceOut) - Number(play.sourceIn));
     const playbackRate = Number(play.pacing?.replaySpeed ?? manifest.defaultReplaySpeed ?? 0.6);
-    const overlays = [
-      normalizeOverlay(play.freezeFrames?.[0]?.overlayText || play.takeaway || play.label),
-      play.official?.clock && play.official?.period ? `Q${play.official.period} ${play.official.clock}` : "",
-    ].filter(Boolean);
+    const overlays = (play.freezeFrames ?? []).length
+      ? []
+      : [
+          normalizeOverlay(play.takeaway || play.label),
+          play.official?.clock && play.official?.period ? `Q${play.official.period} ${play.official.clock}` : "",
+        ].filter(Boolean);
 
     const freezeFrames = (play.freezeFrames ?? []).map((freeze, freezeIndex) => {
       const fallbackOffset = Math.min(duration - 1, Math.max(0.6, freezeIndex === 0 ? 0.9 : duration * 0.42));
