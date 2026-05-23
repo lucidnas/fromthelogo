@@ -51,15 +51,17 @@ Each play beat must include: source clip, source timestamps, Gemini 3.1 Pro visu
 Beat rhythm:
 
 ```text
-show the play
--> freeze the key moment
--> explain the read
--> play the payoff
+show the setup briefly
+-> freeze the key moment for about 5 seconds
+-> explain the read in one short VO beat
+-> play the payoff in slow motion
 -> land a simple hype takeaway
 -> next play
 ```
 
-Add a final ~60 second commentary beat after the play analysis. This beat can use any strong player b-roll because it is opinion/commentary, not possession analysis. It must still include real receipts from the game: box score, official post, postgame quote, milestone, or play-by-play stat. For Clark videos, this final beat should explain why she is special, why the game orbits around her, and why Indiana becomes dangerous when she controls the floor.
+Each play should be fast. The VO should cover only the frozen read plus a quick description of the payoff; do not spend 20-30 seconds on one possession unless it is the whole video hook. Default freeze duration is 5 seconds, default replay speed is 0.6x, and the edit should move to the next verified play as soon as the payoff lands.
+
+Add a final ~30 second commentary beat after the play analysis. This beat can use any strong player b-roll because it is opinion/commentary, not possession analysis. It must still include real receipts from the game: box score, official post, postgame quote, milestone, or play-by-play stat. For Clark videos, this final beat should explain why she is special, why the game orbits around her, and why Indiana becomes dangerous when she controls the floor.
 
 **VO:** ElevenLabs Johnny is the production voice for this formula. Voice ID: `jyskLvwz58RBB27YwdcR`. The tonality should remain consistent across videos: calm, clear, fan-smart, positive, simple, and hype without sounding like a sports announcer.
 

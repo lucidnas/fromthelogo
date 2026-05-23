@@ -67,6 +67,7 @@ interface Cue {
   imageCaption?: string;
   sourceIn?: number | null;
   sourceOut?: number | null;
+  playbackRate?: number | null;
   treatment?: string;
   overlays?: string[];
   graphics?: FilmRoomGraphic[];
@@ -118,6 +119,7 @@ interface EdlCue {
   assetPath?: string | null;
   sourceIn?: number | null;
   sourceOut?: number | null;
+  playbackRate?: number | null;
   treatment?: string;
   overlays?: string[];
   graphics?: FilmRoomGraphic[];
@@ -161,7 +163,7 @@ function renderedAssetPath(name: string): string {
   return path.join(assetsDir, name);
 }
 
-function ensureRenderedClip(src: string, name: string, durationSecs: number, sourceIn?: number | null, sourceOut?: number | null): string {
+function ensureRenderedClip(src: string, name: string, durationSecs: number, sourceIn?: number | null, sourceOut?: number | null, playbackRate?: number | null): string {
   const dst = renderedAssetPath(name);
   if (fs.existsSync(dst)) {
     fs.unlinkSync(dst);
@@ -170,6 +172,8 @@ function ensureRenderedClip(src: string, name: string, durationSecs: number, sou
   const start = Math.max(0, sourceIn ?? 0);
   const span = sourceOut != null ? Math.max(0.1, sourceOut - start) : durationSecs;
   const needsLoop = durationSecs > span + 0.05;
+  const rate = Number.isFinite(Number(playbackRate)) ? Math.max(0.25, Math.min(2, Number(playbackRate))) : 1;
+  const setPts = rate === 1 ? "setpts=PTS-STARTPTS" : `setpts=${(1 / rate).toFixed(6)}*(PTS-STARTPTS)`;
   const args = [
     "ffmpeg",
     "-y",
@@ -187,7 +191,7 @@ function ensureRenderedClip(src: string, name: string, durationSecs: number, sou
     durationSecs.toFixed(3),
     "-an",
     "-vf",
-    "scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,fps=30,setpts=PTS-STARTPTS",
+    `scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,fps=30,${setPts}`,
     "-c:v",
     "libx264",
     "-preset",
@@ -486,7 +490,7 @@ function renderEdlClipHTML(cue: Cue, index: number): string {
   const assetName = `edl-${index}-${path.basename(cue.clipPath)}`;
   const assetRef = audioVolume > 0
     ? symlinkAsset(cue.clipPath, assetName)
-    : ensureRenderedClip(cue.clipPath, assetName, cueDur, cue.sourceIn, cue.sourceOut);
+    : ensureRenderedClip(cue.clipPath, assetName, cueDur, cue.sourceIn, cue.sourceOut, cue.playbackRate);
   const src = assetRef;
   const mutedAttr = audioVolume > 0 ? "" : "muted";
   const audioAttr = audioVolume > 0 ? 'data-has-audio="true"' : "";
@@ -520,6 +524,7 @@ function loadEditScriptCues(): Cue[] {
     imagePath: cue.assetPath && /\.(jpe?g|png|webp)$/i.test(cue.assetPath) ? cue.assetPath : undefined,
     sourceIn: cue.sourceIn,
     sourceOut: cue.sourceOut,
+    playbackRate: cue.playbackRate,
     treatment: cue.treatment,
     overlays: cue.overlays ?? [],
     graphics: cue.graphics ?? [],

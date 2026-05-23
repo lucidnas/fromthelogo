@@ -265,18 +265,28 @@ function buildEdit() {
     const duration = Math.max(8, estimatedDurations[index] * scale);
     const start = t;
     const end = t + duration;
-    const sourceSpan = Math.max(0.1, Number(play.sourceOut) - Number(play.sourceIn));
+    const hasCutClip = exists(play.clipPath);
+    const assetPath = hasCutClip ? play.clipPath : play.sourcePath;
+    const sourceStart = hasCutClip ? 0 : Number(play.sourceIn);
+    const clipDuration = durationSeconds(assetPath);
+    const sourceSpan = hasCutClip
+      ? Math.max(0.1, clipDuration ?? (Number(play.sourceOut) - Number(play.sourceIn)))
+      : Math.max(0.1, Number(play.sourceOut) - Number(play.sourceIn));
+    const playbackRate = Number(play.pacing?.replaySpeed ?? manifest.defaultReplaySpeed ?? 0.6);
     const overlays = [
       normalizeOverlay(play.freezeFrames?.[0]?.overlayText || play.takeaway || play.label),
       play.official?.clock && play.official?.period ? `Q${play.official.period} ${play.official.clock}` : "",
     ].filter(Boolean);
 
     const freezeFrames = (play.freezeFrames ?? []).map((freeze, freezeIndex) => {
-      const fallbackOffset = Math.min(duration - 1, Math.max(2, duration * (0.34 + freezeIndex * 0.22)));
+      const fallbackOffset = Math.min(duration - 1, Math.max(0.6, freezeIndex === 0 ? 0.9 : duration * 0.42));
+      const sourceTime = hasCutClip
+        ? Math.max(0, Number(freeze.sourceTime) - Number(play.sourceIn))
+        : Number(freeze.sourceTime);
       return {
         startOffset: Number(freeze.startOffset ?? fallbackOffset),
-        duration: Number(freeze.duration ?? 3),
-        sourceTime: Number(freeze.sourceTime),
+        duration: Number(freeze.duration ?? 5),
+        sourceTime,
         zoomFrom: Number(freeze.zoomFrom ?? 1.04),
         zoomTo: Number(freeze.zoomTo ?? 1.12),
         x: Number(freeze.x ?? 50),
@@ -291,10 +301,11 @@ function buildEdit() {
       beat: `Beat ${String(play.playNumber).padStart(2, "0")} - ${play.label ?? ""}`,
       vo: playVo(play),
       asset: "edl-clip",
-      assetPath: play.sourcePath,
-      sourceIn: Number(play.sourceIn),
-      sourceOut: Number(play.sourceIn) + Math.min(sourceSpan, Math.max(4, duration - 1)),
-      treatment: "clip-first live play with freeze-frame analysis and big text callouts",
+      assetPath,
+      sourceIn: sourceStart,
+      sourceOut: sourceStart + Math.min(sourceSpan, Math.max(4, duration - 1)),
+      playbackRate,
+      treatment: "clip-first fast play: 5-second freeze, quick read, then slow-motion payoff",
       overlays,
       graphics: [],
       freezeFrames,
@@ -305,7 +316,8 @@ function buildEdit() {
 
   if (closingText) {
     const index = manifest.plays?.length ?? 0;
-    const duration = Math.max(45, estimatedDurations[index] * scale);
+    const closingTarget = Number(manifest.closingCommentary.durationTargetSeconds ?? 30);
+    const duration = Math.max(12, Math.min(closingTarget || 30, estimatedDurations[index] * scale));
     const sourcePaths = (manifest.closingCommentary.sourcePaths ?? []).filter(exists);
     const fallback = sourcePaths[0] ?? manifest.plays?.at(-1)?.sourcePath;
     cues.push({
