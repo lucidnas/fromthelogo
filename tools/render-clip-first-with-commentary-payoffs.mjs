@@ -30,6 +30,46 @@ function run(args) {
   execFileSync(args[0], args.slice(1), { stdio: "inherit" });
 }
 
+function probeDuration(file) {
+  return Number(execFileSync("ffprobe", [
+    "-v", "error",
+    "-show_entries", "format=duration",
+    "-of", "csv=p=0",
+    file,
+  ], { encoding: "utf8" }).trim());
+}
+
+function latestVoChunkDir() {
+  const dirs = fs.readdirSync(videoDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && /^vo-johnny-pause-work-\d+/.test(entry.name))
+    .map((entry) => path.join(videoDir, entry.name))
+    .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+  return dirs[0] ?? null;
+}
+
+function applyVoChunkTimings() {
+  if (process.env.FTL_USE_VO_CHUNKS === "0") return;
+  const dir = latestVoChunkDir();
+  if (!dir) return;
+  const chunkPaths = fs.readdirSync(dir)
+    .filter((name) => /^chunk-\d+\.mp3$/.test(name))
+    .sort()
+    .map((name) => path.join(dir, name));
+  if (chunkPaths.length < cues.length) return;
+
+  let cursor = 0;
+  for (let i = 0; i < cues.length; i += 1) {
+    const chunkPath = chunkPaths[i];
+    const chunkDuration = probeDuration(chunkPath);
+    cues[i].start = cursor;
+    cues[i].end = cursor + chunkDuration;
+    const silencePath = path.join(dir, `silence-${String(i + 1).padStart(2, "0")}-0.35s.mp3`);
+    cursor += chunkDuration + (fs.existsSync(silencePath) ? probeDuration(silencePath) : 0);
+  }
+}
+
+applyVoChunkTimings();
+
 function escapeDrawtext(text) {
   return String(text ?? "")
     .replaceAll("\\", "\\\\")
