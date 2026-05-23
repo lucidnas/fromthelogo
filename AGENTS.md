@@ -30,9 +30,9 @@ FTL is a faceless YouTube channel covering the WNBA every day from the Caitlin C
 
 ## Clip-First Celebration Formula
 
-This is the default formula for Caitlin Clark game/play breakdowns and the generic template for any other player we want to hype.
+This is the default formula for Caitlin Clark game/play breakdowns and the generic template for any other player, team, or play-led basketball narrative we want to hype.
 
-**Rule:** selected plays drive the video. The VO does not invent a story first and then hunt for footage. Every analysis beat must come from a verified play row in a selected-play manifest.
+**Rule:** official play-by-play or source receipts drive the evidence universe, then selected plays drive the VO. The VO does not invent a story first and then hunt for footage. Every Caitlin Clark play in the official play-by-play must be checked against the official/social highlight sources and classified before scripting. For NBA/player/team videos, every relevant official play row, advanced-stat clip, stat row, quote, or source receipt must be classified before scripting. Every analysis beat must come from a verified row in the manifest.
 
 Use the `ftl-clip-first-celebration` Codex skill when available.
 
@@ -45,6 +45,26 @@ node tools/ftl-clip-first-formula.mjs export-vo --manifest "/Volumes/SSK SSD/ftl
 ELEVENLABS_VOICE_ID=jyskLvwz58RBB27YwdcR node tools/generate-elevenlabs-vo-with-pauses.mjs "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/game-or-topic-slug/vo-draft-v1.md" "/Volumes/SSK SSD/ftl/videos/clip-first-game-or-topic-slug/vo.mp3"
 node tools/ftl-clip-first-formula.mjs build-edit --manifest "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/game-or-topic-slug/selected-play-manifest-v1.json" --video-slug "clip-first-game-or-topic-slug"
 ```
+
+Before selecting beats, create `officialPlayCoverage[]` in the manifest. This is the coverage ledger for every Clark PBP event: made shots, missed shots worth explaining, assists, hockey-assist-style creation if visible, turnovers/steals if useful, and any other official event that shows her impact. Each row must be classified as:
+
+- `analysis-beat` — full VO beat with freeze/read/payoff
+- `quick-montage-receipt` — shown quickly as proof, but not a full analysis paragraph
+- `closing-stat-context` — saved for the final take/stat receipt
+- `no-footage-found` — official PBP event exists, but no usable highlight/source clip found
+- `not-usable` — footage exists but is too unclear, too late, duplicate, or not helpful
+- `duplicate-angle` — alternate angle of a play already covered
+
+Do not skip a target-player PBP play silently. If it is not in the final video, the ledger should say why.
+
+This formula is not limited to highlight-specific videos. It can also make:
+
+- NBA player breakdowns using NBA Advanced Stats play-by-play videos
+- team/system videos built from possession types, lineup stats, or shot-quality receipts
+- skill compilations where every example comes from an audited play row
+- non-game narratives where each beat is tied to `sourceReceipts[]` such as stats, quotes, articles, screenshots, or transaction records
+
+For NBA Advanced Stats workflows, treat each play video as a primary source candidate. Store the official game id/action number when available, player/team, event text, stat context, video URL or downloaded clip path, Gemini 3.1 Pro visual read, and `coverageStatus`.
 
 Each play beat must include: source clip, source timestamps, Gemini 3.1 Pro visual read, official play-by-play/stat validation when available, the player's read, the defensive mistake, the payoff, freeze-frame source times, big text callouts, and approved VO.
 

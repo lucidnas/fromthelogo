@@ -15,7 +15,13 @@ function usage() {
   node tools/ftl-clip-first-formula.mjs build-edit --manifest PATH --video-slug SLUG [--vo PATH]
   node tools/ftl-clip-first-formula.mjs checklist --slug SLUG
 
-The manifest is the source of truth. If a play is not in manifest.plays[], it should not be in the VO.`);
+The manifest is the source of truth. Every official player play should be classified in
+manifest.officialPlayCoverage[] before VO. If a play is not in manifest.plays[], it should
+not become an analysis VO beat.
+
+This runner can be used for Clark/Fever videos, NBA player videos, team/system videos,
+or non-highlight narratives as long as every claim is tied to verified rows, sources,
+stats, quotes, or clips.`);
 }
 
 function arg(name, fallback = "") {
@@ -117,6 +123,7 @@ function init() {
       format: "Clip-first player celebration",
       player,
       yellowWord,
+      contentMode: "play-led-player-celebration",
       game: {
         date: "YYYY-MM-DD",
         teams: "",
@@ -125,7 +132,9 @@ function init() {
         officialBox: ""
       },
       sourceClips: [],
-      editorialRule: "Every VO beat is tied to a selected play row. If a row does not exist, the VO beat does not exist.",
+      editorialRule: "Every official player play is checked against available footage first. Every VO beat is tied to a selected play row, stat row, quote row, or source receipt. If a row does not exist, the VO beat does not exist.",
+      officialPlayCoverage: [],
+      sourceReceipts: [],
       plays: [],
       closingCommentary: {
         enabled: true,
@@ -166,8 +175,43 @@ function validate() {
   if (!manifest.slug) errors.push("manifest.slug is required");
   if (!manifest.title) errors.push("manifest.title is required");
   if (!manifest.player) warnings.push("manifest.player is missing; default scripts should name the player explicitly");
+  if (!Array.isArray(manifest.officialPlayCoverage)) {
+    warnings.push("manifest.officialPlayCoverage[] is missing; next videos should classify every official player play before selecting beats");
+  } else {
+    const allowedCoverage = new Set([
+      "analysis-beat",
+      "quick-montage-receipt",
+      "closing-stat-context",
+      "no-footage-found",
+      "not-usable",
+      "duplicate-angle"
+    ]);
+    const coverageSeen = new Set();
+    for (const [i, row] of manifest.officialPlayCoverage.entries()) {
+      const rowId = row.actionNumber ?? row.eventText ?? `row ${i + 1}`;
+      if (row.actionNumber != null) {
+        const key = String(row.actionNumber);
+        if (coverageSeen.has(key)) warnings.push(`officialPlayCoverage ${rowId}: duplicate actionNumber`);
+        coverageSeen.add(key);
+      }
+      if (!row.eventText) warnings.push(`officialPlayCoverage ${rowId}: eventText is missing`);
+      if (!allowedCoverage.has(row.coverageStatus)) {
+        warnings.push(`officialPlayCoverage ${rowId}: coverageStatus should be one of ${[...allowedCoverage].join(", ")}, got ${row.coverageStatus ?? "missing"}`);
+      }
+      if (["analysis-beat", "quick-montage-receipt"].includes(row.coverageStatus) && !exists(row.sourcePath)) {
+        errors.push(`officialPlayCoverage ${rowId}: ${row.coverageStatus} requires sourcePath on disk`);
+      }
+      if (row.coverageStatus === "analysis-beat" && !row.playNumber) {
+        warnings.push(`officialPlayCoverage ${rowId}: analysis-beat should link to plays[].playNumber`);
+      }
+      if (["no-footage-found", "not-usable"].includes(row.coverageStatus) && !row.reason) {
+        warnings.push(`officialPlayCoverage ${rowId}: ${row.coverageStatus} should include reason`);
+      }
+    }
+  }
   if (!Array.isArray(manifest.plays) || manifest.plays.length === 0) {
-    errors.push("manifest.plays[] is empty; clip-first videos need selected plays before VO");
+    const hasReceipts = Array.isArray(manifest.sourceReceipts) && manifest.sourceReceipts.length > 0;
+    if (!hasReceipts) errors.push("manifest.plays[] is empty; play-led videos need selected plays or sourceReceipts before VO");
   }
 
   const seen = new Set();
@@ -392,8 +436,9 @@ function buildEdit() {
     voiceDuration: actualVoDuration ?? Number(t.toFixed(3)),
     formula: "clip-first player celebration",
     rules: [
-      "No VO beat without a selected play row.",
+      "No VO beat without a selected play row, source receipt, stat row, or quote row.",
       "Use Johnny VO for the full narration.",
+      "Start from official play-by-play and classify every player play before writing VO.",
       "Use Gemini 3.1 Pro and official play-by-play to verify each analyzed play.",
       "Use only text callouts and freeze-frame labels unless coordinates are manually verified."
     ],
@@ -414,7 +459,12 @@ function checklist() {
 
 2. Create or update selected plays:
    - ${workflowDir}/selected-play-manifest-v1.json
+   - Fill officialPlayCoverage[] first: every official target-player play from PBP gets classified.
+   - Coverage statuses: analysis-beat, quick-montage-receipt, closing-stat-context, no-footage-found, not-usable, duplicate-angle.
+   - Only plays with available footage become analysis beats or montage receipts.
    - Every play needs sourcePath, sourceIn/sourceOut, Gemini 3.1 Pro read, official PBP/stat context, VO beat, and freezeFrames.
+   - For NBA Advanced Stats or other per-play video sources, each PBP video row can become a source candidate. Store the play id/action number, stat context, video URL or downloaded file, and classification.
+   - For non-highlight narratives, use sourceReceipts[] for verified stats, quotes, articles, screenshots, or timeline evidence. VO still cannot make claims that are not tied to a row.
 
 3. Validate:
    node tools/ftl-clip-first-formula.mjs validate --manifest "${workflowDir}/selected-play-manifest-v1.json"
