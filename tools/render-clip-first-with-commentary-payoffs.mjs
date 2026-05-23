@@ -80,8 +80,8 @@ function escapeDrawtext(text) {
 
 function normalizeCardLine(text, index) {
   const value = String(text ?? "");
-  if (/FEVER 90,\s*VALKYRIES 82/i.test(value)) return "FEVER 90-82  |  CLARK: 22 PTS, 9 AST, 4 3s";
-  if (/22 PTS/i.test(value) && /9 AST/i.test(value)) return "22 PTS  |  9 AST  |  4 3s";
+  if (/FEVER 90,\s*VALKYRIES 82/i.test(value)) return "FEVER 90-82 / CLARK: 22 PTS, 9 AST, 4 3s";
+  if (/22 PTS/i.test(value) && /9 AST/i.test(value)) return "22 PTS / 9 AST / 4 3s";
   return value;
 }
 
@@ -89,7 +89,7 @@ function labelFilter(text, size = 76) {
   if (!text) return "";
   const parts = String(text).split(/\s+\|\s+/).map((part) => part.trim()).filter(Boolean);
   if (parts.length > 1) {
-    const cardW = 690;
+    const cardW = 760;
     const cardH = parts.length >= 3 ? 230 : 185;
     const cardX = 58;
     const cardY = 62;
@@ -102,7 +102,7 @@ function labelFilter(text, size = 76) {
     parts.slice(0, 3).forEach((part, index) => {
       const normalized = normalizeCardLine(part, index);
       const safe = escapeDrawtext(normalized);
-      const fontSize = index === 0 ? 44 : index === 1 ? 42 : 28;
+      const fontSize = index === 0 ? 40 : index === 1 ? 36 : 25;
       const color = index === 2 ? "white" : "0xFFE84D";
       filters.push(`drawtext=text='${safe}':fontcolor=${color}:fontsize=${fontSize}:font='Arial Black':box=0:x=${cardX + 30}:y=${yBase + index * 52}`);
     });
