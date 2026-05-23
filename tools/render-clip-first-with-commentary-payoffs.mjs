@@ -37,19 +37,33 @@ function escapeDrawtext(text) {
     .replaceAll("%", "\\%");
 }
 
+function normalizeCardLine(text, index) {
+  const value = String(text ?? "");
+  if (/FEVER 90,\s*VALKYRIES 82/i.test(value)) return "FEVER 90-82  |  CLARK: 22 PTS, 9 AST, 4 3s";
+  if (/22 PTS/i.test(value) && /9 AST/i.test(value)) return "22 PTS  |  9 AST  |  4 3s";
+  return value;
+}
+
 function labelFilter(text, size = 76) {
   if (!text) return "";
   const parts = String(text).split(/\s+\|\s+/).map((part) => part.trim()).filter(Boolean);
   if (parts.length > 1) {
-    const yBase = 650;
+    const cardW = 690;
+    const cardH = parts.length >= 3 ? 230 : 185;
+    const cardX = 58;
+    const cardY = 62;
+    const yBase = cardY + 54;
     const filters = [
-      "drawbox=x=0:y=610:w=iw:h=310:color=black@0.66:t=fill",
+      `drawbox=x=${cardX}:y=${cardY}:w=${cardW}:h=${cardH}:color=black@0.78:t=fill`,
+      `drawbox=x=${cardX}:y=${cardY}:w=${cardW}:h=${cardH}:color=0xFFE84D@0.95:t=5`,
+      `drawbox=x=${cardX + 28}:y=${cardY + 24}:w=106:h=7:color=0xFFE84D@1:t=fill`,
     ];
     parts.slice(0, 3).forEach((part, index) => {
-      const safe = escapeDrawtext(part);
-      const fontSize = index === 0 ? 82 : index === 1 ? 78 : 52;
+      const normalized = normalizeCardLine(part, index);
+      const safe = escapeDrawtext(normalized);
+      const fontSize = index === 0 ? 44 : index === 1 ? 42 : 28;
       const color = index === 2 ? "white" : "0xFFE84D";
-      filters.push(`drawtext=text='${safe}':fontcolor=${color}:fontsize=${fontSize}:font='Arial Black':box=0:x=(w-text_w)/2:y=${yBase + index * 86}`);
+      filters.push(`drawtext=text='${safe}':fontcolor=${color}:fontsize=${fontSize}:font='Arial Black':box=0:x=${cardX + 30}:y=${yBase + index * 52}`);
     });
     return `,${filters.join(",")}`;
   }
@@ -74,6 +88,31 @@ function hasAudio(file) {
   } catch {
     return false;
   }
+}
+
+function sentenceBreaksRelSecs(text, duration) {
+  const clean = String(text ?? "").replace(/\s+/g, " ").trim();
+  if (!clean) return [];
+  const matches = [...clean.matchAll(/[^.!?]+[.!?]+/g)];
+  if (!matches.length) return [];
+  const totalChars = clean.length;
+  return matches
+    .map((match) => {
+      const end = (match.index ?? 0) + match[0].length;
+      return (end / totalChars) * duration;
+    })
+    .filter((time) => time > 0.5 && time < duration - 0.5);
+}
+
+function naturalBreakRelSec(cue, duration, target) {
+  const breaks = sentenceBreaksRelSecs(cue.vo, duration);
+  const candidates = breaks.filter((time) => time >= target - 1.4 && time <= target + 3.2);
+  if (candidates.length) {
+    return candidates.reduce((best, time) => Math.abs(time - target) < Math.abs(best - target) ? time : best, candidates[0]);
+  }
+  const nextBreak = breaks.find((time) => time > target);
+  if (nextBreak && nextBreak <= target + 5) return nextBreak;
+  return target;
 }
 
 function renderVideo({ source, start, duration, out, label = "", size = 76 }) {
@@ -259,7 +298,8 @@ function renderCueSegments(cue, index) {
 
   const freezeStart = Math.max(0.8, Math.min(duration - 0.2, Number(freeze.startOffset ?? 2.8)));
   const freezeDur = Math.max(0.5, Math.min(Number(freeze.duration ?? 5), duration - freezeStart));
-  const readDuration = Math.min(duration, freezeStart + freezeDur);
+  const targetReadDuration = Math.min(duration, freezeStart + freezeDur);
+  const readDuration = Math.min(duration, naturalBreakRelSec(cue, duration, targetReadDuration));
   const segments = [renderAnalysisCue(cue, index, {
     durationOverride: readDuration,
     suffix: "read",
@@ -267,8 +307,8 @@ function renderCueSegments(cue, index) {
 
   const sourceIn = Number(cue.sourceIn ?? 0);
   const sourceOut = Number(cue.sourceOut ?? sourceIn + payoffSeconds);
-  const payoffStart = Math.max(sourceIn, Number(freeze.sourceTime ?? sourceIn) - 0.6);
-  const payoffDuration = Math.max(4.5, Math.min(7, sourceOut - payoffStart + 0.9));
+  const payoffStart = sourceIn;
+  const payoffDuration = Math.max(5.2, Math.min(8.5, sourceOut - payoffStart));
   const payoff = renderPayoff(cue, index, {
     start: payoffStart,
     duration: payoffDuration,
