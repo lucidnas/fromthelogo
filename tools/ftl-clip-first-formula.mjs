@@ -229,6 +229,12 @@ function exportVo() {
     "",
   ];
 
+  if (manifest.openingHook?.vo) {
+    lines.push("// Opening hook");
+    lines.push(String(manifest.openingHook.vo).trim());
+    lines.push("");
+  }
+
   for (const play of manifest.plays ?? []) {
     lines.push(`// Beat ${String(play.playNumber).padStart(2, "0")} - ${play.label ?? ""}`);
     lines.push(playVo(play));
@@ -252,17 +258,47 @@ function buildEdit() {
   const voPath = arg("vo", `${VIDEOS_ROOT}/${videoSlug}/vo.mp3`);
   const manifest = readJson(manifestPath);
   const cues = [];
+  const openingText = manifest.openingHook?.enabled ? String(manifest.openingHook.vo ?? "").trim() : "";
   const playTexts = (manifest.plays ?? []).map(playVo);
   const closingText = manifest.closingCommentary?.enabled ? String(manifest.closingCommentary.vo ?? "").trim() : "";
-  const allTexts = closingText ? [...playTexts, closingText] : playTexts;
+  const allTexts = [openingText, ...playTexts, closingText].filter(Boolean);
   const estimatedDurations = allTexts.map(estimateSpeechSeconds);
   const totalEstimate = estimatedDurations.reduce((sum, n) => sum + n, 0);
   const actualVoDuration = durationSeconds(voPath);
   const scale = actualVoDuration && totalEstimate > 0 ? actualVoDuration / totalEstimate : 1;
 
   let t = 0;
+  let durationIndex = 0;
+  if (openingText) {
+    const firstPlay = manifest.plays?.[0];
+    const sourcePaths = (manifest.openingHook.sourcePaths ?? []).filter(exists);
+    const fallback = sourcePaths[0] ?? firstPlay?.clipPath ?? firstPlay?.sourcePath;
+    const duration = Math.max(10, estimatedDurations[durationIndex] * scale);
+    cues.push({
+      start: Number(t.toFixed(3)),
+      end: Number((t + duration).toFixed(3)),
+      beat: "Opening hook",
+      vo: openingText,
+      asset: "edl-clip",
+      assetPath: fallback,
+      sourceIn: Number(manifest.openingHook.sourceIn ?? 0),
+      sourceOut: Math.min(Number(manifest.openingHook.sourceOut ?? duration), durationSeconds(fallback) ?? duration),
+      playbackRate: Number(manifest.openingHook.playbackRate ?? 0.85),
+      treatment: "cold hook with game stakes, Clark stat receipt, and retention CTA",
+      overlays: (manifest.openingHook.overlays ?? [
+        normalizeOverlay(manifest.yellowWord || "SPECTACULAR"),
+        "WATCH THE LAST READ"
+      ]).map(normalizeOverlay),
+      graphics: [],
+      freezeFrames: [],
+      audioVolume: 0
+    });
+    t += duration;
+    durationIndex += 1;
+  }
+
   for (const [index, play] of (manifest.plays ?? []).entries()) {
-    const duration = Math.max(8, estimatedDurations[index] * scale);
+    const duration = Math.max(8, estimatedDurations[durationIndex] * scale);
     const start = t;
     const end = t + duration;
     const hasCutClip = exists(play.clipPath);
@@ -312,12 +348,12 @@ function buildEdit() {
       audioVolume: 0
     });
     t = end;
+    durationIndex += 1;
   }
 
   if (closingText) {
-    const index = manifest.plays?.length ?? 0;
     const closingTarget = Number(manifest.closingCommentary.durationTargetSeconds ?? 30);
-    const duration = Math.max(12, Math.min(closingTarget || 30, estimatedDurations[index] * scale));
+    const duration = Math.max(12, Math.min(closingTarget || 30, estimatedDurations[durationIndex] * scale));
     const sourcePaths = (manifest.closingCommentary.sourcePaths ?? []).filter(exists);
     const fallback = sourcePaths[0] ?? manifest.plays?.at(-1)?.sourcePath;
     cues.push({

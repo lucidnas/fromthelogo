@@ -51,6 +51,9 @@ Each play beat must include: source clip, source timestamps, Gemini 3.1 Pro visu
 Beat rhythm:
 
 ```text
+open with a hook naming the game, Clark's stat receipt, and why the final read is worth staying for
+-> ask for one simple engagement action only if it naturally fits the hook
+-> move into the selected plays
 show the setup briefly
 -> freeze the key moment for about 5 seconds
 -> explain the read in one short VO beat
