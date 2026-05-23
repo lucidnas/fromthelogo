@@ -16,6 +16,7 @@ const editPath = `${videoDir}/edit-script-johnny.json`;
 const voPath = `${videoDir}/vo.mp3`;
 const outPath = outputArg ?? `${videoDir}/render/${slug}-with-commentary-payoffs.mp4`;
 const payoffSeconds = Number(process.env.FTL_PAYOFF_SECONDS ?? 2.8);
+const payoffMode = process.env.FTL_PAYOFF_MODE || "post-beat";
 
 if (!fs.existsSync(editPath)) throw new Error(`Missing edit script: ${editPath}`);
 if (!fs.existsSync(voPath)) throw new Error(`Missing VO: ${voPath}`);
@@ -295,6 +296,20 @@ function renderCueSegments(cue, index) {
   const duration = Number(cue.end) - Number(cue.start);
   const freeze = Array.isArray(cue.freezeFrames) && cue.freezeFrames.length ? cue.freezeFrames[0] : null;
   if (!freeze) return [renderAnalysisCue(cue, index)];
+
+  if (payoffMode === "post-beat") {
+    const segments = [renderAnalysisCue(cue, index)];
+    const sourceIn = Number(cue.sourceIn ?? 0);
+    const sourceOut = Number(cue.sourceOut ?? sourceIn + payoffSeconds);
+    const payoff = renderPayoff(cue, index, {
+      start: sourceIn,
+      duration: Math.max(5.2, Math.min(8.5, sourceOut - sourceIn)),
+      suffix: "postbeat-broadcast-payoff",
+      label: "LET IT PLAY",
+    });
+    if (payoff) segments.push(payoff);
+    return segments;
+  }
 
   const freezeStart = Math.max(0.8, Math.min(duration - 0.2, Number(freeze.startOffset ?? 2.8)));
   const freezeDur = Math.max(0.5, Math.min(Number(freeze.duration ?? 5), duration - freezeStart));
