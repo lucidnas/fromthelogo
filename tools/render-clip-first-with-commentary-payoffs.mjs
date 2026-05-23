@@ -39,8 +39,22 @@ function escapeDrawtext(text) {
 
 function labelFilter(text, size = 76) {
   if (!text) return "";
+  const parts = String(text).split(/\s+\|\s+/).map((part) => part.trim()).filter(Boolean);
+  if (parts.length > 1) {
+    const yBase = 650;
+    const filters = [
+      "drawbox=x=0:y=610:w=iw:h=310:color=black@0.66:t=fill",
+    ];
+    parts.slice(0, 3).forEach((part, index) => {
+      const safe = escapeDrawtext(part);
+      const fontSize = index === 0 ? 82 : index === 1 ? 78 : 52;
+      const color = index === 2 ? "white" : "0xFFE84D";
+      filters.push(`drawtext=text='${safe}':fontcolor=${color}:fontsize=${fontSize}:font='Arial Black':box=0:x=(w-text_w)/2:y=${yBase + index * 86}`);
+    });
+    return `,${filters.join(",")}`;
+  }
   const safe = escapeDrawtext(text);
-  return `,drawtext=text='${safe}':fontcolor=0xFFE84D:fontsize=${size}:font='Arial Black':box=1:boxcolor=black@0.72:boxborderw=22:x=44:y=h-th-72`;
+  return `,drawtext=text='${safe}':fontcolor=0xFFE84D:fontsize=${size}:font='Arial Black':box=1:boxcolor=black@0.72:boxborderw=28:x=44:y=h-th-78`;
 }
 
 function videoFilter(label = "", size = 76) {
@@ -153,14 +167,15 @@ function muxVo(video, voStart, duration, out) {
   ]);
 }
 
-function renderAnalysisCue(cue, index) {
+function renderAnalysisCue(cue, index, { relStart = 0, durationOverride = null, suffix = "vo" } = {}) {
   const source = cue.assetPath;
-  const duration = Number(cue.end) - Number(cue.start);
+  const cueDuration = Number(cue.end) - Number(cue.start);
+  const duration = Math.max(0.05, Number(durationOverride ?? cueDuration));
   const sourceIn = Number(cue.sourceIn ?? 0);
   const freeze = Array.isArray(cue.freezeFrames) && cue.freezeFrames.length ? cue.freezeFrames[0] : null;
-  const silentPath = path.join(workDir, `cue-${String(index).padStart(3, "0")}-silent.mp4`);
+  const silentPath = path.join(workDir, `cue-${String(index).padStart(3, "0")}-${suffix}-silent.mp4`);
 
-  if (freeze) {
+  if (freeze && relStart === 0) {
     const freezeStart = Math.max(0.8, Math.min(duration - 0.2, Number(freeze.startOffset ?? 2.8)));
     const freezeDur = Math.max(0.5, Math.min(Number(freeze.duration ?? 5), duration - freezeStart));
     const parts = [];
@@ -177,51 +192,107 @@ function renderAnalysisCue(cue, index) {
     concatVideo(parts, silentPath);
   } else {
     const label = (cue.overlays ?? []).join("  |  ");
-    renderVideo({ source, start: sourceIn, duration, out: silentPath, label, size: index === 0 ? 64 : 58 });
+    const visualStart = freeze
+      ? Math.max(sourceIn, Number(freeze.sourceTime ?? sourceIn) - 0.35)
+      : sourceIn + Math.max(0, relStart * 0.6);
+    renderVideo({ source, start: visualStart, duration, out: silentPath, label, size: index === 0 ? 82 : 58 });
   }
 
-  const withVoPath = path.join(workDir, `cue-${String(index).padStart(3, "0")}-vo.mp4`);
-  muxVo(silentPath, Number(cue.start), duration, withVoPath);
+  const withVoPath = path.join(workDir, `cue-${String(index).padStart(3, "0")}-${suffix}-vo.mp4`);
+  muxVo(silentPath, Number(cue.start) + Math.max(0, relStart), duration, withVoPath);
   return withVoPath;
 }
 
-function renderPayoff(cue, index) {
+function renderPayoff(cue, index, { suffix = "broadcast-payoff", label = "LET IT PLAY", start = null, duration = null } = {}) {
   const freeze = Array.isArray(cue.freezeFrames) && cue.freezeFrames.length ? cue.freezeFrames[0] : null;
   if (!freeze) return null;
   const source = cue.assetPath;
   const sourceIn = Number(cue.sourceIn ?? 0);
-  const start = Math.max(sourceIn, Number(freeze.sourceTime ?? sourceIn) - 0.6);
-  const out = path.join(workDir, `cue-${String(index).padStart(3, "0")}-broadcast-payoff.mp4`);
+  const sourceOut = Number(cue.sourceOut ?? sourceIn + payoffSeconds);
+  const clipStart = Number.isFinite(Number(start)) ? Number(start) : Math.max(sourceIn, Number(freeze.sourceTime ?? sourceIn) - 0.6);
+  const clipDuration = Number.isFinite(Number(duration))
+    ? Math.max(0.5, Number(duration))
+    : Math.max(4.5, Math.min(7, sourceOut - clipStart + 0.9));
+  const out = path.join(workDir, `cue-${String(index).padStart(3, "0")}-${suffix}.mp4`);
   const inputHasAudio = hasAudio(source);
-  const args = [
-    "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-    "-ss", start.toFixed(3),
-    "-i", source,
-    "-t", payoffSeconds.toFixed(3),
-    "-vf", videoFilter("LET IT PLAY", 62),
-  ];
   if (inputHasAudio) {
-    args.push("-map", "0:v:0", "-map", "0:a:0", "-af", "volume=1.15", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2");
+    run([
+      "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+      "-ss", clipStart.toFixed(3),
+      "-i", source,
+      "-t", clipDuration.toFixed(3),
+      "-vf", videoFilter(label, 62),
+      "-map", "0:v:0", "-map", "0:a:0",
+      "-af", "volume=1.15",
+      "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
+      "-r", "30", "-g", "30", "-keyint_min", "30",
+      "-pix_fmt", "yuv420p",
+      "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",
+      "-movflags", "+faststart",
+      out,
+    ]);
   } else {
-    args.push("-f", "lavfi", "-t", payoffSeconds.toFixed(3), "-i", "anullsrc=channel_layout=stereo:sample_rate=48000", "-map", "0:v:0", "-map", "1:a:0", "-c:a", "aac", "-b:a", "192k");
+    run([
+      "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+      "-ss", clipStart.toFixed(3),
+      "-i", source,
+      "-f", "lavfi", "-t", clipDuration.toFixed(3),
+      "-i", "anullsrc=channel_layout=stereo:sample_rate=48000",
+      "-t", clipDuration.toFixed(3),
+      "-vf", videoFilter(label, 62),
+      "-map", "0:v:0", "-map", "1:a:0",
+      "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
+      "-r", "30", "-g", "30", "-keyint_min", "30",
+      "-pix_fmt", "yuv420p",
+      "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",
+      "-movflags", "+faststart",
+      out,
+    ]);
   }
-  args.push(
-    "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
-    "-r", "30", "-g", "30", "-keyint_min", "30",
-    "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-    out,
-  );
-  run(args);
   return out;
+}
+
+function renderCueSegments(cue, index) {
+  const duration = Number(cue.end) - Number(cue.start);
+  const freeze = Array.isArray(cue.freezeFrames) && cue.freezeFrames.length ? cue.freezeFrames[0] : null;
+  if (!freeze) return [renderAnalysisCue(cue, index)];
+
+  const freezeStart = Math.max(0.8, Math.min(duration - 0.2, Number(freeze.startOffset ?? 2.8)));
+  const freezeDur = Math.max(0.5, Math.min(Number(freeze.duration ?? 5), duration - freezeStart));
+  const readDuration = Math.min(duration, freezeStart + freezeDur);
+  const segments = [renderAnalysisCue(cue, index, {
+    durationOverride: readDuration,
+    suffix: "read",
+  })];
+
+  const sourceIn = Number(cue.sourceIn ?? 0);
+  const sourceOut = Number(cue.sourceOut ?? sourceIn + payoffSeconds);
+  const payoffStart = Math.max(sourceIn, Number(freeze.sourceTime ?? sourceIn) - 0.6);
+  const payoffDuration = Math.max(4.5, Math.min(7, sourceOut - payoffStart + 0.9));
+  const payoff = renderPayoff(cue, index, {
+    start: payoffStart,
+    duration: payoffDuration,
+    suffix: "inbeat-broadcast-payoff",
+    label: "LET IT PLAY",
+  });
+  if (payoff) segments.push(payoff);
+
+  const remaining = duration - readDuration;
+  if (remaining > 0.1) {
+    segments.push(renderAnalysisCue(cue, index, {
+      relStart: readDuration,
+      durationOverride: remaining,
+      suffix: "tail",
+    }));
+  }
+  return segments;
 }
 
 try {
   for (let i = 0; i < cues.length; i += 1) {
     const cue = cues[i];
     if (!fs.existsSync(cue.assetPath)) throw new Error(`Missing asset: ${cue.assetPath}`);
-    segmentPaths.push(renderAnalysisCue(cue, i));
-    const payoff = renderPayoff(cue, i);
-    if (payoff) segmentPaths.push(payoff);
+    segmentPaths.push(...renderCueSegments(cue, i));
   }
 
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
