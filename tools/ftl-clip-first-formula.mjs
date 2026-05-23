@@ -317,7 +317,11 @@ function buildEdit() {
         ].filter(Boolean);
 
     const freezeFrames = (play.freezeFrames ?? []).map((freeze, freezeIndex) => {
-      const fallbackOffset = Math.min(duration - 1, Math.max(0.6, freezeIndex === 0 ? 0.9 : duration * 0.42));
+      const defaultFreezeStart = Math.min(
+        Math.max(1.4, duration - 6.2),
+        Math.max(1.8, Math.min(2.8, duration * 0.22))
+      );
+      const fallbackOffset = Math.min(duration - 1, Math.max(0.6, freezeIndex === 0 ? defaultFreezeStart : duration * 0.42));
       const sourceTime = hasCutClip
         ? Math.max(0, Number(freeze.sourceTime) - Number(play.sourceIn))
         : Number(freeze.sourceTime);
