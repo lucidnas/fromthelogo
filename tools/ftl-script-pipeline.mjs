@@ -10,14 +10,17 @@ const TRANSCRIPTS = "/Users/abdul/transcripts";
 function usage() {
   console.error(`Usage:
   node tools/ftl-script-pipeline.mjs --slug SLUG --title TITLE --research PATH --clips PATH [options]
+  node tools/ftl-script-pipeline.mjs --mode news --slug SLUG --title TITLE --research PATH [options]
 
 Options:
+  --mode MODE             celebration (default) | news. News mode is image-led, makes
+                          --clips optional, and defaults to a 700-900 word target.
   --out PATH              Script output path. Default: ~/transcripts/script-SLUG.txt
   --generate              Generate a draft with Gemini from research + clip manifest
   --validate              Validate an existing script without generating
-  --model MODEL           Gemini model for draft generation. Default: gemini-3.1-pro-preview
-  --min-words N           Default: 1200
-  --max-words N           Default: 1400
+  --model MODEL           Gemini model for draft generation. Default: gemini-2.5-pro
+  --min-words N           Default: 1200 (celebration), 700 (news)
+  --max-words N           Default: 1400 (celebration), 900 (news)
   --skip-roast            Skip RoastMyVideo scoring
   --skip-fact-check       Skip Codex fact-check
   --report PATH           Report output path. Default: /Volumes/SSK SSD/ftl/videos/SLUG/script/script-report.json
@@ -44,11 +47,12 @@ function parseArgs(argv) {
   const args = {
     generate: false,
     validate: false,
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-2.5-pro",
     minWords: 1200,
     maxWords: 1400,
     roast: true,
     factCheck: true,
+    mode: "celebration",
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -66,13 +70,22 @@ function parseArgs(argv) {
     else if (arg === "--model") args.model = next();
     else if (arg === "--min-words") args.minWords = Number(next());
     else if (arg === "--max-words") args.maxWords = Number(next());
+    else if (arg === "--mode") args.mode = next();
     else if (arg === "--generate") args.generate = true;
     else if (arg === "--validate") args.validate = true;
     else if (arg === "--skip-roast") args.roast = false;
     else if (arg === "--skip-fact-check") args.factCheck = false;
     else usage();
   }
-  if (!args.slug || !args.title || !args.research || !args.clips) usage();
+  if (args.mode !== "celebration" && args.mode !== "news") usage();
+  // News scripts are image-led and have no clip manifest, so --clips is optional in news mode.
+  if (args.mode === "news") {
+    // For a 4-6 min news recap (~135 wpm), default to a tighter target unless the caller overrides.
+    if (args.minWords === 1200) args.minWords = 600;
+    if (args.maxWords === 1400) args.maxWords = 950;
+  }
+  const clipsRequired = args.mode !== "news";
+  if (!args.slug || !args.title || !args.research || (clipsRequired && !args.clips)) usage();
   if (!args.generate && !args.validate) args.validate = true;
   args.out ||= path.join(TRANSCRIPTS, `script-${args.slug}.txt`);
   args.report ||= `/Volumes/SSK SSD/ftl/videos/${args.slug}/script/script-report.json`;
@@ -117,6 +130,12 @@ function run(cmd, args, options = {}) {
 function read(filePath) {
   const resolved = resolvePath(filePath);
   if (!fs.existsSync(resolved)) throw new Error(`Missing file: ${resolved}`);
+  return fs.readFileSync(resolved, "utf8");
+}
+
+function readOptional(filePath, fallback = "") {
+  const resolved = resolvePath(filePath);
+  if (!fs.existsSync(resolved)) return fallback;
   return fs.readFileSync(resolved, "utf8");
 }
 
@@ -185,10 +204,57 @@ ${doctrine.voice}
 Write the final VO script only.`;
 }
 
+function buildNewsDraftPrompt({ title, researchText, doctrine, minWords, maxWords }) {
+  const newsDoc = readOptional("docs/formats/news-recap.md");
+  const dailyTakeDoc = readOptional("docs/formats/daily-take.md");
+  return `You are writing a From The Logo Caitlin Clark NEWS RECAP script (image-led, 4-6 minutes).
+
+TITLE:
+${title}
+
+MANDATORY FORMAT:
+- This is a trending-news recap told entirely through the Clark Lens: every beat answers
+  "what does this mean for Caitlin Clark?" even when she is not the subject.
+- Target ${minWords}-${maxWords} words of continuous spoken narration.
+- Cold open: lead with the take/news, no greeting, no "today we're". Hook in the first 5-10s.
+- News-desk urgency with film-room specificity. Sharp, punchy, declarative. First-person "I"
+  only for genuine opinion.
+- SENSATIONAL BUT STRICTLY FACTUAL: you may frame harder than the source outlets, but every
+  factual claim (quote, stat, score, date, contract, ruling) must come ONLY from the research
+  file below. Do NOT invent numbers, quotes, or events. If the research does not support a
+  claim, do not make it.
+- Attribute reporting to the outlet in the VO when stating a sourced fact ("Yahoo Sports is
+  reporting...", "according to The Athletic...").
+- Include exactly one direct subscribe CTA near the end.
+- End exactly with: New videos every week on From The Logo. See you next time.
+- Do not write markdown headers, labels, stage directions, or bracketed notes — VO only.
+- Avoid saying "clip", "sequence", "segment", "visual", "asset", or "B-roll" in the VO.
+
+RESEARCH (the ONLY allowed source of facts):
+${researchText}
+
+NEWS RECAP FORMAT DOC:
+${newsDoc || "(not yet written — follow the Daily Take voice below)"}
+
+DAILY TAKE VOICE REFERENCE:
+${dailyTakeDoc}
+
+SCRIPT RULES:
+${doctrine.scriptRules}
+
+HOOKS LIBRARY:
+${doctrine.hooks}
+
+VOICE PROFILE:
+${doctrine.voice}
+
+Write the final VO script only.`;
+}
+
 async function generateDraft(args, context) {
   if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is required for --generate");
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  const prompt = buildDraftPrompt(context);
+  const prompt = args.mode === "news" ? buildNewsDraftPrompt(context) : buildDraftPrompt(context);
   const result = await ai.models.generateContent({
     model: args.model,
     contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -232,11 +298,15 @@ console.log(JSON.stringify(result, null, 2));
 }
 
 function runFactCheck(args) {
-  const prompt = `Fact-check this From The Logo script against public recaps/box scores and the provided research file. Focus only on factual claims, unsupported player/action descriptions, final score, injuries, stats, timestamps, and whether any claim needs correction. Return concise pass/fail findings and suggested corrections.
+  const prompt = `Fact-check this From The Logo script against public recaps/box scores and the provided research file. Focus only on factual claims, unsupported player/action descriptions, final score, injuries, stats, timestamps, and whether any claim needs correction. Return concise findings and suggested corrections.
+
+End your response with a single final line that is EXACTLY one of:
+  VERDICT: PASS   (only if every factual claim in the script is accurate and supported)
+  VERDICT: FAIL   (if any claim is wrong, misleading, unsupported, or needs correction)
 
 Title: ${args.title}
 Research path: ${resolvePath(args.research)}
-Clip manifest path: ${resolvePath(args.clips)}
+Clip manifest path: ${args.clips ? resolvePath(args.clips) : "(none — image-led news recap)"}
 Script path: ${args.out}`;
   return run("codex", ["exec", "-c", 'sandbox_permissions=["disk-full-read-access"]', prompt], {
     cwd: REPO,
@@ -246,7 +316,13 @@ Script path: ${args.out}`;
 function passGate(report) {
   if (report.static.checks.some((check) => !check.pass)) return false;
   if (report.roast && !["strong", "fire"].includes(report.roast.overallSentiment)) return false;
-  if (report.factCheck && !/\bPASS\b/i.test(report.factCheck)) return false;
+  if (report.factCheckError) return false; // fact-check is a hard gate; a tooling failure must not pass
+  if (report.factCheck) {
+    // Require the explicit machine-readable verdict; a bare "PASS" elsewhere in the prose is not enough.
+    const verdictPass = /VERDICT:\s*PASS\b/i.test(report.factCheck);
+    const verdictFail = /VERDICT:\s*FAIL\b/i.test(report.factCheck);
+    if (verdictFail || !verdictPass) return false;
+  }
   return true;
 }
 
@@ -256,13 +332,13 @@ async function main() {
 
   const args = parseArgs(process.argv.slice(2));
   args.research = resolvePath(args.research);
-  args.clips = resolvePath(args.clips);
+  args.clips = args.clips ? resolvePath(args.clips) : null;
   args.out = resolvePath(args.out);
   args.report = resolvePath(args.report);
 
   const doctrine = loadDoctrine();
   const researchText = read(args.research);
-  const clipsText = read(args.clips);
+  const clipsText = args.clips ? read(args.clips) : "(none — image-led news recap, no clip manifest)";
 
   let script = "";
   if (args.generate) {
@@ -292,12 +368,25 @@ async function main() {
 
   if (args.roast) {
     console.log("Running RoastMyVideo script analysis...");
-    report.roast = await runRoast(script);
+    try {
+      report.roast = await runRoast(script);
+    } catch (err) {
+      // A Roast tooling failure (e.g. bun/roastmyvideo output parse error) should not crash the
+      // whole pipeline — the draft is already written. Surface it; treat as non-blocking.
+      report.roastError = String(err.message || err);
+      console.warn(`RoastMyVideo step failed (non-fatal): ${report.roastError}`);
+    }
   }
 
   if (args.factCheck) {
     console.log("Running Codex fact-check...");
-    report.factCheck = runFactCheck(args);
+    try {
+      report.factCheck = runFactCheck(args);
+    } catch (err) {
+      // Fact-check is a hard gate: a failure here must NOT pass. Record and let passGate fail.
+      report.factCheckError = String(err.message || err);
+      console.warn(`Codex fact-check failed: ${report.factCheckError}`);
+    }
   }
 
   report.passed = passGate(report);
