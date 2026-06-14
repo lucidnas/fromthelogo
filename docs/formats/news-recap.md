@@ -16,12 +16,12 @@ a report, a trade rumor, a social post) rather than a clip-worthy on-court play.
 1. **Clark Lens (mandatory).** Every story is told through "what does this mean for Caitlin
    Clark?" — even when she is not the subject. If a story has no Clark/Fever connection, it is
    not an FTL news recap.
-2. **Caitlin Clark in the title.** Always. Titles are **sensational and curiosity-driven, in the
-   style of the source outlet headlines** (SI / Yahoo / Athlon) — open a curiosity gap, tease the
-   stakes, don't give away the payoff. **Do NOT use the Clark Celebration formula** ("THIS Caitlin
-   Clark ___ is GENIUS/UNREAL/INSANE") and **no yellow/awe word** — that hype pattern is the
-   Celebration lane's and reads as clickbait on a news beat. Examples: "Caitlin Clark And Aliyah
-   Boston Just Did Something No WNBA Duo Ever Has", "The WNBA Just Put Caitlin Clark On The Clock".
+2. **Caitlin Clark in the title.** Always. Titles use the **curiosity-gap hook formulas in
+   `research/news-title-hooks.md`** (reverse-engineered from real SI / Yahoo / Athlon / B-R
+   headlines) — withhold the payoff, tease the stakes, don't state the stat. **Do NOT use the Clark
+   Celebration formula** ("THIS Caitlin Clark ___ is GENIUS/UNREAL/INSANE") and **no yellow/awe
+   word** — that hype pattern is the Celebration lane's and reads as clickbait on a news beat.
+   **Read `research/news-title-hooks.md` before writing any news title.**
 3. **Sensational but strictly factual.** You may frame harder than the source outlet. You may
    NOT invent. Every on-screen claim and every sourced VO statement must trace to a real source
    captured in the research file. Attribute reporting in the VO ("Yahoo Sports is reporting…",

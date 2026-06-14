@@ -213,8 +213,11 @@ TITLE:
 ${title}
 
 MANDATORY FORMAT:
-- This is a trending-news recap told entirely through the Clark Lens: every beat answers
-  "what does this mean for Caitlin Clark?" even when she is not the subject.
+- This is the VIDEO VERSION of the source outlet's article: keep the article's angle, but cover it
+  MORE EXPLICITLY and MORE CASUALLY than the outlet — the faceless Clark-fan voice, blunt and direct,
+  saying out loud what the article only implies. Same facts and angle; louder and more opinionated.
+- Told entirely through the Clark Lens: every beat answers "what does this mean for Caitlin Clark?"
+  even when she is not the subject.
 - Target ${minWords}-${maxWords} words of continuous spoken narration.
 - Cold open: lead with the take/news, no greeting, no "today we're". Hook in the first 5-10s.
 - News-desk urgency with film-room specificity. Sharp, punchy, declarative. First-person "I"

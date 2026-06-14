@@ -93,15 +93,26 @@ For EACH story you must:
   3. Pull the CORE FACTS as discrete, verifiable receipts — each with the specific source + URL it
      came from. Quotes must be verbatim. Numbers (stats, salary, dates) must be exact. Do NOT
      paraphrase a fact into something stronger than the source supports.
-  4. Propose an FTL title that is SENSATIONAL AND CURIOSITY-DRIVEN, in the style of the source outlets'
-     own article headlines (SI / Yahoo / Athlon / ClutchPoints) — open a curiosity gap, tease the
-     stakes, and make the reader need to click WITHOUT giving away the payoff. It must be AS
-     SENSATIONAL AS, OR MORE THAN, the outlet's headline, but STRICTLY FACTUAL — every word defensible
-     from the receipts. Caitlin Clark's name MUST appear in the title.
-     DO NOT use the Clark Celebration formula "THIS Caitlin Clark ___ is GENIUS/UNREAL/INSANE" and DO
-     NOT use an awe/yellow word — that hype pattern is for a different lane and reads as clickbait on a
-     news beat. Think news-headline curiosity, e.g. "Caitlin Clark And Aliyah Boston Just Did Something
-     No WNBA Duo Ever Has" or "The WNBA Just Put Caitlin Clark On The Clock".
+  4. Treat this story as the VIDEO VERSION of the outlet's article: adopt the article's angle and the
+     strength of its hook (don't invent a different story), then rebuild its headline as a CURIOSITY-GAP
+     YouTube title. The #1 rule: WITHHOLD THE PAYOFF — name that something big/historic/absurd happened,
+     do NOT state the stat/number/punchline (a wire headline spells the fact for SEO; a YouTube title
+     hides it for the click). It must be AS SENSATIONAL AS, OR MORE THAN, the outlet's headline, but
+     STRICTLY FACTUAL. Caitlin Clark's name MUST appear. NEVER use the Celebration awe/yellow word
+     (GENIUS/UNREAL/INSANE/etc.) or the "THIS Caitlin Clark ___ is ___" pattern. (FTL's only spin vs
+     the article is delivery — more explicit and casual — never a different angle or invented facts.)
+     Hook formulas (pick the best fit, slot in today's facts):
+       - Withheld Superlative: "Caitlin Clark Just Set An Absurd WNBA Record No One Saw Coming"
+       - Domination: "Caitlin Clark And [teammate] Were Just Too Much For [opponent]"
+       - Quote-Tease/Reaction: "Caitlin Clark Wasn't Having It After This '[word]' Call"
+       - Found It/Missing Piece: "Caitlin Clark Just Found The One Thing The Fever Were Missing"
+       - Hidden Hero/Secret Behind: "The Real Reason Behind Caitlin Clark's [result] Isn't What You Think"
+       - Label/New Status: "Caitlin Clark Just Earned A New Title — And It's Not What You'd Guess"
+       - Authority/Villain: "The WNBA Just Put Caitlin Clark On The Clock"
+       - Prophecy/Open Loop: "Caitlin Clark Just Changed The Fever's Biggest Question"
+       - Just Ask/Simple Answer: "The Fever's Fix Was Simple — Just Ask Caitlin Clark"
+     Self-check: if a wire service could have written it verbatim, it spells out the fact — rewrite to
+     withhold. Provide 2 alt titles using DIFFERENT formulas.
   5. Sketch a VISUAL PLAN: 5-9 beats for an image-led 4-6 minute recap. For each beat give a type:
        - "ai-image"     : conceptual editorial image we will generate (the safe default / majority)
        - "receipt"      : a real screenshot we will show briefly + attribute (headline, tweet, box score)
