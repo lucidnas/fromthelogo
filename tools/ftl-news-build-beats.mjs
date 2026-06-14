@@ -28,8 +28,11 @@ const IMAGE_GEN = path.join(process.env.HOME, ".claude/skills/codex-image-gen/sc
 
 const FTL_IMAGE_STYLE =
   "High-resolution editorial sports-news illustration, cinematic dramatic lighting, " +
-  "Indiana Fever navy/gold palette, bold and modern, broadcast-quality, no text unless specified, " +
-  "no watermarks, no logos of real brands.";
+  "Indiana Fever navy/gold palette, bold and modern, broadcast-quality. Real brand/team logos " +
+  "(WNBA, Indiana Fever, etc.) are allowed. CRITICAL: do NOT render any scoreboard, final score, " +
+  "statistics, jersey numbers, dates, or readable text of any kind — AI-generated text is unreliable " +
+  "and can display FALSE information. Render mood and concept only; any factual number/score/quote " +
+  "belongs on a separate receipt card, never inside this image.";
 
 function usage(msg) {
   if (msg) console.error(`Error: ${msg}\n`);
@@ -139,6 +142,11 @@ Produce a beat-by-beat visual plan that covers the WHOLE script in order. Rules:
     "broll-video"  : a short moving clip of our Caitlin Clark game footage. Give "brollQuery".
 - Prefer ai-image for the majority; use receipt for every cited fact; use broll only for genuine
   on-court action references. Do NOT invent receipts — only use facts present in the research.
+- CRITICAL: ai-image prompts must NEVER request a scoreboard, final score, statistics, jersey
+  numbers, dates, standings, or any readable on-screen text/headline — AI image text is unreliable
+  and will hallucinate FALSE numbers/teams. If a score, stat, headline, or quote needs to appear on
+  screen, make it a "receipt" beat (typeset accurately), not an ai-image. Keep ai-image prompts to
+  mood/metaphor/concept only.
 
 Return ONLY a single fenced \`\`\`json block:
 \`\`\`json
@@ -280,34 +288,50 @@ function wrapText(text, maxChars) {
   return lines;
 }
 
-function ffEscapeInline(text) {
-  // Escaping for an inline drawtext text= value.
-  return String(text).replace(/\\/g, "\\\\").replace(/:/g, "\\:").replace(/'/g, "’").replace(/%/g, "\\%");
-}
-
 // Render a deterministic, always-legible receipt CARD with ffmpeg drawtext. codex image_gen
 // (gpt-image-2) cannot reliably spell long exact headline/stat text, so receipts are NOT AI-drawn —
 // they are typeset directly. The text is therefore guaranteed accurate to the source.
+//
+// Each wrapped line is its OWN drawtext reading its OWN textfile: this (a) avoids ffmpeg drawtext
+// rendering an embedded "\n" as a tofu box (a multi-line textfile quirk), and (b) needs zero
+// escaping since the text lives in files, not in the comma-delimited filter string.
 function renderReceiptCard(receiptText, attribution, outPath) {
   if (!RECEIPT_FONT) throw new Error("no usable system font for receipt cards");
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   const lines = wrapText(receiptText, 30).slice(0, 5);
   const fontSize = lines.length <= 2 ? 84 : lines.length === 3 ? 72 : 60;
-  const tmp = path.join(require_tmpdir(), `ftl-receipt-${path.basename(outPath, ".png")}.txt`);
-  fs.writeFileSync(tmp, lines.join("\n"));
-  const attr = ffEscapeInline((attribution || "Source").toUpperCase());
+  const lineH = Math.round(fontSize * 1.34);
+  const startY = Math.round((1080 - lines.length * lineH) / 2);
+  const base = path.basename(outPath, ".png");
+  const tmps = [];
+  const writeTmp = (suffix, text) => {
+    const tf = path.join(require_tmpdir(), `ftl-receipt-${base}-${suffix}.txt`);
+    fs.writeFileSync(tf, text);
+    tmps.push(tf);
+    return tf;
+  };
+
+  const headlineDraws = lines.map((ln, i) => {
+    const tf = writeTmp(`l${i}`, ln);
+    const y = startY + i * lineH;
+    return `drawtext=fontfile=${RECEIPT_FONT}:textfile=${tf}:fontcolor=white:fontsize=${fontSize}:x=(w-text_w)/2:y=${y}`;
+  });
+  const labelTf = writeTmp("label", "THE RECEIPT");
+  const attrTf = writeTmp("attr", (attribution || "Source").toUpperCase());
+
   const vf = [
     `drawbox=x=150:y=232:w=1620:h=5:color=0xFFD648@0.95:t=fill`,
-    `drawtext=fontfile=${RECEIPT_FONT}:text='THE RECEIPT':fontcolor=0xFFD648:fontsize=40:x=150:y=176`,
-    `drawtext=fontfile=${RECEIPT_FONT}:textfile=${tmp}:fontcolor=white:fontsize=${fontSize}:line_spacing=20:x=(w-text_w)/2:y=(h-text_h)/2`,
-    `drawtext=fontfile=${RECEIPT_FONT}:text='${attr}':fontcolor=0xFFD648:fontsize=44:x=150:y=h-150`,
+    `drawtext=fontfile=${RECEIPT_FONT}:textfile=${labelTf}:fontcolor=0xFFD648:fontsize=40:x=150:y=176`,
+    ...headlineDraws,
+    `drawtext=fontfile=${RECEIPT_FONT}:textfile=${attrTf}:fontcolor=0xFFD648:fontsize=44:x=150:y=h-150`,
   ].join(",");
-  const proc = spawnSync(
+
+  spawnSync(
     "ffmpeg",
     ["-y", "-f", "lavfi", "-i", "color=c=0x0a1f3d:s=1920x1080", "-vf", vf, "-frames:v", "1", outPath],
     { stdio: "inherit" },
   );
-  try { fs.rmSync(tmp, { force: true }); } catch {}
+  for (const t of tmps) { try { fs.rmSync(t, { force: true }); } catch { /* best effort */ } }
   stripAppleDouble(outPath);
   if (!isRealPng(outPath)) throw new Error(`receipt card render failed for ${outPath}`);
 }

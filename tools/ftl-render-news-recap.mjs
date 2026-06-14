@@ -36,6 +36,9 @@ Options:
   --music-volume V     Default: 0.18
   --whisper-model M    Default: base.en
   --out PATH           Render output. Default: <video-dir>/render/renders/final-v1-<quality>.mp4
+  --remote             Render on Modal (cloud) instead of locally: prep the HyperFrames project
+                       here, then bundle + upload + render on Modal + fetch the MP4.
+                       Offloads the heavy encode off this machine. Requires modal auth.
   --prepare-only       Build project + alignment, skip inspect/render (for validation).`);
   process.exit(1);
 }
@@ -57,6 +60,7 @@ function parseArgs(argv) {
     else if (a === "--music-volume") args.musicVolume = Number(next());
     else if (a === "--whisper-model") args.whisperModel = next();
     else if (a === "--out") args.out = next();
+    else if (a === "--remote") args.remote = true;
     else if (a === "--prepare-only") args.prepareOnly = true;
     else if (a === "--help" || a === "-h") usage();
     else usage(`unknown flag ${a}`);
@@ -67,9 +71,10 @@ function parseArgs(argv) {
 }
 
 function run(cmd, cmdArgs, opts = {}) {
+  const { allowFail, ...spawnOpts } = opts;
   console.log(`$ ${cmd} ${cmdArgs.map((x) => (String(x).includes(" ") ? JSON.stringify(x) : x)).join(" ")}`);
-  const proc = spawnSync(cmd, cmdArgs, { stdio: "inherit", env: process.env, ...opts });
-  if (proc.status !== 0) throw new Error(`${cmd} exited ${proc.status}`);
+  const proc = spawnSync(cmd, cmdArgs, { stdio: "inherit", env: process.env, ...spawnOpts });
+  if (proc.status !== 0 && !allowFail) throw new Error(`${cmd} exited ${proc.status}`);
 }
 
 function probeDuration(file) {
@@ -428,11 +433,63 @@ function main() {
   const out = args.out || path.join(projectDir, "renders", `final-v1-${args.quality}.mp4`);
   fs.mkdirSync(path.dirname(out), { recursive: true });
 
+  if (args.remote) {
+    remoteRender(projectDir, out, args.quality, args.slug);
+    console.log(JSON.stringify({ projectDir, render: out, mode: "modal" }, null, 2));
+    return;
+  }
+
   // Inspect (sanity), then render through the cleanup wrapper (kills leftover Chrome/ffmpeg).
   run("npx", ["hyperframes", "inspect", "--samples", "10", "--json"], { cwd: projectDir });
   run("node", [path.join(REPO, "tools/render-hyperframes-clean.mjs"), "--output", out, "--quality", args.quality, "--fps", "30"], { cwd: projectDir });
 
   console.log(JSON.stringify({ projectDir, render: out }, null, 2));
+}
+
+function resolveModal() {
+  const candidates = [
+    process.env.MODAL_BIN,
+    `${process.env.HOME}/.pyenv/versions/3.11.0/envs/modal-env/bin/modal`,
+  ].filter(Boolean);
+  for (const c of candidates) if (fs.existsSync(c)) return c;
+  return "modal"; // hope it's on PATH
+}
+
+// Render the prepared HyperFrames project on Modal: bundle the project dir (index.html +
+// hyperframes.json + assets/, NO node_modules), upload to the shared volume, run the cloud
+// `hyperframes render`, fetch the MP4, and clean up the remote job.
+function remoteRender(projectDir, out, quality, slug) {
+  const MODAL = resolveModal();
+  const VOLUME = "video-render-io";
+  const APP = path.join(REPO, "tools/modal/hyperframes_render_modal_app.py");
+  const job = `ftl-${slug}-${Date.now()}`;
+  const stage = fs.mkdtempSync(path.join(require_os_tmpdir(), "ftl-modal-"));
+  const bundle = path.join(stage, "project.tar.gz");
+
+  // Bundle only what the cloud render needs (hyperframes is global in the Modal image).
+  const members = ["index.html", "hyperframes.json", "assets"];
+  if (fs.existsSync(path.join(projectDir, "package.json"))) members.push("package.json");
+  console.log(`Bundling project (${members.join(", ")})...`);
+  run("tar", ["czf", bundle, "-C", projectDir, ...members]);
+  const sizeMb = (fs.statSync(bundle).size / (1024 * 1024)).toFixed(0);
+  console.log(`Bundle: ${sizeMb} MB  job=${job}`);
+
+  run(MODAL, ["volume", "create", VOLUME], { allowFail: true });
+  console.log("Uploading to Modal volume...");
+  run(MODAL, ["volume", "put", VOLUME, bundle, `/hfjobs/${job}/project.tar.gz`]);
+
+  console.log(`Rendering on Modal (quality=${quality})...`);
+  run(MODAL, ["run", APP, "--job-id", job, "--quality", quality]);
+
+  console.log("Downloading result...");
+  run(MODAL, ["volume", "get", "--force", VOLUME, `/hfjobs/${job}/ep.mp4`, out]);
+
+  run(MODAL, ["volume", "rm", VOLUME, `/hfjobs/${job}`, "-r"], { allowFail: true });
+  try { fs.rmSync(stage, { recursive: true, force: true }); } catch { /* best effort */ }
+}
+
+function require_os_tmpdir() {
+  return process.env.TMPDIR || "/tmp";
 }
 
 export { normalize, flattenWords, matchExcerptStart, alignBeats, buildCaptions, buildCaptionsFromScript, splitScriptIntoCues, buildHtml };
