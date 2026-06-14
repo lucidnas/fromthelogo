@@ -36,9 +36,10 @@ Options:
   --music-volume V     Default: 0.18
   --whisper-model M    Default: base.en
   --out PATH           Render output. Default: <video-dir>/render/renders/final-v1-<quality>.mp4
-  --remote             Render on Modal (cloud) instead of locally: prep the HyperFrames project
-                       here, then bundle + upload + render on Modal + fetch the MP4.
-                       Offloads the heavy encode off this machine. Requires modal auth.
+                       (DEFAULT: renders on Modal — prep happens locally, the heavy HyperFrames
+                       encode is offloaded to the cloud and the MP4 fetched back. Requires modal auth.)
+  --local              Render locally instead of on Modal (Chromium + ffmpeg on this machine).
+  --remote             Explicitly force the Modal render (already the default).
   --prepare-only       Build project + alignment, skip inspect/render (for validation).`);
   process.exit(1);
 }
@@ -60,7 +61,8 @@ function parseArgs(argv) {
     else if (a === "--music-volume") args.musicVolume = Number(next());
     else if (a === "--whisper-model") args.whisperModel = next();
     else if (a === "--out") args.out = next();
-    else if (a === "--remote") args.remote = true;
+    else if (a === "--remote") args.local = false;
+    else if (a === "--local") args.local = true;
     else if (a === "--prepare-only") args.prepareOnly = true;
     else if (a === "--help" || a === "-h") usage();
     else usage(`unknown flag ${a}`);
@@ -433,13 +435,14 @@ function main() {
   const out = args.out || path.join(projectDir, "renders", `final-v1-${args.quality}.mp4`);
   fs.mkdirSync(path.dirname(out), { recursive: true });
 
-  if (args.remote) {
+  // Modal is the default render target for the news lane; --local opts out.
+  if (!args.local) {
     remoteRender(projectDir, out, args.quality, args.slug);
     console.log(JSON.stringify({ projectDir, render: out, mode: "modal" }, null, 2));
     return;
   }
 
-  // Inspect (sanity), then render through the cleanup wrapper (kills leftover Chrome/ffmpeg).
+  // Local render: inspect (sanity), then render through the cleanup wrapper (kills leftover Chrome/ffmpeg).
   run("npx", ["hyperframes", "inspect", "--samples", "10", "--json"], { cwd: projectDir });
   run("node", [path.join(REPO, "tools/render-hyperframes-clean.mjs"), "--output", out, "--quality", args.quality, "--fps", "30"], { cwd: projectDir });
 

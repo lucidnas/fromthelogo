@@ -90,7 +90,8 @@ AI render or an owned b-roll frame over a scraped news photo whenever it can car
 5. Beats     node tools/ftl-news-build-beats.mjs --slug SLUG
              → beats.json + images/ (+ clips/ for video beats), materialized from the visual plan
 
-6. Render    node tools/ftl-render-news-recap.mjs --slug SLUG
+6. Render    node tools/ftl-render-news-recap.mjs --slug SLUG   (Modal by default: prep is local,
+             the heavy HyperFrames encode is offloaded to the cloud; add --local to render here.)
              → /Volumes/SSK SSD/ftl/videos/SLUG/render/renders/final-v1-approved.mp4
 
 7. QC        node tools/ftl-news-recap-qc.mjs --video=<final.mp4> --title "TITLE"
