@@ -45,7 +45,7 @@ Options:
 }
 
 function parseArgs(argv) {
-  const args = { quality: "draft", music: DEFAULT_MUSIC, musicVolume: 0.18, whisperModel: "base.en" };
+  const args = { quality: "draft", music: DEFAULT_MUSIC, musicVolume: 0.18, whisperModel: "base.en", captionMaxWords: 11 };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const next = () => {
@@ -60,6 +60,7 @@ function parseArgs(argv) {
     else if (a === "--music") args.music = next();
     else if (a === "--music-volume") args.musicVolume = Number(next());
     else if (a === "--whisper-model") args.whisperModel = next();
+    else if (a === "--caption-max-words") args.captionMaxWords = Number(next());
     else if (a === "--out") args.out = next();
     else if (a === "--remote") args.local = false;
     else if (a === "--local") args.local = true;
@@ -150,12 +151,12 @@ function flattenWords(whisperJson) {
   return words;
 }
 
-// Find the timeline start for a beat's narration_excerpt by best contiguous word match.
-function matchExcerptStart(words, excerpt) {
-  const needle = normalize(excerpt).split(" ").filter(Boolean);
+// Best contiguous match of a normalized needle in the word stream, searching from startIndex.
+// Returns {time, index} or null.
+function matchExcerptAt(words, needle, startIndex = 0) {
   if (!needle.length || !words.length) return null;
   let best = { score: 0, idx: -1 };
-  for (let i = 0; i <= words.length - 1; i++) {
+  for (let i = Math.max(0, startIndex); i <= words.length - 1; i++) {
     let score = 0;
     for (let j = 0; j < needle.length && i + j < words.length; j++) {
       if (words[i + j].t === needle[j]) score += 1;
@@ -164,7 +165,13 @@ function matchExcerptStart(words, excerpt) {
     if (score > best.score) best = { score, idx: i };
   }
   if (best.idx === -1 || best.score < Math.max(1, needle.length * 0.4)) return null;
-  return words[best.idx].start;
+  return { time: words[best.idx].start, index: best.idx };
+}
+
+// Find the timeline start for a beat's narration_excerpt by best contiguous word match.
+function matchExcerptStart(words, excerpt) {
+  const r = matchExcerptAt(words, normalize(excerpt).split(" ").filter(Boolean), 0);
+  return r ? r.time : null;
 }
 
 function alignBeats(beats, words, totalDuration) {
@@ -224,9 +231,20 @@ function splitScriptIntoCues(scriptText, maxWords = 11) {
 // Build captions from the SCRIPT (correct names/spelling) timed against Whisper word timestamps.
 // Whisper base.en mishears proper nouns ("Aliyah" -> "Alia", "Aliyah Boston" -> "a LeBron"), so we
 // only borrow its timing, never its text.
-function buildCaptionsFromScript(scriptText, words, totalDuration) {
-  const phrases = splitScriptIntoCues(scriptText);
-  const cues = phrases.map((text) => ({ text, _start: matchExcerptStart(words, text) }));
+function buildCaptionsFromScript(scriptText, words, totalDuration, maxWords = 11) {
+  const phrases = splitScriptIntoCues(scriptText, maxWords);
+  // FORWARD-ONLY alignment: each phrase is matched only at/after the previous phrase's position, so
+  // a short line ("Read that again.") can't grab a far-off identical-ish match and desync captions.
+  let cursor = 0;
+  const cues = phrases.map((text) => {
+    const needle = normalize(text).split(" ").filter(Boolean);
+    const r = needle.length ? matchExcerptAt(words, needle, cursor) : null;
+    if (r) {
+      cursor = r.index + Math.max(1, Math.floor(needle.length * 0.5));
+      return { text, _start: r.time };
+    }
+    return { text, _start: null };
+  });
   if (!cues.length) return [];
   cues[0]._start = 0;
   // Interpolate unmatched / out-of-order starts (same approach as alignBeats).
@@ -404,7 +422,7 @@ function main() {
   const scriptPath = args.script || path.join(process.env.HOME, "transcripts", `script-${args.slug}.txt`);
   let captions;
   if (fs.existsSync(scriptPath)) {
-    captions = buildCaptionsFromScript(fs.readFileSync(scriptPath, "utf8"), words, duration);
+    captions = buildCaptionsFromScript(fs.readFileSync(scriptPath, "utf8"), words, duration, args.captionMaxWords);
     console.log(`Captions from script: ${scriptPath}`);
   } else {
     captions = buildCaptions(whisperJson, duration);

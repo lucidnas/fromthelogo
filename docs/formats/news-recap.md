@@ -7,7 +7,8 @@ The reactive **news lane**. FTL scans the major outlets covering Caitlin Clark /
 the compilation lanes. Use it when the day's story is a narrative/news beat (a quote, a ruling,
 a report, a trade rumor, a social post) rather than a clip-worthy on-court play.
 
-**Voice:** Johnny ElevenLabs (Australian Neutral default). **Renderer:** Hyperframes.
+**Voice:** Chatterbox TTS on Modal — the voice-cloned "aym explains" narration voice, slowed with
+natural pauses (`tools/ftl-chatterbox-vo.mjs`). **Renderer:** Hyperframes (Modal by default).
 
 ---
 
@@ -85,7 +86,9 @@ AI render or an owned b-roll frame over a scraped news photo whenever it can car
                --research research/news-ideas/YYYY-MM-DD-news-stories.md --generate
              (news mode: no --clips needed, 700-900 word target, Roast + Codex fact-check gate)
 
-4. VO        /ftl-vo SLUG     (Johnny, → /Volumes/SSK SSD/ftl/videos/SLUG/vo.mp3)
+4. VO        node tools/ftl-chatterbox-vo.mjs ~/transcripts/script-SLUG.txt /Volumes/.../SLUG/vo.mp3
+             (Chatterbox TTS on Modal, voice-cloned "aym explains" voice, slowed + natural pauses,
+              TTS number normalization. Then delete vo.json so the render re-aligns to the new VO.)
 
 5. Beats     node tools/ftl-news-build-beats.mjs --slug SLUG
              → beats.json + images/ (+ clips/ for video beats), materialized from the visual plan
