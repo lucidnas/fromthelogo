@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.ftl.daily-news-recap</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/abdul/code/fromthelogo/tools/ftl-daily-news-recap.sh</string>
+  </array>
+
+  <!-- Fire every morning at 9:07 local (off the :00 mark). If the Mac is asleep/off at the time,
+       launchd runs it at the next wake. Needs the Mac awake + the SSD mounted. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>9</integer>
+    <key>Minute</key>
+    <integer>7</integer>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/abdul/code/fromthelogo/.claude/daily-news-recap.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/abdul/code/fromthelogo/.claude/daily-news-recap.err.log</string>
+</dict>
+</plist>
