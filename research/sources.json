@@ -1,0 +1,62 @@
+{
+  "_note": "FTL researcher sources. Add/remove freely. youtube = @handles (podcasts/shows to mine for viral clips). x_accounts = handles that post viral CC/WNBA/NBA video clips. keywords = what makes an item relevant.",
+  "youtube_podcasts": [
+    {
+      "handle": "TheRobinLundberg",
+      "lane": "wnba",
+      "note": "daily Caitlin/Fever takes \u2014 primary"
+    },
+    {
+      "handle": "PodcastPShow",
+      "lane": "nba",
+      "note": "Paul George pod"
+    },
+    {
+      "handle": "allthesmoke",
+      "lane": "nba",
+      "note": "Matt Barnes / Stephen Jackson"
+    },
+    {
+      "handle": "ClubShayShay",
+      "lane": "nba",
+      "note": "Shannon Sharpe"
+    },
+    {
+      "handle": "GilsArenaShow",
+      "lane": "nba",
+      "note": "Gilbert Arenas \u2014 verify handle"
+    },
+    {
+      "handle": "ThePatBevPodcastwithRoneShow",
+      "lane": "nba",
+      "note": "Pat Beverley \u2014 verify handle"
+    }
+  ],
+  "x_accounts": [
+    "IndianaFever",
+    "WNBA",
+    "NBA",
+    "LegionHoops",
+    "Buckets",
+    "CourtsideClub_",
+    "jammles9",
+    "TheHoopCentral",
+    "ClarkReport",
+    "underdognba",
+    "NBACentel"
+  ],
+  "keywords": [
+    "caitlin clark",
+    "clark",
+    "fever",
+    "wnba",
+    "sophie cunningham",
+    "aliyah boston"
+  ],
+  "formats": {
+    "split_clip": "podcast/pundit soundbite (top) + action (bottom) \u2014 the ftl-split-short default",
+    "slowmo_highlight": "slow-motion / close-up Caitlin Clark highlight (game replay or fan clip), vertical, music bed \u2014 TOP performer",
+    "play_ranking": "ranked list of Caitlin Clark plays (multiple clips + rank overlay)",
+    "nba_split_clip": "same split-clip format but NBA viral-pod soundbite \u2014 algorithm finds the audience"
+  }
+}
