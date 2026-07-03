@@ -17,7 +17,7 @@ Session lives in PROFILE_DIR (persistent context). Media stays on the SSD.
 
 Run with: ~/.pyenv/versions/tiktok-browser-agents/bin/python
 """
-import argparse, os, subprocess, sys, time
+import argparse, json, os, subprocess, sys, time
 
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
@@ -239,8 +239,37 @@ def _switch_channel(page, hint):
     page.wait_for_timeout(5000)
 
 
-def upload(file, title, desc="", headed=False):
+def _probe_kind(file):
+    """short if vertical AND <=180s, else long."""
+    try:
+        wh = subprocess.check_output(["ffprobe", "-v", "error", "-select_streams", "v:0",
+              "-show_entries", "stream=width,height", "-of", "csv=p=0", file]).decode().strip()
+        w, h = (int(x) for x in wh.split(",")[:2])
+        d = float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries",
+              "format=duration", "-of", "csv=p=0", file]).decode().strip())
+        return "short" if (h > w and d <= 180) else "long"
+    except Exception:
+        return "long"
+
+
+def auto_meta(file, kind=None):
+    """Generate SEO/recommendation-optimized metadata via tools/ftl_meta.py."""
+    kind = kind or _probe_kind(file)
+    here = os.path.dirname(os.path.abspath(__file__))
+    out = subprocess.run([sys.executable, os.path.join(here, "ftl_meta.py"), "generate",
+                          "--file", file, "--kind", kind, "--json"],
+                         capture_output=True, text=True, timeout=340)
+    line = [l for l in out.stdout.splitlines() if l.strip().startswith("{")][-1]
+    m = json.loads(line)
+    print(f"auto-meta ({kind}): {m['title']}")
+    return m["title"], m["description"], m.get("tags", [])
+
+
+def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None):
     assert os.path.isfile(file), f"missing file: {file}"
+    tags = tags or []
+    if auto or not title:
+        title, desc, tags = auto_meta(file, kind)
     with sync_playwright() as p:
         c = ctx(p, headed)
         page = c.pages[0] if c.pages else c.new_page()
@@ -285,6 +314,19 @@ def upload(file, title, desc="", headed=False):
             print("audience: not made for kids")
         except PWTimeout:
             print("WARN: kids radio not found (may be preset)")
+
+        # Tags live under "Show more" -> Tags field (chip input, comma-separated).
+        if tags:
+            try:
+                page.get_by_text("Show more", exact=False).first.click(timeout=8000)
+                page.wait_for_timeout(1500)
+                tin = page.locator('#tags-container input, input[aria-label="Tags"], #text-input').first
+                tin.wait_for(state="visible", timeout=8000)
+                tin.click()
+                tin.type(", ".join(tags) + ",", delay=3)
+                print(f"tags set: {len(tags)}")
+            except Exception as e:
+                print("WARN: tags field not filled:", str(e).splitlines()[0][:80])
         shot(page, "details-filled")
 
         # Wait for the raw upload to finish. Read the whole dialog text and the
@@ -439,8 +481,11 @@ if __name__ == "__main__":
     st.add_argument("--headed", action="store_true")
     u = sub.add_parser("upload")
     u.add_argument("--file", required=True)
-    u.add_argument("--title", required=True)
+    u.add_argument("--title", default="")  # omit (or --auto) to auto-generate SEO metadata
     u.add_argument("--desc", default="")
+    u.add_argument("--tags", default="")     # comma-separated; ignored when --auto
+    u.add_argument("--auto", action="store_true")
+    u.add_argument("--kind", choices=["short", "long"], default=None)
     u.add_argument("--headed", action="store_true")
     v = sub.add_parser("verify")
     v.add_argument("--title", required=True)
@@ -465,7 +510,8 @@ if __name__ == "__main__":
             print("logged in:" , "studio.youtube.com/channel" in page.url)
             c.close()
     elif a.cmd == "upload":
-        upload(a.file, a.title, a.desc, a.headed)
+        tag_list = [t.strip() for t in a.tags.split(",") if t.strip()]
+        upload(a.file, a.title, a.desc, a.headed, tags=tag_list, auto=a.auto, kind=a.kind)
     elif a.cmd == "verify":
         verify(a.title)
     elif a.cmd == "list":
