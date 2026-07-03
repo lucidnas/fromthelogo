@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.ftl.yt-uploader</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/abdul/.pyenv/versions/tiktok-browser-agents/bin/python</string>
+    <string>/Users/abdul/code/fromthelogo/tools/yt_studio_upload.py</string>
+    <string>drain-queue</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/bin:/bin:/usr/local/bin</string>
+  </dict>
+  <!-- run once a day at 09:00 in the user's GUI (Aqua) session so headed Chrome + Keychain work -->
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
+  <key>StandardOutPath</key>
+  <string>/Volumes/SSK SSD/fromthelogo-cache/upload-queue/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Volumes/SSK SSD/fromthelogo-cache/upload-queue/launchd.err.log</string>
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>

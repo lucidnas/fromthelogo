@@ -239,6 +239,40 @@ def _switch_channel(page, hint):
     page.wait_for_timeout(5000)
 
 
+QUEUE_DIR = "/Volumes/SSK SSD/fromthelogo-cache/upload-queue"
+QUEUE_DONE = "/Volumes/SSK SSD/fromthelogo-cache/upload-queue/uploaded"
+QUEUE_LOG = "/Volumes/SSK SSD/fromthelogo-cache/upload-queue/drain.log"
+
+
+def drain_queue():
+    """Scheduled entry point: upload every *.mp4 dropped in QUEUE_DIR as an
+    auto-metadata DRAFT, then move it to uploaded/. Headed (GUI session) so the
+    Keychain works. Safe to run on a launchd cadence; no-op when the queue is
+    empty. The render/production step just cp's finished videos into QUEUE_DIR."""
+    import glob, shutil, datetime
+    os.makedirs(QUEUE_DONE, exist_ok=True)
+    files = sorted(f for f in glob.glob(os.path.join(QUEUE_DIR, "*.mp4"))
+                   if not os.path.basename(f).startswith("."))
+    def log(m):
+        line = f"{datetime.datetime.now():%Y-%m-%d %H:%M} {m}"
+        print(line)
+        with open(QUEUE_LOG, "a") as fh:
+            fh.write(line + "\n")
+    if not files:
+        log("queue empty — nothing to upload"); return
+    log(f"draining {len(files)} file(s)")
+    for f in files:
+        try:
+            upload(f, "", headed=True, auto=True)
+            shutil.move(f, os.path.join(QUEUE_DONE, os.path.basename(f)))
+            log(f"OK draft + moved: {os.path.basename(f)}")
+        except SystemExit as e:
+            log(f"SKIP {os.path.basename(f)}: {e}")
+        except Exception as e:
+            log(f"FAIL {os.path.basename(f)}: {str(e).splitlines()[0][:100]}")
+    log("drain complete")
+
+
 def _probe_kind(file):
     """short if vertical AND <=180s, else long."""
     try:
@@ -490,6 +524,7 @@ if __name__ == "__main__":
     v = sub.add_parser("verify")
     v.add_argument("--title", required=True)
     sub.add_parser("list")
+    sub.add_parser("drain-queue")
     a = ap.parse_args()
     if a.cmd == "login":
         login()
@@ -516,3 +551,5 @@ if __name__ == "__main__":
         verify(a.title)
     elif a.cmd == "list":
         list_()
+    elif a.cmd == "drain-queue":
+        drain_queue()

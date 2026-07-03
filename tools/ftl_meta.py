@@ -35,25 +35,31 @@ def bank_row(file):
 
 
 def codex_meta(ctx, kind):
+    if kind == "short":
+        spec = """This is a SHORT — keep metadata LEAN. Shorts are discovered by title + hashtags, not tags.
+- TITLE: front-load "Caitlin Clark" (MANDATORY), punchy, match search intent, <=100 chars, end with #shorts.
+- DESCRIPTION: SHORT. Just 1-2 hashtags, and it MUST include #caitlinclark and #wnba. Optionally one topical
+  hashtag. No paragraph, no CTA, no links. Example: "#caitlinclark #wnba #wnbarefs".
+- TAGS: return a SMALL list, max 5 (caitlin clark, wnba, + up to 3 topical). Lowercase, no #."""
+    else:
+        spec = f"""This is a LONG-FORM video — full SEO treatment.
+- TITLE: front-load "Caitlin Clark" (MANDATORY), <=70 visible chars, real search intent, no clickbait the video can't pay off.
+- DESCRIPTION: first 1-2 lines keyword-rich (shown in search) and specific to the quote; then 2-3 sentences of
+  Clark-lens context; attribute the speaker/source; one CTA to subscribe; end with 3-5 hashtags and {CHANNEL_URL}.
+- TAGS: 12-18 tags mixing broad (caitlin clark, wnba, indiana fever, fromthelogo), entity-specific (speaker,
+  named players/teams, topic), and long-tail search phrases people type. Lowercase, no #."""
     prompt = f"""You are the YouTube SEO strategist for "From The Logo" (@fromthelogo22),
 a faceless daily channel covering the WNBA through the Caitlin Clark / Indiana Fever lens.
 
-Write metadata for a {"YouTube Short (vertical, <60s)" if kind=="short" else "long-form YouTube video"}
+Write metadata for a {"YouTube Short (vertical, <=60s)" if kind=="short" else "long-form YouTube video"}
 built from this soundbite:
   SPEAKER/SOURCE: {ctx.get('channel','?')}
   QUOTE: "{ctx.get('quote','')}"
   TOPIC: {ctx.get('topic','?')}
   ORIGINAL SOURCE TITLE: {ctx.get('title','')}
 
-Optimize for BOTH YouTube search AND the Browse/Suggested recommendation algorithm:
-- TITLE: front-load "Caitlin Clark" (MANDATORY — it must appear), match real search intent,
-  add one curiosity/hook element. {"<=100 chars, end with #shorts." if kind=="short" else "<=70 visible chars, no clickbait that the video can't pay off."}
-- DESCRIPTION: first 1-2 lines keyword-rich (they show in search) and specific to the quote;
-  then 2-3 sentences of Clark-lens context; attribute the speaker/source; one CTA to subscribe;
-  end with 3-5 hashtags and the channel link {CHANNEL_URL}.
-- TAGS: 12-18 tags mixing broad ("caitlin clark","wnba","indiana fever","fromthelogo"),
-  entity-specific (the speaker, any named players/teams, the topic), and long-tail search phrases
-  people actually type. Lowercase, no # in tags.
+Optimize for BOTH YouTube search AND the Browse/Suggested recommendation algorithm.
+{spec}
 
 Use current, real WNBA context (browse the web if useful). Do NOT fabricate stats.
 Return ONLY a JSON object between <META> and </META> markers, no prose:
@@ -75,11 +81,38 @@ Return ONLY a JSON object between <META> and </META> markers, no prose:
         return None
 
 
+def _hashtag(s):
+    return "#" + re.sub(r"[^a-z0-9]", "", s.lower())
+
+
+def enforce(meta, kind):
+    """Guardrails: Caitlin Clark in title; shorts stay lean and ALWAYS carry
+    #caitlinclark + #wnba in the description; shorts cap tags at 5."""
+    if "caitlin clark" not in meta["title"].lower():
+        meta["title"] = "Caitlin Clark: " + meta["title"]
+    meta["title"] = meta["title"][:100]
+    if kind == "short":
+        d = meta.get("description", "")
+        tags_in_d = re.findall(r"#\w+", d.lower())
+        for req in ("#caitlinclark", "#wnba"):
+            if req not in tags_in_d:
+                d = (d + " " + req).strip()
+        # keep it to the hashtag line only (lean)
+        meta["description"] = " ".join(re.findall(r"#\w+", d)) or "#caitlinclark #wnba"
+        meta["tags"] = (meta.get("tags") or ["caitlin clark", "wnba"])[:5]
+    return meta
+
+
 def template_meta(ctx, kind):
     speaker = ctx.get("channel", "").split("(")[0].strip() or "Analyst"
     topic = ctx.get("topic", "wnba").replace("-", " ")
     base = f"Caitlin Clark {topic.title()}"
-    title = f"{base} — {speaker} Goes Off" + (" #shorts" if kind == "short" else " | From The Logo")
+    if kind == "short":
+        title = f"{base} — {speaker} Goes Off #shorts"
+        desc = f"#caitlinclark #wnba {_hashtag(topic.replace(' ',''))}".strip()
+        tags = ["caitlin clark", "wnba", topic]
+        return {"title": title[:100], "description": desc, "tags": tags[:5]}
+    title = f"{base} — {speaker} Goes Off | From The Logo"
     quote = ctx.get("quote", "")
     desc = (f"{speaker} on Caitlin Clark: \"{quote}\"\n\n"
             f"From The Logo covers the WNBA every day through the Caitlin Clark & Indiana Fever lens. "
@@ -94,6 +127,7 @@ def template_meta(ctx, kind):
 def generate(file, kind, as_json):
     ctx = bank_row(file) or {"channel": "", "quote": "", "topic": "wnba", "title": os.path.basename(file)}
     meta = codex_meta(ctx, kind) or template_meta(ctx, kind)
+    meta = enforce(meta, kind)
     if not as_json:
         print("TITLE:", meta["title"])
         print("\nDESCRIPTION:\n" + meta["description"])
