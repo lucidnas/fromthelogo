@@ -468,6 +468,108 @@ def _content_rows(page, tabs=("videos", "shorts")):
     return out, page
 
 
+def _find_video(page, title):
+    """Locate a video by title across both tabs; return (title, video_id, tab)."""
+    chan = _channel_id(page)
+    for tab in ("videos", "shorts"):
+        page.goto(f"{STUDIO}/channel/{chan}/videos/{CONTENT_TABS[tab]}", wait_until="domcontentloaded")
+        page.wait_for_timeout(5000)
+        rows = page.locator("ytcp-video-row")
+        for i in range(min(rows.count(), 25)):
+            r = rows.nth(i)
+            try:
+                t = r.locator("#video-title").inner_text().strip()
+            except Exception:
+                continue
+            if title.lower() in t.lower():
+                import re
+                vid = None
+                # Draft rows expose the id via the ?udvid= param after clicking
+                # the title (they don't carry a /video/ href).
+                try:
+                    r.locator("#video-title").first.click(timeout=5000)
+                    page.wait_for_timeout(3500)
+                    m = re.search(r"udvid=([A-Za-z0-9_-]{6,})", page.url)
+                    if not m:
+                        m = re.search(r"/video/([A-Za-z0-9_-]{6,})", page.url)
+                    vid = m.group(1) if m else None
+                except Exception:
+                    pass
+                return t, vid, tab
+    return None, None, None
+
+
+def publish(title, visibility="public", when=None, confirm=False):
+    """Promote a DRAFT to public/unlisted via the Studio publish WIZARD (same
+    dialog family as upload — the edit page doesn't expose visibility radios).
+    Click the draft -> Next through to the Visibility step -> select target ->
+    (confirm) Publish. DRY-RUN by default: selects visibility, screenshots, stops."""
+    vis_radio = 'tp-yt-paper-radio-button[name="%s"]' % (
+        "PUBLIC" if visibility == "public" else "UNLISTED" if visibility == "unlisted" else "PRIVATE")
+    with sync_playwright() as p:
+        c = ctx(p, headed=True)
+        page = c.pages[0] if c.pages else c.new_page()
+        chan = _channel_id(page)
+        opened = None
+        for tab in ("videos", "shorts"):
+            page.goto(f"{STUDIO}/channel/{chan}/videos/{CONTENT_TABS[tab]}", wait_until="domcontentloaded")
+            page.wait_for_timeout(5000)
+            rows = page.locator("ytcp-video-row")
+            for i in range(min(rows.count(), 25)):
+                r = rows.nth(i)
+                try:
+                    t = r.locator("#video-title").inner_text().strip()
+                except Exception:
+                    continue
+                if title.lower() in t.lower():
+                    r.locator("#video-title").first.click(timeout=6000)
+                    page.wait_for_timeout(5000)
+                    opened = (t, tab)
+                    break
+            if opened:
+                break
+        if not opened:
+            sys.exit(f"draft not found by title '{title}'")
+        print(f"target: '{opened[0]}' [{opened[1]}]")
+        shot(page, "wizard-open")
+
+        # Jump straight to the Visibility step via its stepper tab (Next is
+        # blocked on Ad-suitability by the self-rating; the top tabs let you skip).
+        for how in (lambda: page.get_by_role("tab", name="Visibility").first.click(timeout=6000),
+                    lambda: page.get_by_text("Visibility", exact=True).last.click(timeout=6000),
+                    lambda: page.locator('#step-badge-3, [test-id="STEP_VISIBILITY"]').first.click(timeout=6000)):
+            try:
+                how(); page.wait_for_timeout(3000)
+                if page.locator(vis_radio).count():
+                    break
+            except Exception:
+                continue
+        reached = bool(page.locator(vis_radio).count() and page.locator(vis_radio).first.is_visible())
+        shot(page, "visibility-step")
+        if not reached:
+            shot(page, "visibility-miss")
+            sys.exit("could not reach the Visibility step (selectors changed — see visibility-miss shot)")
+
+        if when:
+            try:
+                page.locator('tp-yt-paper-radio-button[name="SCHEDULE"]').first.click(timeout=6000)
+                print("selected: Schedule", when)
+            except Exception as e:
+                print("WARN schedule radio:", str(e)[:70])
+        else:
+            page.locator(vis_radio).first.click(timeout=6000)
+            print("selected visibility:", visibility)
+        page.wait_for_timeout(1500); shot(page, "visibility-selected")
+
+        if not confirm:
+            print("DRY RUN — visibility selected but NOT published. Re-run with --confirm to publish.")
+            c.close(); return
+        page.locator("#done-button, ytcp-button#done-button").first.click(timeout=8000)
+        page.wait_for_timeout(5000); shot(page, "published")
+        print(f"PUBLISHED '{opened[0]}' -> {visibility}" + (f" @ {when}" if when else ""))
+        c.close()
+
+
 def verify(title, headed=True):
     with sync_playwright() as p:
         c = ctx(p, headed=headed)
@@ -525,6 +627,11 @@ if __name__ == "__main__":
     v.add_argument("--title", required=True)
     sub.add_parser("list")
     sub.add_parser("drain-queue")
+    pub = sub.add_parser("publish")
+    pub.add_argument("--title", required=True)
+    pub.add_argument("--visibility", choices=["public", "unlisted", "private"], default="public")
+    pub.add_argument("--when", default=None, help='schedule "YYYY-MM-DD HH:MM" (public at that time)')
+    pub.add_argument("--confirm", action="store_true", help="actually publish (default is dry-run)")
     a = ap.parse_args()
     if a.cmd == "login":
         login()
@@ -553,3 +660,5 @@ if __name__ == "__main__":
         list_()
     elif a.cmd == "drain-queue":
         drain_queue()
+    elif a.cmd == "publish":
+        publish(a.title, a.visibility, a.when, a.confirm)
