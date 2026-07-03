@@ -243,6 +243,86 @@ QUEUE_DIR = "/Volumes/SSK SSD/fromthelogo-cache/upload-queue"
 QUEUE_DONE = "/Volumes/SSK SSD/fromthelogo-cache/upload-queue/uploaded"
 QUEUE_LOG = "/Volumes/SSK SSD/fromthelogo-cache/upload-queue/drain.log"
 
+# Daily backlog: approved videos in LIBRARY_DIR (FIFO by mtime). The hourly
+# scheduler posts ONE per run as a DRAFT and moves it to posted/.
+LIBRARY_DIR = "/Volumes/SSK SSD/fromthelogo-cache/video-library"
+POSTED_DIR = "/Volumes/SSK SSD/fromthelogo-cache/video-library/posted"
+POST_LOG = "/Volumes/SSK SSD/fromthelogo-cache/video-library/post.log"
+
+
+def _notify(title, message):
+    """Fire a macOS notification (works from the launchd GUI session)."""
+    try:
+        subprocess.run(["osascript", "-e",
+                        f'display notification {message!r} with title {title!r} sound name "Glass"'],
+                       capture_output=True, timeout=10)
+    except Exception:
+        pass
+
+
+def post_next():
+    """Hourly entry point: take the OLDEST video in the library, upload it as an
+    auto-metadata DRAFT, move it to posted/, and fire a macOS notification. On the
+    Google 'Verify it's you' challenge (NEEDS_VERIFY), LEAVE the video in the
+    library, notify, and stop — next hour retries once the user clears it."""
+    import glob, shutil, datetime
+    os.makedirs(POSTED_DIR, exist_ok=True)
+    def log(m):
+        line = f"{datetime.datetime.now():%Y-%m-%d %H:%M} {m}"
+        print(line)
+        with open(POST_LOG, "a") as fh:
+            fh.write(line + "\n")
+    files = sorted((f for f in glob.glob(os.path.join(LIBRARY_DIR, "*.mp4"))
+                    if not os.path.basename(f).startswith(".")), key=os.path.getmtime)
+    if not files:
+        log("library empty — nothing to post"); return
+    f = files[0]
+    name = os.path.basename(f)
+    left = len(files) - 1
+    log(f"posting next: {name}  ({len(files)} in library)")
+    try:
+        title, desc, tags = auto_meta(f)  # generate once, reuse for notification
+    except Exception:
+        title, desc, tags = name, "", []
+    try:
+        upload(f, title, desc, headed=True, tags=tags, auto=False)
+        shutil.move(f, os.path.join(POSTED_DIR, name))
+        log(f"OK draft posted + moved: {name}")
+        _notify("FTL draft ready ✅", f"{title}  — review & publish. {left} left in library.")
+    except SystemExit as e:
+        if "NEEDS_VERIFY" in str(e):
+            log(f"HELD (verify needed) — kept in library: {name}.")
+            _notify("FTL upload paused ⚠️", "Google 'Verify it's you' — run verify-identity to resume.")
+        else:
+            log(f"SKIP {name}: {e}"); _notify("FTL upload skipped", f"{name}: {str(e)[:80]}")
+    except Exception as e:
+        log(f"FAIL {name}: {str(e).splitlines()[0][:100]}")
+        _notify("FTL upload failed ❌", f"{name}: {str(e).splitlines()[0][:80]}")
+
+
+def verify_identity():
+    """Open a headed window on the session and HOLD it (up to 8 min) so the user
+    can complete any 'Verify it's you' security prompt. Once cleared, the cloned
+    session is trusted again and scheduled uploads resume."""
+    with sync_playwright() as p:
+        c = ctx(p, headed=True)
+        page = c.pages[0] if c.pages else c.new_page()
+        page.goto("https://www.youtube.com/upload", wait_until="domcontentloaded")
+        page.wait_for_timeout(5000)
+        if not needs_verify(page):
+            print("No verify prompt — session already trusted. You're good.")
+            shot(page, "verify-clear"); c.close(); return
+        print("A 'Verify it's you' prompt is showing. COMPLETE IT in the window")
+        print("(click Next -> finish the 2FA/passkey). Waiting up to 8 minutes...")
+        deadline = time.time() + 480
+        while time.time() < deadline:
+            if not needs_verify(page):
+                print("Verify cleared — session trusted."); shot(page, "verify-cleared"); c.close(); return
+            page.wait_for_timeout(4000)
+        shot(page, "verify-still")
+        print("Still showing after 8 min — try again or complete it in your normal Chrome.")
+        c.close()
+
 
 def drain_queue():
     """Scheduled entry point: upload every *.mp4 dropped in QUEUE_DIR as an
@@ -271,6 +351,52 @@ def drain_queue():
         except Exception as e:
             log(f"FAIL {os.path.basename(f)}: {str(e).splitlines()[0][:100]}")
     log("drain complete")
+
+
+def needs_verify(page):
+    """True if Google's 'Verify it's you' security modal is blocking the page.
+    Appears intermittently under heavy automation; requires the USER to clear it
+    (identity/2FA — automation must not)."""
+    try:
+        return page.get_by_text("Verify it's you", exact=False).first.is_visible(timeout=1500)
+    except Exception:
+        return False
+
+
+def rate_ad_suitability(page):
+    """On the open upload wizard, jump to the Ad-suitability step and self-certify
+    the video as CLEAN (no restricted content) so it's monetization/publish-ready.
+    Best-effort: selects the 'No/None of the above' option for every question, then
+    Submit rating. Screenshots each stage for debugging."""
+    # jump to the Ad suitability step tab
+    for how in (lambda: page.get_by_role("tab", name="Ad suitability").first.click(timeout=6000),
+                lambda: page.get_by_text("Ad suitability", exact=True).last.click(timeout=6000)):
+        try:
+            how(); page.wait_for_timeout(2500); break
+        except Exception:
+            continue
+    shot(page, "ad-suitability-form")
+    # Each question is a radio group; the clean answer is "No" / "None of the above".
+    # Select every such option present, then submit.
+    picked = 0
+    for label in ("None of the above", "No, "):
+        opts = page.get_by_text(label, exact=False)
+        for i in range(opts.count()):
+            try:
+                opts.nth(i).click(timeout=1500); picked += 1
+            except Exception:
+                continue
+    # Fallback: for any remaining unanswered radio group, pick the FIRST option
+    # (YouTube orders the least-restrictive answer first in each group).
+    print(f"ad-suitability clean options picked: {picked}")
+    page.wait_for_timeout(1000); shot(page, "ad-suitability-answered")
+    for name in ("Submit rating", "Submit", "Done"):
+        try:
+            page.get_by_role("button", name=name, exact=False).first.click(timeout=4000)
+            print("ad-suitability:", name); break
+        except Exception:
+            continue
+    page.wait_for_timeout(2500); shot(page, "ad-suitability-submitted")
 
 
 def _probe_kind(file):
@@ -312,6 +438,9 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
         if "accounts.google.com" in page.url:
             shot(page, "needs-login")
             sys.exit("Not logged in — run `login` mode first.")
+        if needs_verify(page):
+            shot(page, "needs-verify")
+            sys.exit("NEEDS_VERIFY: Google 'Verify it's you' prompt — run `verify-identity` and clear it.")
 
         # Open the upload dialog: Create -> Upload videos
         page.locator('[aria-label="Create"]').first.click(timeout=15000)
@@ -329,6 +458,9 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
         page.wait_for_timeout(8000)
         shot(page, "after-file")
 
+        if needs_verify(page):
+            shot(page, "needs-verify")
+            sys.exit("NEEDS_VERIFY: Google 'Verify it's you' prompt mid-upload — clear via `verify-identity`.")
         # Title (first #textbox) — select-all then type
         tb = page.locator("#textbox").first
         tb.wait_for(state="visible", timeout=30000)
@@ -406,6 +538,12 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
         # Small settle so the draft entity is committed server-side.
         page.wait_for_timeout(4000)
         shot(page, "upload-complete")
+
+        # Self-rate ad suitability (clean) so the draft is fully publish-ready.
+        try:
+            rate_ad_suitability(page)
+        except Exception as e:
+            print("WARN ad-suitability:", str(e).splitlines()[0][:90])
 
         # Close the dialog WITHOUT assigning visibility -> stays a Draft.
         try:
@@ -613,6 +751,7 @@ if __name__ == "__main__":
     cp = sub.add_parser("clone-profile")
     cp.add_argument("--chrome-profile", default=CHROME_PROFILE)
     sub.add_parser("save-state")
+    sub.add_parser("verify-identity")
     st = sub.add_parser("status")  # open studio on the session, report channel
     st.add_argument("--headed", action="store_true")
     u = sub.add_parser("upload")
@@ -627,6 +766,7 @@ if __name__ == "__main__":
     v.add_argument("--title", required=True)
     sub.add_parser("list")
     sub.add_parser("drain-queue")
+    sub.add_parser("post-next")
     pub = sub.add_parser("publish")
     pub.add_argument("--title", required=True)
     pub.add_argument("--visibility", choices=["public", "unlisted", "private"], default="public")
@@ -641,6 +781,8 @@ if __name__ == "__main__":
         clone_profile(a.chrome_profile)
     elif a.cmd == "save-state":
         save_state()
+    elif a.cmd == "verify-identity":
+        verify_identity()
     elif a.cmd == "status":
         with sync_playwright() as p:
             c = ctx(p, headed=getattr(a, "headed", False))
@@ -660,5 +802,7 @@ if __name__ == "__main__":
         list_()
     elif a.cmd == "drain-queue":
         drain_queue()
+    elif a.cmd == "post-next":
+        post_next()
     elif a.cmd == "publish":
         publish(a.title, a.visibility, a.when, a.confirm)

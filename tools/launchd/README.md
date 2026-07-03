@@ -20,3 +20,15 @@ The render/production step just copies finished videos into the queue:
 ## Change cadence
 Edit StartCalendarInterval in the plist (e.g. multiple <dict> entries for several
 times a day), then unload + load again. Logs: upload-queue/drain.log + launchd.*.log
+
+## Hourly draft scheduler (the daily backlog)
+Library of approved videos: `/Volumes/SSK SSD/fromthelogo-cache/video-library/*.mp4` (FIFO by add-time).
+`post-next` posts the OLDEST as a DRAFT + macOS notification, moves it to `posted/`. One per run.
+
+Enable hourly (8am-10pm, 15 drafts/day):
+    cp tools/launchd/com.ftl.yt-post-hourly.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.ftl.yt-post-hourly.plist
+    launchctl start com.ftl.yt-post-hourly   # test one now
+
+If Google shows "Verify it's you", the job HOLDS the video (keeps it in the library) and notifies;
+run `... verify-identity`, clear it, and next hour resumes. Logs: video-library/post.log + post.*.log
