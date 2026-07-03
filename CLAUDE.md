@@ -6,6 +6,54 @@ For Caitlin Clark or other player-hype analysis videos, use the `ftl-clip-first-
 
 Default play pacing is fast: brief setup, about a 5-second freeze with one short VO read, then the payoff in slow motion before moving to the next verified play. Do not stretch one possession unless it is the central hook.
 
+For Increasingly compilations, follow the hard rules in `AGENTS.md`: replace dirty or questionable clips from the broader pool instead of forcing/salvaging them, and do not approve dead-silent gameplay unless an intentional interview/commentary bed covers it.
+
+For 8-minute Caitlin Clark assist/pass compilations, use 7.5 seconds only as a planning estimate, not a hard trim. Show the full useful approved clip when it needs more time for Clark's read, pass, replay, or payoff, and keep adding unique-game clips until the timeline reaches 8+ minutes. Do not repeat a game/source to fill runtime unless the user explicitly requests a repeat-based draft. Save every approved clip into the reusable source library with its game/source/Gemini metadata before using it in a render.
+
+Official Indiana Fever assist compilations are a supplemental lane, not the primary source library. If used, cut them with Gemini, mark them as `sourceLane: "official-compilation-supplement"`, and spread those inserts across the existing unique-game clips. Never place official-compilation supplement clips back-to-back.
+
+Clean base compilation renders are review intermediates only. The publish version must restore the Hyperframes finish: low copyright-safe music, Caitlin Clark interview bed where source audio is missing or dirty, transitions, and occasional readable freeze/effect callouts. If the finish layer has stale labels or bad PIP, fix the finish layer or source clip and reapply it; do not ship a raw base render as the final.
+
+Interview sourcing is its own reusable library. For assist/pass compilations, keep 8-15 Caitlin Clark quote segments tagged for transition, pace, passing, reads, gravity, pressure, leadership, teammates, and defenses loading up. Use public YouTube URLs for Gemini analysis when available, and only upload local/private/social interview files when needed.
+
+After interview ingest/analyze, run `node tools/ftl-caitlin-interview-library.mjs cut --slug all` so Hyperframes has reusable MP4 quote clips and `quote-clips-manifest.json` to place under dirty/silent assist clips.
+
+For Caitlin Clark assist/pass compilations, use the Gemini-first source-library workflow in `AGENTS.md`: search/download with `yt-dlp`, let Gemini identify games and assist timestamps from the actual highlights, then use official play-by-play only when Gemini needs validation or cannot identify the game confidently. For public YouTube highlights, pass Gemini the public URL instead of uploading the local MP4. Only approve visible Caitlin Clark-created assist/pass plays where Clark is shown making the read or pass before the teammate payoff; reject receiver-only or late payoff-only clips.
+
+For public YouTube highlight sourcing, do not download the whole highlight by default. Use `process-url` so Gemini reads the public URL first, returns the assist sections, and `yt-dlp --download-sections` downloads only those approved ranges. Full source downloads are fallback/debug only.
+
+When WNBA liveData returns empty or wrong Clark context for older games, rerun the URL-first pipeline with an explicit Basketball-Reference id, for example `--bref-id 202407060IND`. Explicit `--bref-id` should override Gemini's inferred WNBA id.
+
+After each sourcing batch, rebuild the approved library and current 8-minute selection with `node tools/build-approved-assist-inventory.mjs`. The script writes:
+
+- `/Volumes/SSK SSD/ftl/assist-library/caitlin-clark/approved-inventory/approved-assist-clips-v1.json`
+- `/Volumes/SSK SSD/ftl/assist-library/caitlin-clark/approved-inventory/eight-minute-selection-v1.json`
+
+The selected review timeline must have zero repeated games/source URLs. A true one-clip-per-game 8-minute assist compilation needs enough unique games to reach 8+ minutes; if the unique-game runtime is short, keep sourcing more games instead of repeating games.
+
+For Increasingly compilation QC, Gemini must explicitly check source/game diversity, high-quality source footage, label-to-screen accuracy, interview-overlay discipline, and Caitlin interview relevance. Do not approve videos built mostly from a single all-in-one compilation source. Interview beds may cover clips with existing commentary only when the clip is intentionally muted and the manifest marks that audio policy. Keep interview moments limited and spread out, usually 3-4 in an 8-minute compilation rather than constant. Do not use college press conference quotes unless Clark is specifically talking about how she plays.
+
+For ChazNBA-style reaction videos, use the FTL Reaction Video Format in `AGENTS.md`. The reaction clip is only the doorway; the video must become a Caitlin Clark, Indiana Fever, or WNBA take with receipts. The hook must directly complement the title, and mini reaction videos should usually run 60-180 seconds with Johnny VO.
+
+For social-clip reaction sourcing, use Gemini neutral description first: `tools/gemini-blind-video-review.mjs --mode describe`. Do not ask whether a clip is fake/simulated unless factual verification is the explicit task; otherwise Gemini should return visible actions, gestures, audio, text, and suggested cut points.
+
+For daily Caitlin Clark Shorts, use the `ftl-shorts-production` skill plus repo scripts. Start from the clean local library at `/Volumes/SSK SSD/broll/clips/`, not finished long-video exports with baked-in title cards, subscribe graphics, or press-conference inserts. Generate a dated draft manifest with `node tools/ftl-generate-daily-shorts-manifest.mjs --date YYYY-MM-DD --limit 10`, render with `node tools/ftl-create-short.mjs --manifest ...`, QC contact sheets, and move rejected cuts to a `renders/rejected-*` folder.
+
+For 10-30 second Caitlin Clark Shorts, Clark must be visible from the beginning of the selected clip through the end. Use the shorts renderer's default safe 3:4 foreground window on the vertical canvas instead of an aggressive 9:16 crop whenever cropping would lose Clark, the ball, the defender, or the pass target. The default Shorts music is `/Volumes/SSK SSD/Desktop/Background Music/Anno Domini Beats - Like That.mp3`.
+
+Shorts may run **60 seconds or longer (1 min+)** when the play, multi-angle treatment, or replay sequence requires it — do not trim out lead-in, replays, or alternate broadcast angles just to stay under 60s. YouTube Shorts permits up to 3 minutes; length is content-driven, not platform-driven. For game-winners and signature moments, default to including a multi-angle replay sequence (broadcast live, alternate sideline, phantom/slow-mo) rather than a single cut.
+
+After every Hyperframes render, run the stale render-process check documented in `AGENTS.md` and kill leftover Hyperframes/Puppeteer/Chrome/ffmpeg workers before starting another render.
+
+## News Recap (trending-story, image-led)
+
+For trending-news Caitlin Clark videos — where the day's story is a news beat (a quote, ruling, report, or social post) rather than a clip-worthy play — use the `ftl-news-recap` skill and `docs/formats/news-recap.md`. This is an additional lane, not a replacement for Clip-First Celebration or the compilation lanes. Pipeline: `node tools/ftl-news-scan.mjs` (scan Yahoo/SI/Athlon/Sporting News/USA Today/IndyStar/The Athletic/ESPN/CBS/B-R/ClutchPoints + CC/Sophie social) → `node tools/ftl-script-pipeline.mjs --mode news` (no `--clips`, ~700–900 words, Roast + Codex fact-check gate) → `/ftl-vo` → `node tools/ftl-news-build-beats.mjs` (hybrid beats: AI images + factual receipt cards + Caitlin Clark b-roll, still and moving) → `node tools/ftl-render-news-recap.mjs` (Hyperframes) → Gemini QC. The title may be more sensational than the outlet's but must stay strictly factual — every on-screen claim traces to a real source, and the Codex fact-check is a hard gate. Receipt beats render as factual headline/quote cards by default; swap in the literal outlet screenshot only when you keep the on-screen attribution.
+
+## Change Log
+
+- **2026-07-03 14:20** — Added `tools/yt_studio_upload.py`: a Playwright YouTube Studio uploader for the FTL brand channel that leaves videos as **drafts** (login / clone-profile / save-state / status / upload / verify / list). Proven end-to-end — a Short landed as a Draft on the Shorts tab, a 6.6-min longform as a Draft on the Videos tab. Why: the brand account blocks API upload and the Data API has no "draft" status, so browser automation is the only path to real drafts (never auto-publish). Auth uses a cloned real-Chrome profile (Tales/Profile 3) driven by the real Chrome binary with the macOS Keychain (headed). Known issues/follow-ups: runs HEADED only (headless can't reach Keychain and Google rejects headless storage_state); metadata auto-generation from the video is the next step (currently title/desc passed in, not-made-for-kids set); tags-field auto-fill pending. See AGENTS.md "YouTube Studio uploader" for the full gotcha list.
+- **2026-06-13 06:30** — Added the **News Recap** lane (trending-story, image-led). New: `tools/ftl-news-scan.mjs` (Codex web scan → `research/news-ideas/`), `tools/ftl-news-build-beats.mjs` (Gemini beat plan + hybrid asset materialization), `tools/ftl-render-news-recap.mjs` (Whisper-aligned Hyperframes image+video composition), `docs/formats/news-recap.md`, and the `ftl-news-recap` skill. Edited `tools/ftl-script-pipeline.mjs` to add `--mode news` (makes `--clips` optional, 700–900 word target, news draft prompt). Why: pivot to cover trending Caitlin Clark/Fever news with sensational-but-factual headlines using high-res AI images, receipt cards, and b-roll. Follow-up: full local Hyperframes render + Gemini QC pending an end-to-end run on a real story (the heavy render is environment/SSD-dependent).
+
 ## Git
 
 Commit changes after every meaningful step — after updating AGENTS.md, after writing or updating a skill, after any pipeline change. Do not batch up multiple sessions of work into one commit. Each commit should represent one logical change.

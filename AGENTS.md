@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ---
 
-# From The Logo — Content Creation Process
+# From The Logo — Channel Overview
 
 FTL is a faceless YouTube channel covering the WNBA every day from the Caitlin Clark and Indiana Fever perspective. Every story — trades, games, league decisions, rival teams, drama — gets filtered through one question: **what does this mean for Caitlin Clark?**
 
@@ -20,6 +20,7 @@ FTL is a faceless YouTube channel covering the WNBA every day from the Caitlin C
 | **Refs / Fines / Villain Reaction** | Opportunistic only | When a real fine, tech, foul, or league decision actually drops | 5–8 min | 343K, 220K, 211K, 130K, 108K — high ceiling, but only when there's a real artifact to react to |
 | **Game Recap (villain-response framing)** | Opportunistic only | Game day or next morning, only for noteworthy games | 5–8 min | 152K, 94K, 69K, 61K |
 | **FTL Documentary** | Rare | ~1 per month max, only for genuinely big narrative moments | 8–10 min | Recent docs landed at 490 and 698 views — underperforms |
+| **News Recap (trending-story, image-led)** | Daily/opportunistic | When the day's story is a news beat (quote, ruling, report, social post) rather than a clip-worthy play | 4–6 min | New lane — additional, not a replacement |
 
 **Operating rule:**
 1. Research sessions default to Clark Celebration angles — find the clip, the play, the commercial, the skill, the moment that deserves an awe word.
@@ -28,79 +29,27 @@ FTL is a faceless YouTube channel covering the WNBA every day from the Caitlin C
 
 **Yellow word library for Celebration format:** GENIUS, SPECTACULAR, UNREAL, INSANE, AWARD, DIFFERENT, ART, NEXT LEVEL, ELITE, MASTERFUL.
 
-## Clip-First Celebration Formula
+---
 
-This is the default formula for Caitlin Clark game/play breakdowns and the generic template for any other player, team, or play-led basketball narrative we want to hype.
+## Format-Specific Playbooks
 
-**Rule:** official play-by-play or source receipts drive the evidence universe, then selected plays drive the VO. The VO does not invent a story first and then hunt for footage. Every Caitlin Clark play in the official play-by-play must be checked against the official/social highlight sources and classified before scripting. For NBA/player/team videos, every relevant official play row, advanced-stat clip, stat row, quote, or source receipt must be classified before scripting. Every analysis beat must come from a verified row in the manifest.
+Each FTL production lane has its own doc. Load the one that matches the work; do not pre-load all of them.
 
-Use the `ftl-clip-first-celebration` Codex skill when available.
+- [Clip-First Celebration](docs/formats/clip-first-celebration.md) — default formula for Clark game/play breakdowns. Manifest-driven, Johnny VO, Hyperframes.
+- [Increasingly Compilation](docs/formats/increasingly-compilation.md) — 8-minute one-clip-per-unique-game assist/pass/threes/handles compilations. Minimal VO, Hyperframes finishing.
+- [Shorts](docs/formats/shorts.md) — 9:16 daily Caitlin Clark Shorts. Music-bed, 10–30 sec, clean-clip library first.
+- [Daily Take](docs/formats/daily-take.md) — same-day 400–500 word reactive takes. Johnny VO, minimal B-roll.
+- [Reaction Commentary](docs/formats/reaction-commentary.md) — **DEFAULT commentary format.** Opinion/reaction/news videos carried by clips + our take. Casual flowing FTL fan voice, reaction rhythm (commentary-over-clip → clip-with-audio), captions on clip soundbites only, community-reaction wall, Johnny VO. Tooling: `tools/ftl-reaction-build.py` + `tools/ftl-reaction-captions.py`.
+- [Reaction Video](docs/formats/reaction-video.md) — ChazNBA-style reaction frames, Clark-lensed. 60–180 sec mini-reactions.
+- [Documentary](docs/formats/documentary.md) — rare, full 8-step pipeline. Title-and-thumbnail-first, 1,200–1,400 word script, RoastMyVideo gate.
+- [News Recap](docs/formats/news-recap.md) — trending-story, image-led 4–6 min videos. Scan the outlets + CC/Sophie social, sensational-but-factual title, Johnny VO, hybrid visuals (AI images + factual receipt cards + Caitlin Clark b-roll, still and moving), Hyperframes. Use the `ftl-news-recap` skill.
 
-Core sequence:
+CLAUDE.md keeps the short operational reminders for the most-used lanes. Open the format doc above for the full pipeline before starting work in that lane.
 
-```bash
-node tools/ftl-clip-first-formula.mjs init --slug "game-or-topic-slug" --title "This Caitlin Clark Game Was SPECTACULAR"
-node tools/ftl-clip-first-formula.mjs validate --manifest "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/game-or-topic-slug/selected-play-manifest-v1.json"
-node tools/ftl-clip-first-formula.mjs export-vo --manifest "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/game-or-topic-slug/selected-play-manifest-v1.json" --out "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/game-or-topic-slug/vo-draft-v1.md"
-ELEVENLABS_VOICE_ID=jyskLvwz58RBB27YwdcR node tools/generate-elevenlabs-vo-with-pauses.mjs "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/game-or-topic-slug/vo-draft-v1.md" "/Volumes/SSK SSD/ftl/videos/clip-first-game-or-topic-slug/vo.mp3"
-node tools/ftl-clip-first-formula.mjs build-edit --manifest "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/game-or-topic-slug/selected-play-manifest-v1.json" --video-slug "clip-first-game-or-topic-slug"
-```
+---
 
-Before selecting beats, create `officialPlayCoverage[]` in the manifest. This is the coverage ledger for every Clark PBP event: made shots, missed shots worth explaining, assists, hockey-assist-style creation if visible, turnovers/steals if useful, and any other official event that shows her impact. Each row must be classified as:
+## The Clark Lens — mandatory editorial filter
 
-- `analysis-beat` — full VO beat with freeze/read/payoff
-- `quick-montage-receipt` — shown quickly as proof, but not a full analysis paragraph
-- `closing-stat-context` — saved for the final take/stat receipt
-- `no-footage-found` — official PBP event exists, but no usable highlight/source clip found
-- `not-usable` — footage exists but is too unclear, too late, duplicate, or not helpful
-- `duplicate-angle` — alternate angle of a play already covered
-
-Do not skip a target-player PBP play silently. If it is not in the final video, the ledger should say why.
-
-This formula is not limited to highlight-specific videos. It can also make:
-
-- NBA player breakdowns using NBA Advanced Stats play-by-play videos
-- team/system videos built from possession types, lineup stats, or shot-quality receipts
-- skill compilations where every example comes from an audited play row
-- non-game narratives where each beat is tied to `sourceReceipts[]` such as stats, quotes, articles, screenshots, or transaction records
-
-For NBA Advanced Stats workflows, treat each play video as a primary source candidate. Store the official game id/action number when available, player/team, event text, stat context, video URL or downloaded clip path, Gemini 3.1 Pro visual read, and `coverageStatus`.
-
-Each play beat must include: source clip, source timestamps, Gemini 3.1 Pro visual read, official play-by-play/stat validation when available, the player's read, the defensive mistake, the payoff, freeze-frame source times, big text callouts, and approved VO.
-
-Beat rhythm:
-
-```text
-open with a hook naming the game, Clark's stat receipt, and why the final read is worth staying for
--> ask for one simple engagement action only if it naturally fits the hook
--> move into the selected plays
-show the setup briefly
--> freeze the key moment for about 5 seconds
--> explain the read in one short VO beat
--> play the payoff in slow motion
--> land a simple hype takeaway
--> next play
-```
-
-Each play should be fast. The VO should cover only the frozen read plus a quick description of the payoff; do not spend 20-30 seconds on one possession unless it is the whole video hook. Default freeze duration is 5 seconds, default replay speed is 0.6x, and the edit should move to the next verified play as soon as the payoff lands.
-
-Add a final ~30 second commentary beat after the play analysis. This beat can use any strong player b-roll because it is opinion/commentary, not possession analysis. It must still include real receipts from the game: box score, official post, postgame quote, milestone, or play-by-play stat. For Clark videos, this final beat should explain why she is special, why the game orbits around her, and why Indiana becomes dangerous when she controls the floor.
-
-**VO:** ElevenLabs Johnny is the production voice for this formula. Voice ID: `jyskLvwz58RBB27YwdcR`. The tonality should remain consistent across videos: calm, clear, fan-smart, positive, simple, and hype without sounding like a sports announcer.
-
-**Visuals:** Use Hyperframes only. Use text callouts and freeze-frame labels by default. Do not use arrows/circles unless coordinates are manually verified on the exact frozen frame. Moving clips should change every 5-10 seconds unless a freeze-frame teaching moment is intentional.
-
-**Required reading before any script (any format):**
-- `research/script-writing-rules.md` — **canonical script doctrine.** Hook = 5–10s. Open loops + mini-hooks mandatory at every chapter break. One CTA per script. Show-don't-tell — visuals are central, narration is secondary. First-person "I" for opinions. Includes pre-flight checklist that must pass before VO. Read this FIRST.
-- `research/hooks-library.md` — the 7 hook templates pulled from every 50K+ video on the channel. **Do not invent a new hook.** Pick a template, slot in today's facts. Source transcripts live in `~/transcripts/audience-research/` and `~/transcripts/ftl-own/`.
-- `research/celebration-format-playbook.md` — the spine every Celebration winner uses (compilation listicle, game audio + reaction quips, one pop-culture comparison, 1,200–1,400 words, no documentary tone). Re-read before scripting.
-- `research/hyperframes-video-process.md` — current FTL video production workflow for Gemini shot maps, verified clip cutting, Johnny VO, Hyperframes film-room graphics, and fair-use-oriented rendering.
-- `research/celebration-ideas/` — dated research files with current angles. Pick from here or generate a new file before writing.
-
-**Generating new celebration research:**
-Use Codex to find current celebration-worthy moments. Save to `research/celebration-ideas/YYYY-MM-DD-celebration-angles.md`. Each angle must include the moment, footage URL, yellow word, and proposed title in the "THIS Caitlin Clark ___ is ___" format.
-
-**The Clark Lens — mandatory editorial filter:**
 Every story must be told through Clark's perspective, even when she's not the subject.
 - A rival team signs a player → what does it mean for Clark's path to a title?
 - The league makes a ruling → how does it affect Clark's ability to play her game?
@@ -110,11 +59,6 @@ Every story must be told through Clark's perspective, even when she's not the su
 If a story has no connection to Clark or the Fever — it is not an FTL story.
 
 **Channel:** https://www.youtube.com/@fromthelogo22
-
-To check the channel's videos and view counts, always use yt-dlp:
-```bash
-yt-dlp --flat-playlist --print "%(title)s | %(view_count)s views | %(duration_string)s" "https://www.youtube.com/@fromthelogo22"
-```
 
 **Title rule:** Caitlin Clark's name must appear in every video title — even when the story is about the Indiana Fever team. Every top-performing FTL video includes "Caitlin Clark" in the title. Indiana Fever appears alongside her, never as the sole subject.
 
@@ -131,6 +75,21 @@ yt-dlp --write-auto-sub --sub-lang en --skip-download --write-sub -o "/tmp/yttra
 yt-dlp -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]" --merge-output-format mp4 -o "OUTPUT_PATH" "URL"
 ```
 
+---
+
+## Required reading before any script (any format)
+
+- `research/script-writing-rules.md` — **canonical script doctrine.** Hook = 5–10s. Open loops + mini-hooks mandatory at every chapter break. One CTA per script. Show-don't-tell — visuals are central, narration is secondary. First-person "I" for opinions. Includes pre-flight checklist that must pass before VO. Read this FIRST.
+- `research/hooks-library.md` — the 7 hook templates pulled from every 50K+ video on the channel. **Do not invent a new hook.** Pick a template, slot in today's facts. Source transcripts live in `~/transcripts/audience-research/` and `~/transcripts/ftl-own/`.
+- `research/celebration-format-playbook.md` — the spine every Celebration winner uses (compilation listicle, game audio + reaction quips, one pop-culture comparison, 1,200–1,400 words, no documentary tone). Re-read before scripting.
+- `research/hyperframes-video-process.md` — current FTL video production workflow for Gemini shot maps, verified clip cutting, Johnny VO, Hyperframes film-room graphics, and fair-use-oriented rendering.
+- `research/celebration-ideas/` — dated research files with current angles. Pick from here or generate a new file before writing.
+
+**Generating new celebration research:**
+Use Codex to find current celebration-worthy moments. Save to `research/celebration-ideas/YYYY-MM-DD-celebration-angles.md`. Each angle must include the moment, footage URL, yellow word, and proposed title in the "THIS Caitlin Clark ___ is ___" format.
+
+---
+
 ## AI Tools Available
 
 You have access to two AI tools beyond Claude that can be used at any stage of the workflow. Use them proactively — don't wait to be asked.
@@ -143,6 +102,35 @@ codex exec -c 'sandbox_permissions=["disk-full-read-access"]' "YOUR PROMPT" 2>&1
 ```
 
 Codex can browse the web in real time. Use it whenever you need to verify a fact, find a quote, or research a topic before writing. Always run Codex to fact-check any script before finalizing.
+
+### Gemini visual QC and video analysis — default tool + model
+
+**Default tool: `tools/gemini-cli-review.mjs` (Gemini CLI under the hood).**
+**Default model: `gemini-2.5-pro`** — set in `.env`, all tools pick it up automatically.
+
+```bash
+# Local MP4 — quick QC with default upload-gate prompt:
+node tools/gemini-cli-review.mjs --video=/abs/short.mp4 --out=/abs/qc.json
+
+# Local MP4 — custom prompt:
+node tools/gemini-cli-review.mjs --video=/abs/short.mp4 --prompt="Describe every cut and any baked-in third-party graphics." --json=0
+
+# YouTube URL — auto-delegates to SDK-based tools/gemini-scout-youtube.mjs
+# (the CLI binary does not accept URL fileData yet):
+node tools/gemini-cli-review.mjs --url="https://www.youtube.com/watch?v=XXX" --prompt="Find step-back threes" --out=/abs/scout.json
+```
+
+The wrapper handles the documented Gemini CLI workarounds (github.com/google-gemini/gemini-cli issue #3379): `@filename.mp4` syntax from the file's cwd, `--skip-trust` for non-default directories, and a prepended assertion that the agent CAN read video (otherwise it refuses by default).
+
+**Gemini CLI runs under the user's subscription** — token cost is not a constraint. Use `tools/gemini-cli-review.mjs` as the default for any video QC or video analysis task. The SDK-based `tools/gemini-review-ftl-shorts-batch.mjs` is a fallback for the rare case where the CLI workarounds break.
+
+**Where the `gemini-2.5-pro` default applies:**
+- Rendered-video upload-gate QC, YouTube URL scouting via `fileData.fileUri`, highlight-game identification, assist-timestamp mapping, freeze-frame planning, visual editorial audits, blind clip review, and any other tool that has Gemini *watch* video.
+- Does NOT apply to: TTS generation, thumbnail image generation, script text analysis — those keep their own model defaults.
+
+**Do NOT use** `gemini-3.1-flash-lite-preview` or `gemini-3.1-pro-preview` for upload-gate QC. Flash Lite under-reports issues (rubber-stamps); 2.5 Pro is cheaper than 3.1 Pro Preview while catching the same or more issues.
+
+Override with `--model gemini-X.Y-name` per tool when intentionally A/B-testing.
 
 ### Gemini (via RoastMyVideo)
 Best for: script analysis, hook strength, retention curve, viral potential scoring, title suggestions, section-by-section feedback.
@@ -167,364 +155,7 @@ Gemini must score `strong` or `fire` on `overallSentiment` before a script moves
 | Script structure, hook, retention curve | Gemini |
 | Second opinion on script or opening | Both |
 | Video review (QC of rendered video) | Codex |
-| Thumbnail image generation | Gemini only (see Step 0) |
-
----
-
-## FTL Daily Take — Fast Pipeline
-
-For daily coverage. Target: same day or next morning. Total production time: under 1 hour.
-
-**The Clark Perspective Rule:** Every Daily Take must answer "what does this mean for Caitlin Clark?" — even if the story is about another player, team, or league decision. She is always the lens.
-
-**Structure (3 acts, 400–500 words):**
-
-1. **The News** (1 paragraph) — what happened today. One sentence. No preamble.
-2. **The Evidence** (2–3 paragraphs) — the quote, the stat, the clip. Prove it. Not opinions — receipts.
-3. **The Verdict** (1 sentence) — close like a gavel. One line that the audience will screenshot.
-
-**The FTL Daily Voice:**
-Sharp, punchy, and relentlessly forward-moving. The urgency of a breaking news desk with the specificity of a film room. Takes from Rachel DeMita's pulse on fan culture and Mick Talks Hoops' cold analytical rigor — but strips away Rachel's parasocial venting and Mick's livestream rambling. The narrator is not a friend, not a personality — it's an insider briefing Clark fans on what happened today and what it means for her.
-
-**Voice rules:**
-- Open with a cold declarative thesis — the take, not the setup. Never a greeting.
-- Short, punchy, declarative sentences. No "I think." No filler.
-- Frame stakes around fan expectations and Clark's trajectory — not personal anecdotes.
-- Back opinions with actual numbers, quotes, or specifics (salary cap math, stat lines, real quotes).
-- One standalone reaction line in the middle ("Read that again." "Nobody is talking about this." "That's the whole story.")
-- Close on what it means for Clark — one line, no summary.
-- No sign-off on Daily Takes.
-- Use casual basketball language, not editorial or production language. Say "that bucket," "that moment," "watching it back," "this play," "the read," or "the possession" instead of phrases like "the milestone clip," "the sequence," "this section," or "the footage." FTL should sound like a sharp Clark fan breaking down hoops, not an editor describing assets.
-
-**Sample Daily Take voice (use as reference):**
-> The Indiana Fever have a massive math problem, and running it back simply isn't an option. Despite the front office quietly adding Kelsey Mitchell back to the 2026 roster, the salary cap reality paints a brutal picture. With Caitlin Clark locked in and Aliyah Boston commanding a max extension, a supermax for Mitchell drains the war room dry. If Indiana cores Mitchell, they are left filling out half their roster with veteran minimums — sacrificing depth pieces like Sophie Cunningham or Lexie Hull to the open market. While fans want the chemistry of last year's playoff run, the Fever's front office is staring down a financial cliff. To build a true dynasty around Clark, somebody from the core has to go.
-
-**Title format for Daily Takes:**
-Same rules as Documentary — Clark's name in the title, yellow word, villain-first or Clark-positive framing. Shorter titles work better for daily: "Clark's Injury Report Just Changed Everything" or "The WNBA Just Made A Massive Mistake."
-
-**Thumbnail for Daily Takes:**
-Format D only. One Gemini variation. No iteration — first good image ships.
-
-**Production pipeline:**
-```
-1. Story identified → Clark perspective angle locked (5 min)
-2. Script written — 400–500 words (20 min)
-3. Fact-checked with Codex (5 min)
-4. Thumbnail generated — one Format D variation (10 min)
-5. VO generated — ElevenLabs Johnny, single chunk when possible (5 min)
-6. Render — minimal, no heavy B-roll (10 min)
-```
-
-**Daily Take topics to cover:**
-- Game recaps (same night or next morning)
-- Trades, signings, waivers — what it means for Clark
-- Injury reports — Clark's or key Fever players
-- WNBA league decisions, rule changes, fines
-- Rival team news filtered through Clark's championship path
-- Reactions to other creators (Rachel DeMita, Hoop Reports) — when they get it wrong or miss the real story
-- Clark quotes or press conferences from that day
-
----
-
-## FTL Documentary — Full Pipeline
-
-**Every new video must follow this order. Do not skip ahead.**
-
-### Step 0 — Lock the title and thumbnail concept FIRST
-
-Before any research or scripting, the title and thumbnail concept must be fully decided.
-
-**Title rules:**
-- Caitlin Clark's name must appear in every title — even when the story is about the Indiana Fever team
-- The title format must be borrowed from a proven high-performing NBA/WNBA channel video (300K+ views)
-- Check `https://www.youtube.com/@fromthelogo22` with yt-dlp to confirm this topic hasn't been covered already
-- **The title must contain one standout word that becomes the yellow thumbnail overlay.** Pick that word first — then write the title around it. The word should be punchy, one concept, all caps energy: GENIUS, SECRETLY, EVERYTHING, EXPOSED, BACKFIRED, PROBLEM, AFRAID, NIGHTMARE. The title is written to make that word land.
-
-**Examples of title ↔ yellow word alignment:**
-| Yellow word | Title |
-|---|---|
-| GENIUS | This Caitlin Clark Commercial is GENIUS |
-| SECRETLY | Caitlin Clark's Offseason Secretly Changed Everything |
-| EXPOSED | The Day Sheryl Swoopes Was EXPOSED as a LIAR |
-| BACKFIRED | The WNBA Just Fined Sophie.. But it Backfired Spectacularly |
-| NIGHTMARE | The Day Caitlin Clark and The Indiana Fever Became The WNBA's Worst Nightmare |
-
-The yellow word is the hook that stops the scroll. The title explains it. They are one system — design them together.
-
-**Thumbnail format — FTL Standard (Format D):**
-
-Every thumbnail follows this exact formula, proven by the "This Caitlin Clark Commercial is GENIUS" video:
-- **Clark's face close-up** fills the left 60% of the frame — face and upper chest only
-- **Dark background** — near-black with deep navy or teal bokeh blur
-- **One bold yellow word** on the right side, large heavy condensed sans-serif, color `#FFE84D`
-- **Zero clutter** — no speech bubbles, no split screens, no extra text, no graphic elements
-- **Expression** — smiling, laughing, or joyful. Head tilt optional. Eyes lit up. The expression carries the emotion.
-
-The only variable between videos is the **yellow word** (derived from the title) and the **specific expression**. Everything else stays the same.
-
-**Generating thumbnails:**
-Use Gemini only (not OpenAI) via `generate.py`. Write a brief for each expression variation you want to test.
-
-```bash
-python3 ~/.claude/skills/ftl-thumbnail/generate.py ~/transcripts/thumbnail-SLUG.txt gemini "Video Title"
-```
-
-Generate 2–3 expression variations (e.g. laughing, intense smirk, knowing smile) and serve them on port 4444 for review.
-
-Reference: `~/ftl-thumbnails/clark-reference/hires/` — use `press-2-smiling.jpg` and `press-5-celebration.jpg` as primary refs for smiling/laughing expressions.
-
-Only proceed to Step 1 once title and thumbnail concept are confirmed by the user.
-
----
-
-### Step 1 — Find proven NBA title formats
-
-Pull transcripts from high-performing NBA YouTube channels. The primary reference channels are:
-
-- **Hoop Reports** — dramatic, fear-based titles ("Just Became The NBA's Worst Nightmare", "Just Sent The NBA A Message")
-- **JxmyHighroller (DKM)** — data-driven, paradigm shift titles ("This Changes Everything", "The Numbers Don't Lie")
-- **Mick Talks Hoops** — player breakdowns, emergence stories
-- **Rachel DeMita** — WNBA-specific, fan-first, conversational takes on Clark/Fever news
-
-Extract transcripts using:
-```bash
-yt-dlp --write-auto-sub --sub-lang en --skip-download --write-sub -o "/tmp/yttranscript" "YOUTUBE_URL"
-```
-
-Clean and read the transcript:
-```bash
-cat /tmp/yttranscript.en.vtt | grep -v '^WEBVTT' | grep -v '^NOTE' | grep -v '^$' | grep -v '^\d\+:\d\+' | grep -v ' --> ' | sed 's/<[^>]*>//g' | awk '!seen[$0]++'
-```
-
-Save all transcripts to `~/transcripts/` with descriptive filenames.
-
-### The Two FTL Video Formats
-
-Every video must fit one of these two formats before any research or scripting begins. If it doesn't fit either — it's not a FTL video.
-
-**Format 1 — The Courtroom Drama** (ceiling: 1M+)
-Requires: Villain + Slight + Response. The audience arrives with a verdict; your job is to organize their existing belief into a satisfying case with receipts.
-- Villain named before the 30-second mark
-- The slight: a quote, a foul, a ranking, a bad call, a coach decision
-- The response: Clark or the Fever answers through basketball
-- Examples: "The Day Caitlin Clark DEMOLISHED her BIGGEST Rival" (2M), "The Day Sheryl Swoopes was EXPOSED as a LIAR" (1M)
-- Yellow word: DEMOLISHED, EXPOSED, HUMBLED, BACKFIRED, WRONG, DISRESPECTED
-
-**Format 2 — The Awe/Spectacle** (ceiling: 200K+)
-Requires: One genius/unmissable thing Clark did, framed as something you have to see. No villain needed — underestimation itself is the antagonist.
-- Opens with the play, skill, or moment
-- Frames it as historic, unprecedented, or unforgettable
-- Examples: "This Caitlin Clark Commercial is GENIUS" (217K), "This Caitlin Clark Play Deserves An AWARD" (204K), "This Caitlin Clark Skill is SPECTACULAR" (204K)
-- Yellow word: GENIUS, SPECTACULAR, UNREAL, INSANE, AWARD, DIFFERENT
-
-**Filter every idea before starting:** Ask "Is there a villain, a slight, and a response?" → Format 1. Ask "Is there one genius/unmissable moment?" → Format 2. Neither → not a FTL video.
-
----
-
-### Step 2 — Identify the title's narrative structure
-
-Every great NBA title tells a specific type of story. Before adapting it, identify what story it actually tells:
-
-| Title format | Narrative type |
-|---|---|
-| "X Just Became The NBA's Worst Nightmare" | Dominance/fear — a team or player is now a threat the league can't ignore |
-| "X Just Sent The NBA A Message" | Statement/response — a team responded to doubt with action |
-| "This Changes Everything For X" | Paradigm shift — one move or development rewrites the entire outlook |
-| "The Day X Exposed Y" | Villain gets punished — hero responds to a specific slight with dominance |
-| "When You're The Best X But Nobody Cares" | Under-recognition — elite player being overlooked or underpaid |
-| "X Has A Problem" | Tension/conflict — a threat to a player or team's future |
-
-### Step 3 — Find the matching Clark/Fever story
-
-The story must genuinely fit the narrative structure — not just feel similar on the surface. Sources to pull from:
-
-- **Training camp footage and recaps** — what the team is focusing on, who is standing out
-- **Rachel DeMita's videos** — WNBA power rankings, roster moves, Clark-specific takes, contract news
-- **WNBA news** — extensions, free agency signings, coaching comments, injury updates
-- **On-court moments** — specific games, stat lines, plays that match a villain/vindication structure
-
-**Hard rule:** Clark and the Indiana Fever are always the protagonist. They are the force doing something. Never the ones being threatened or defeated.
-
-✅ "The Indiana Fever Just Sent The WNBA A Message" — Fever as the agent  
-✅ "This Changes Everything For Caitlin Clark" — Clark at the center of a shift  
-❌ "The New York Liberty Just Became Caitlin Clark's Worst Nightmare" — wrong protagonist
-
-### Step 4 — Map sources to video topics
-
-Each video should have one clear topic pulled from a specific source. Examples from the first batch:
-
-| Video title | Narrative type | Source material |
-|---|---|---|
-| "The Indiana Fever Just Sent The WNBA A Message" | Statement/response | Training camp Day 2 footage — defense as the identity, Clark's transition dominance, Justine Pat's length, locked gym |
-| "This Changes Everything For Caitlin Clark" | Paradigm shift | Rachel DeMita power rankings — Aaliyah Boston's $6.3M historic extension, big three all returning, Clark supermax on the horizon |
-| "The Indiana Fever Just Became The WNBA's Worst Nightmare" | Dominance/fear | Rachel DeMita power rankings — Fever at #3 with full chemistry, one OT loss from Finals, Liberty super team as the foil |
-
-### Step 5 — Write the script
-
-Target: **1,200–1,400 words** (approx. 8 minutes at narration pace). Do not submit a script under 1,200 words — expand sections, deepen the stat context, or add a second villain beat until the count is met.
-
-Follow the FTL voice profile in `src/lib/voice-profile.ts`. Key requirements:
-
-- **Cold open** — stat-first, quote-first, play-first, or emotion-primed. Never a greeting.
-- **Short paragraphs** — 2–4 sentences. At least one single-sentence paragraph.
-- **Stat stacks** — deliver numbers as a rapid list, not buried in prose. Always follow with a "so what" frame.
-- **2–3 first-person reactions** — "I honestly had to reread this.", "My jaw dropped.", "I'm still buzzing."
-- **2–4 two-word punches** — standalone lines: "Real money.", "Yep.", "Wrong read."
-- **Casual basketball speak** — analysis should still feel like a fan who knows hoops. Avoid editorial/production terms like "clip," "sequence," "segment," "visual," "asset," or "B-roll" in VO unless quoting someone. Use "play," "bucket," "read," "possession," "watch it back," "look at this," and "that moment."
-- **One villain beat** — a specific person, quote, or action that Clark/Fever respond to
-- **One vindication moment** — a concrete stat, play, or contract that earns the title
-- **Close** — callback or metaphor punch. Not a summary. One line.
-- **Sign-off** — "New videos every week on From The Logo. See you next time." Nothing after.
-
-Only use facts from the source transcripts. Do not fabricate stats, quotes, or names.
-
-### Step 5.5 — Roast the script (YouTube analysis)
-
-After writing and saving the script, run it through RoastMyVideo's script analyzer before generating VO. This gives a full YouTube-perspective review: hook strength, retention curve, viral potential, title suggestions, and actionable notes.
-
-```bash
-cd ~/code/roastmyvideo
-SCRIPT=$(cat ~/transcripts/script-SLUG.txt) bun -e "
-import { analyzeScript } from './src/utils/gemini';
-const result = await analyzeScript(process.env.SCRIPT, 'professional');
-console.log(JSON.stringify(result, null, 2));
-"
-```
-
-**Act on the output before moving to VO:**
-- `overallSentiment` must be `strong` or `fire` — if `decent` or below, revise
-- Fix any section flagged as `weak` or `bad`
-- Check `retentionCurve` for drop points and tighten those beats
-- Note title suggestions — they may be stronger than the working title
-
-Only proceed to VO once the overall sentiment is `strong` or `fire`.
-
-### Step 6 — Generate VO with ElevenLabs Johnny
-
-ElevenLabs Johnny is the default VO provider for FTL videos. Do not use Gemini TTS for production narration.
-
-- Voice: `Johnny`
-- Voice ID: `jyskLvwz58RBB27YwdcR`
-- Output: `/Volumes/SSK SSD/ftl/videos/{slug}/vo.mp3`
-
-Generate short beat/section VO with:
-
-```bash
-ELEVENLABS_VOICE_ID=jyskLvwz58RBB27YwdcR \
-node tools/generate-elevenlabs-vo-single.mjs \
-  ~/transcripts/script-SLUG.txt \
-  "/Volumes/SSK SSD/ftl/videos/{slug}/vo.mp3"
-```
-
-Use natural-language delivery notes and bracketed audio tags sparingly. Insert pause tags only where the edit needs breathing room. Standard pause placements:
-
-| Moment type | Break duration |
-|---|---|
-| Single-sentence punch line (standalone paragraph) | `1s` – `1.5s` |
-| Major reveal or stat drop | `1.5s` – `2s` |
-| "Let that land" / deliberate beat | `2s` – `2.5s` |
-| Section transition (pivot from one argument to next) | `1s` |
-
-**Chunking:** For full scripts or pause-heavy scripts, use the ElevenLabs pause-aware generator and stitch with ffmpeg filter concat.
-
-```bash
-ELEVENLABS_VOICE_ID=jyskLvwz58RBB27YwdcR \
-node tools/generate-elevenlabs-vo-with-pauses.mjs \
-  ~/transcripts/script-SLUG.txt \
-  "/Volumes/SSK SSD/ftl/videos/{slug}/vo.mp3"
-```
-
-Save the final file to `/Volumes/SSK SSD/ftl/videos/{slug}/vo.mp3` and keep any archived/generated chunks alongside it.
-
-### Step 6.5 — Source and validate all assets
-
-Before running the render, every asset referenced in the cue sheet must exist on disk. Run this validation:
-
-```bash
-python3 - << 'EOF'
-import json, os
-
-SLUG = "your-slug-here"
-SSD = "/Volumes/SSK SSD"
-
-with open(f"{SSD}/ftl/videos/{SLUG}/cue-sheet.json") as f:
-    cues = json.load(f)
-
-missing = []
-for cue in cues:
-    for key in ["clipPath", "imagePath"]:
-        path = cue.get(key)
-        if path and not os.path.exists(path):
-            missing.append(f"{cue['type']} @ {cue['startSecs']}s → {path}")
-
-if missing:
-    print(f"✗ {len(missing)} missing assets:")
-    for m in missing: print(f"  {m}")
-else:
-    print(f"✓ All {len(cues)} cues validated")
-EOF
-```
-
-**If assets are missing**, source them before rendering:
-
-- **B-roll clips** — download via `yt-dlp` and save to `/Volumes/SSK SSD/broll/aroll/{slug}/`:
-  ```bash
-  yt-dlp -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]" \
-    --merge-output-format mp4 \
-    -o "/Volumes/SSK SSD/broll/aroll/{slug}/%(title).50s.mp4" \
-    "YOUTUBE_URL"
-  ```
-- **Graphics / stat cards** — generate with the design tool or ask the user to provide them
-- **Illustrated scenes** — generate via `/ftl-thumbnail` or AI image tool
-
-Do not attempt to render with missing assets — Hyperframes can render blank or stale media if an asset path is wrong.
-
-### Step 7 — Build cue sheet
-
-Create `/Volumes/SSK SSD/ftl/videos/{slug}/cue-sheet.json` — a JSON array mapping timecodes to B-roll clips and graphics.
-
-```json
-[
-  { "startSecs": 0,  "endSecs": 12, "type": "broll",     "clipPath": "/Volumes/SSK SSD/broll/training-camp/clark-warmup.mp4" },
-  { "startSecs": 12, "endSecs": 24, "type": "stat_card", "imagePath": "/Volumes/SSK SSD/ftl/videos/{slug}/graphics/stat-1.png" }
-]
-```
-
-Cue types: `broll`, `stat_card`, `headline`, `tweet`, `illustrated_scene`, `aroll`.
-All paths must be absolute SSD paths — the Hyperframes builder symlinks them into `local/ftl-render/assets/` at build time.
-
-B-roll library lives at `/Volumes/SSK SSD/broll/`.
-
-### Step 8 — Render
-
-FTL videos must render through Hyperframes. Do not use Remotion for FTL production renders, previews, cue-sheet wiring, or edit-script wiring.
-
-Render complex videos section by section, then stitch the approved sections. Do not render the full timeline just to review one change.
-
-Section workflow:
-1. Split the edit into named sections, usually `S01`, `S02`, etc., with exact start/end times.
-2. Generate a section-only render input with `tools/create-section-render-input.mjs`.
-3. Build the section with `FTL_FLAT_BACKGROUND=1`.
-4. Render the section with Hyperframes at one worker for review stability.
-5. QC the section in browser/QuickTime and with contact sheets.
-6. Enforce visual cadence: moving clips should change every 5-10 seconds unless the edit is intentionally holding a freeze frame, still image, graphic board, or overlay-heavy analysis pause.
-7. Prefer alternate angles before repeating a play: live angle, replay, baseline/slow angle, social angle, then freeze-frame/graphics if no new angle exists.
-8. Use `tools/render-hyperframes-clean.mjs` for every Hyperframes render so Puppeteer/Chrome workers are cleaned up after completion or failure.
-9. Only after a section is approved, add its MP4 to `render/sections/concat.txt`.
-10. Stitch approved sections with ffmpeg concat, then add the low music bed.
-
-Example section render:
-
-```bash
-cd /Users/abdul/code/fromthelogo/local/ftl-render
-node ../../tools/create-section-render-input.mjs {slug} S01 0 49
-FTL_FLAT_BACKGROUND=1 bun run build.ts {slug}-section-S01
-npx hyperframes lint
-node ../../tools/render-hyperframes-clean.mjs --quality draft --workers 1 \
-  --output "/Volumes/SSK SSD/ftl/videos/{slug}/render/sections/S01-hook.mp4"
-```
-
-Output: `/Volumes/SSK SSD/ftl/videos/{slug}/render/final.mp4`
+| Thumbnail image generation | Gemini only (see Documentary Step 0) |
 
 ---
 
@@ -556,3 +187,72 @@ A pitch is weak when:
 - Clark or the Fever are framed as the victim or the one being threatened
 - The stats or quotes are vague or fabricated
 - The topic is already in the covered list
+
+---
+
+## News Recap lane — build notes / gotchas (2026-06-13)
+
+- **`ftl-script-pipeline.mjs --mode news`** makes `--clips` optional and targets 600–950 words. The
+  news draft prompt enforces sensational-but-factual + outlet attribution and reuses the same
+  required signoff as celebration.
+- **RoastMyVideo step is flaky:** `runRoast` sometimes throws `Unterminated string in JSON at
+  position ~8192` parsing the `bun -e` output from `~/code/roastmyvideo`. It is now NON-FATAL in
+  the script pipeline (the draft is already written; the run continues). Not specific to news mode.
+- **Fact-check is the hard gate and it works:** Codex caught a real error in the first news draft —
+  the WNBA suspension threshold is the **8th** technical (auto one-game suspension, then every ~2
+  after), not "beyond the seventh." The Athlon source phrasing ("beyond the seventh") is ambiguous;
+  prefer the explicit 8th-technical rule and attribute. `passGate` now requires an explicit
+  `VERDICT: PASS` final line from the fact-check — a bare "PASS" in the prose is no longer enough.
+- **Renderer Hyperframes bootstrap:** hyperframes is NOT installed in the repo. `ftl-render-news-recap.mjs`
+  inits a local project per video via `npx -y hyperframes@latest init render --example blank
+  --non-interactive --skip-skills` (same as the kinetic-video skill), then renders through
+  `tools/render-hyperframes-clean.mjs` (cwd = `<video-dir>/render`) so leftover Chrome/ffmpeg die.
+- **Receipt beats** render as factual headline/quote CARDS via codex-image-gen by default (clean +
+  copyright-safe). Swap in the literal outlet screenshot only if you keep the on-screen attribution.
+
+### News Recap — QC + render gotchas (from first end-to-end run)
+- **whisper is not on PATH in the fromthelogo pyenv context.** `ftl-render-news-recap.mjs` resolves it
+  from `~/.pyenv/versions/psych-channel/bin/whisper` (and 3.9.21 / 3.11.0-psych-channel envs), or set
+  `WHISPER_BIN`.
+- **Caption from the SCRIPT, not Whisper ASR.** Whisper base.en mishears proper nouns ("Aliyah"→"Alia",
+  "Aliyah Boston"→"a LeBron", "Caitlin"→"Catlin"). The renderer borrows Whisper *timing* but uses the
+  locked script text for caption words. This was a QC blocker on the first render.
+- **broll-video beats must loop-fill the beat.** A short clip (4-6s) on a long beat (17-25s) left a BLACK
+  SCREEN after it ended. The renderer now loop-extends each broll clip to the aligned beat duration
+  (ffmpeg `-stream_loop -1 -t <beatDur>`, scaled/letterboxed to 1920x1080).
+- **Receipt cards are NOT AI-drawn.** codex image_gen (gpt-image-2) cannot spell long exact headline/stat
+  text; receipts are typeset with ffmpeg `drawtext` (font: Arial Bold) — guaranteed accurate + legible.
+- **codex image_gen copy grabs the `._ig_*` AppleDouble** (4 KB) instead of the real PNG intermittently
+  (macOS/exFAT). The beat builder validates PNG magic bytes and recovers the real `ig_*.png` from
+  `~/.codex/generated_images/<session>/`. Also exclude `._*` files when scanning the b-roll library.
+- **Do NOT QC with `tools/gemini-cli-review.mjs`** — it routes >20 MB videos to the Shorts batch reviewer,
+  which fails any 4-6 min recap for exceeding 60s. Use `tools/ftl-news-recap-qc.mjs` (long-form).
+- **Gemini visual QC is unreliable for CURRENT-EVENT FACTS** (knowledge cutoff). It "corrected" verified
+  2026 stats to its 2024 memory. The QC prompt now tells Gemini NOT to fact-check stats/dates from its own
+  knowledge — Codex's live-web fact-check in the script step is the fact authority; Gemini only judges
+  legibility, spelling, visual match, framing, captions, pacing.
+
+---
+
+## YouTube Studio uploader (Playwright) — auth + upload gotchas (2026-07-03)
+
+`tools/yt_studio_upload.py` uploads to the FTL brand channel and leaves videos as **drafts** (login / clone-profile / save-state / status / upload / verify / list modes). Run with `~/.pyenv/versions/tiktok-browser-agents/bin/python`. Proven end-to-end: a Short → Draft on the Shorts tab, a longform → Draft on the Videos tab.
+
+**Why browser automation, not the API:** the brand account blocks API upload, AND the YouTube Data API v3 has NO "draft" privacyStatus (only public/private/unlisted), and unverified API projects get uploads force-locked private. So browser automation is the only path to a real draft. (Open-source survey: tiktoka-studio-uploader/ytb-up is the closest Python+Playwright match but bloated; fawazahmed0/youtube-uploader has an `uploadAsDraft` flag but is Node+password-login and fights bot-detection; linouk23 selenium is dead; 7x11x13/youtube-up is API-replay with no draft mode. Verdict: own ~200-line script.)
+
+**Auth — the hard part (macOS Keychain):**
+- Playwright launches Chrome with `--use-mock-keychain --password-store=basic`, so it CANNOT decrypt the real Chrome profile's cookies. Injecting yt-dlp-exported cookies via `add_cookies` also failed — Google's account-chooser rejected the session, and cloud/gemini subdomain cookies carry WebKit-epoch `expires` that Playwright rejects.
+- **What works:** `clone-profile` rsyncs the real Chrome profile (Tales = Profile 3 holds @fromthelogo22) + `Local State` into an isolated user-data-dir, then launch `channel="chrome"` with `ignore_default_args=["--use-mock-keychain","--password-store=basic"]` so the REAL macOS Keychain decrypts the cloned session. Requires **headed** (GUI login session) — Allow the Keychain prompt once.
+- **Headless does NOT work:** headless Chrome can't reach the Keychain, and `storage_state` JSON captured from the live session is rejected by Google's headless detection (bounces to accounts.google.com). So uploads run HEADED. save-state exists but the headless path is unreliable — treat headed as the supported mode.
+
+**Upload dialog selectors (current Studio, changes often):**
+- Create button = `[aria-label="Create"]` (the old `#create-icon` is gone) → click text "Upload videos" → `input[type=file]` appears (Playwright pierces shadow DOM) inside `ytcp-uploads-dialog`.
+- Title/desc = the two `#textbox` elements. Not-made-for-kids = `tp-yt-paper-radio-button[name="VIDEO_MADE_FOR_KIDS_NOT_MFK"]`.
+- **Draft = upload the file, fill details, then CLOSE the dialog without assigning visibility.** Studio autosaves it as a draft. Confirm any "Save as draft" prompt.
+
+**Completion polling (this bit hung the first runs):** `ytcp-video-upload-progress` `state` attribute is often empty (`-`). Do NOT loop on `.progress-label` — it returns empty → infinite loop until timeout (the raw upload finishes but the script never detects it; the draft still autosaves, which is why the first Short appeared despite the hang). Instead read `ytcp-uploads-dialog` inner_text: it goes `uploading N%` → `processing will begin shortly` / `checks complete`. Break when text shows processing/complete and no "uploading". Confirmed working on the longform (24%→98%→processing→closed clean, no hang).
+
+**Content tabs are SEPARATE:** longform lives at `.../channel/UC.../videos/upload`, Shorts at `.../videos/short`. A Short draft ONLY shows on the Shorts tab — checking Videos alone will falsely report "not found". `verify`/`list` now read BOTH tabs.
+
+- Channel: @fromthelogo22 = `UCvWdLRqA7R2Gggisxn4Xkhg`. Profile clone + shots + auth.json live under `/Volumes/SSK SSD/fromthelogo-cache/yt-uploader-*`.
+- Minor: python stdout buffers to a pipe, so `state=` lines don't stream live until flush/exit — fine, just don't expect live progress in a `| tail` monitor.
