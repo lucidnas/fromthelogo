@@ -75,12 +75,14 @@
     {
       "handle": "kenswift",
       "lane": "nba",
-      "note": "user-requested source"
+      "note": "user-requested source",
+      "context": true
     },
     {
       "handle": "MickTalksHoops",
       "lane": "wnba",
-      "note": "Caitlin stories"
+      "note": "Caitlin stories",
+      "context": true
     }
   ],
   "scan_bookmarks": true,

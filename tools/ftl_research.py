@@ -105,17 +105,20 @@ def report(days, top):
 
 
 def x_scan(rounds=6):
-    """Scan each X account's /media feed AND the user's bookmarks for VIDEO posts,
-    collecting view counts + links + text. Uses the cloned Tales profile (real
-    logged-in X session, headed). Returns rows ranked by views."""
+    """Scan each X account's timeline + the user's bookmarks. For normal accounts
+    collect VIDEO posts (viral clips). For accounts flagged `context:true`
+    (@kenswift, @MickTalksHoops) collect ALL posts — their TEXT is narrative
+    context on the Caitlin world and they surface podcast clips to pull. Uses the
+    cloned Tales profile (real logged-in X session, headed). Returns rows."""
     import re
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from yt_studio_upload import _persistent
     from playwright.sync_api import sync_playwright
     c = cfg()
-    targets = [(a["handle"], a["lane"], f"https://x.com/{a['handle']}") for a in c["x_accounts"]]
+    targets = [(a["handle"], a["lane"], bool(a.get("context")), f"https://x.com/{a['handle']}")
+               for a in c["x_accounts"]]
     if c.get("scan_bookmarks"):
-        targets.append(("bookmarks", "mixed", "https://x.com/i/bookmarks"))
+        targets.append(("bookmarks", "mixed", False, "https://x.com/i/bookmarks"))
     found = []
     with sync_playwright() as p:
         ctx = _persistent(p, headed=True)
@@ -123,7 +126,7 @@ def x_scan(rounds=6):
         page.goto("https://x.com/home", wait_until="domcontentloaded"); page.wait_for_timeout(5000)
         if "/login" in page.url or "i/flow" in page.url:
             print("  [warn] X not logged in on the Tales clone", file=sys.stderr)
-        for handle, lane, url in targets:
+        for handle, lane, context, url in targets:
             try:
                 page.goto(url, wait_until="domcontentloaded"); page.wait_for_timeout(5000)
             except Exception:
@@ -134,7 +137,9 @@ def x_scan(rounds=6):
                 for i in range(min(arts.count(), 30)):
                     a = arts.nth(i)
                     try:
-                        if not a.locator('[data-testid="videoComponent"], [data-testid="videoPlayer"]').count():
+                        has_video = a.locator('[data-testid="videoComponent"], [data-testid="videoPlayer"]').count() > 0
+                        # normal accounts: video only. context accounts: every post.
+                        if not has_video and not context:
                             continue
                         href = a.locator('a[href*="/status/"]').first.get_attribute("href", timeout=800) or ""
                     except Exception:
@@ -154,13 +159,17 @@ def x_scan(rounds=6):
                     except Exception:
                         pass
                     try:
-                        text = a.locator('[data-testid="tweetText"]').first.inner_text(timeout=600).replace("\n", " ")[:110]
+                        text = a.locator('[data-testid="tweetText"]').first.inner_text(timeout=600).replace("\n", " ")
                     except Exception:
                         text = ""
-                    found.append({"handle": handle, "lane": lane, "sid": sid,
-                                  "url": "https://x.com" + href.split("?")[0], "views": views, "text": text})
+                    text = text[:280] if context else text[:110]
+                    if not has_video and not text:
+                        continue  # nothing to use
+                    found.append({"handle": handle, "lane": lane, "context": context, "has_video": has_video,
+                                  "sid": sid, "url": "https://x.com" + href.split("?")[0], "views": views, "text": text})
                 page.mouse.wheel(0, 4000); page.wait_for_timeout(2500)
-            print(f"  @{handle}: {len(seen)} video posts", file=sys.stderr)
+            nv = sum(1 for f in found if f["handle"] == handle and f["has_video"])
+            print(f"  @{handle}: {len(seen)} posts ({nv} w/ video)", file=sys.stderr)
         ctx.close()
     found.sort(key=lambda r: r["views"], reverse=True)
     return found
@@ -171,18 +180,27 @@ def x_report(rounds=6, top=40):
     SPORTS = ("caitlin","clark","fever","wnba","nba","sophie","aliyah","kelsey",
               "boston","basketball","dunk","lebron","jokic","curry","hoop","playoff",
               "all-star","allstar","mvp","reese","bueckers","referee","ref ")
-    rows = [r for r in rows if r["lane"] in ("nba","wnba")
-            or any(k in (r["text"] or "").lower() for k in SPORTS)]
     today = datetime.date.today().isoformat()
     path = os.path.join(REPO, "research", f"{today}-x-clips.md")
-    lines = [f"# FTL X Viral Clips — {today}", "",
-             f"Video posts from {len(cfg()['x_accounts'])} accounts + bookmarks, ranked by views. "
-             "Download headless (yt-dlp) and build slow-mo highlights (game/fan clips) or split-clips.", ""]
-    for r in rows[:top]:
+    # 1) viral video clips (ranked) — sports-relevant, has a pullable clip
+    vids = [r for r in rows if r["has_video"] and
+            (r["lane"] in ("nba","wnba") or any(k in (r["text"] or "").lower() for k in SPORTS))]
+    # 2) context / story leads from the flagged accounts (read for narrative)
+    ctxrows = [r for r in rows if r.get("context")]
+    lines = [f"# FTL X Research — {today}", "",
+             "## Viral video clips — clip these (ranked by views)",
+             "Download headless (yt-dlp). Build split-clip, b-roll voiceover, or slow-mo highlight.", ""]
+    for r in vids[:top]:
         v = f"{r['views']:,}" if r["views"] else "?"
         lines.append(f"- **{v} views** · @{r['handle']} · [{(r['text'] or r['url'])[:75]}]({r['url']})")
+    lines += ["", "## Caitlin Clark world — context & story leads",
+              "From @kenswift / @MickTalksHoops etc. READ THESE for what's happening; "
+              "⏯ = has a podcast/video clip we can pull for a short.", ""]
+    for r in ctxrows[:top]:
+        clip = " ⏯" if r["has_video"] else ""
+        lines.append(f"- @{r['handle']}{clip}: {(r['text'] or r['url'])[:200]}  ({r['url']})")
     open(path, "w").write("\n".join(lines))
-    print(f"wrote {path}  ({len(rows)} video posts)")
+    print(f"wrote {path}  ({len(vids)} clips + {len(ctxrows)} context posts)")
     return path
 
 
