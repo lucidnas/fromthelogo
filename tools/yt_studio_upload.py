@@ -52,15 +52,44 @@ def save_state():
         c.close()
 
 
-def _persistent(p, headed=False):
+CDP_URL = "http://127.0.0.1:9222"
+
+
+def _persistent(p, headed=False, debug_port=None):
     """Persistent context on the cloned real-Chrome profile with the REAL
-    Keychain (for save_state / interactive only)."""
+    Keychain. debug_port opens a CDP endpoint so other commands can ATTACH to
+    this same window instead of launching their own (keeps the session warm,
+    avoids re-triggering Google's 'Verify it's you')."""
+    args = ["--disable-blink-features=AutomationControlled", "--profile-directory=Default"]
+    if debug_port:
+        args.append(f"--remote-debugging-port={debug_port}")
     return p.chromium.launch_persistent_context(
         CLONE_DIR, channel="chrome", headless=not headed,
         viewport={"width": 1440, "height": 900},
         ignore_default_args=["--use-mock-keychain", "--password-store=basic"],
-        args=["--disable-blink-features=AutomationControlled", "--profile-directory=Default"],
+        args=args,
     )
+
+
+def keep_open():
+    """Launch ONE long-lived browser window (clone profile, real Keychain) with a
+    CDP endpoint on :9222, and HOLD it open. Leave this running in the background;
+    every other command (upload/list/verify/publish/post-next) will attach to
+    this window instead of opening a new one. Ctrl-C / kill to stop."""
+    with sync_playwright() as p:
+        c = _persistent(p, headed=True, debug_port=9222)
+        page = c.pages[0] if c.pages else c.new_page()
+        page.goto(STUDIO, wait_until="domcontentloaded")
+        page.wait_for_timeout(5000)
+        ok = "studio.youtube.com/channel/" in page.url
+        print(f"Browser open on :9222 (studio {'ready' if ok else 'url='+page.url}).")
+        print("Leave this running — other commands attach here. Ctrl-C to stop.")
+        try:
+            while True:
+                page.wait_for_timeout(600000)  # keepalive tick
+        except KeyboardInterrupt:
+            print("closing keep-open window")
+        c.close()
 
 
 def clone_profile(chrome_profile=CHROME_PROFILE):
@@ -97,11 +126,31 @@ class _Ctx:
         finally: self._b.close()
 
 
+class _CdpCtx:
+    """Attached to a running keep-open window over CDP. close() only cleans up
+    the pages THIS command opened — it never closes the shared window."""
+    def __init__(self, browser, context):
+        self._b, self._c = browser, context; self._opened = []
+    def new_page(self):
+        pg = self._c.new_page(); self._opened.append(pg); return pg
+    def __getattr__(self, n):
+        return getattr(self._c, n)
+    def close(self):
+        for pg in self._opened:
+            try: pg.close()
+            except Exception: pass
+
+
 def ctx(p, headed=False):
-    """Preferred path: saved storage_state JSON -> headless real-Chrome, no
-    Keychain. Falls back to the persistent clone (real Keychain) if no state
-    file yet."""
+    """Attach to a running keep-open window (CDP :9222) if present — reuses the
+    SAME warm session. Otherwise: saved storage_state, then the persistent clone."""
     os.makedirs(SHOTS_DIR, exist_ok=True)
+    try:
+        b = p.chromium.connect_over_cdp(CDP_URL, timeout=3000)
+        if b.contexts:
+            return _CdpCtx(b, b.contexts[0])
+    except Exception:
+        pass
     if os.path.isfile(STATE_FILE):
         b = p.chromium.launch(
             channel="chrome", headless=not headed,
@@ -752,6 +801,7 @@ if __name__ == "__main__":
     cp.add_argument("--chrome-profile", default=CHROME_PROFILE)
     sub.add_parser("save-state")
     sub.add_parser("verify-identity")
+    sub.add_parser("keep-open")
     st = sub.add_parser("status")  # open studio on the session, report channel
     st.add_argument("--headed", action="store_true")
     u = sub.add_parser("upload")
@@ -783,6 +833,8 @@ if __name__ == "__main__":
         save_state()
     elif a.cmd == "verify-identity":
         verify_identity()
+    elif a.cmd == "keep-open":
+        keep_open()
     elif a.cmd == "status":
         with sync_playwright() as p:
             c = ctx(p, headed=getattr(a, "headed", False))
