@@ -1,62 +1,93 @@
 {
-  "_note": "FTL researcher sources. Add/remove freely. youtube = @handles (podcasts/shows to mine for viral clips). x_accounts = handles that post viral CC/WNBA/NBA video clips. keywords = what makes an item relevant.",
+  "_note": "FTL researcher sources. youtube_podcasts = Caitlin-content channels (yt-dlp virality scan). x_accounts = viral NBA/CC video accounts + bookmarks (browser scan, Tales session). lane: wnba=take all, mixed=keyword-filter to CC/WNBA only.",
   "youtube_podcasts": [
     {
       "handle": "TheRobinLundberg",
       "lane": "wnba",
-      "note": "daily Caitlin/Fever takes \u2014 primary"
+      "note": "daily Caitlin/Fever takes"
     },
     {
-      "handle": "PodcastPShow",
-      "lane": "nba",
-      "note": "Paul George pod"
+      "handle": "rademita",
+      "lane": "wnba",
+      "note": "Rachel DeMita \u2014 WNBA/Caitlin"
     },
     {
-      "handle": "allthesmoke",
-      "lane": "nba",
-      "note": "Matt Barnes / Stephen Jackson"
+      "handle": "ShowMe_Pod",
+      "lane": "wnba",
+      "note": "Show Me Something \u2014 Sophie Cunningham & West Wilson"
     },
     {
-      "handle": "ClubShayShay",
-      "lane": "nba",
-      "note": "Shannon Sharpe"
+      "handle": "PostMovesShow",
+      "lane": "wnba",
+      "note": "Post Moves \u2014 Candace Parker & Aliyah Boston"
     },
     {
-      "handle": "GilsArenaShow",
-      "lane": "nba",
-      "note": "Gilbert Arenas \u2014 verify handle"
+      "handle": "TheHerdwithColinCowherd",
+      "lane": "mixed",
+      "note": "Colin Cowherd \u2014 keep only Caitlin/WNBA"
     },
     {
-      "handle": "ThePatBevPodcastwithRoneShow",
-      "lane": "nba",
-      "note": "Pat Beverley \u2014 verify handle"
+      "handle": "ESPN",
+      "lane": "mixed",
+      "note": "ESPN \u2014 keep only Caitlin/WNBA"
     }
   ],
   "x_accounts": [
-    "IndianaFever",
-    "WNBA",
-    "NBA",
-    "LegionHoops",
-    "Buckets",
-    "CourtsideClub_",
-    "jammles9",
-    "TheHoopCentral",
-    "ClarkReport",
-    "underdognba",
-    "NBACentel"
+    {
+      "handle": "DunkCentral",
+      "lane": "nba",
+      "note": "viral NBA video clips"
+    },
+    {
+      "handle": "LegionHoops",
+      "lane": "nba",
+      "note": "viral NBA news/clips"
+    },
+    {
+      "handle": "IndianaFever",
+      "lane": "wnba",
+      "note": "official Fever \u2014 CC b-roll/moments"
+    },
+    {
+      "handle": "WNBA",
+      "lane": "wnba",
+      "note": "official WNBA clips"
+    },
+    {
+      "handle": "TheHoopCentral",
+      "lane": "nba",
+      "note": "viral NBA clips"
+    },
+    {
+      "handle": "CourtsideClub_",
+      "lane": "wnba",
+      "note": "CC commentary/clips"
+    },
+    {
+      "handle": "NBACentral",
+      "lane": "nba",
+      "note": "NBA Central \u2014 viral NBA clips (verify handle)"
+    },
+    {
+      "handle": "TheNBACentral",
+      "lane": "nba",
+      "note": "NBA Central \u2014 viral NBA clips (verify handle)"
+    }
   ],
+  "scan_bookmarks": true,
   "keywords": [
     "caitlin clark",
     "clark",
     "fever",
     "wnba",
     "sophie cunningham",
-    "aliyah boston"
+    "aliyah boston",
+    "kelsey mitchell"
   ],
   "formats": {
-    "split_clip": "podcast/pundit soundbite (top) + action (bottom) \u2014 the ftl-split-short default",
-    "slowmo_highlight": "slow-motion / close-up Caitlin Clark highlight (game replay or fan clip), vertical, music bed \u2014 TOP performer",
+    "split_clip": "podcast/pundit soundbite (top) + action (bottom) \u2014 ftl-split-short default",
+    "slowmo_highlight": "slow-motion / close-up Caitlin Clark highlight (game replay or fan clip), vertical, music \u2014 TOP performer",
     "play_ranking": "ranked list of Caitlin Clark plays (multiple clips + rank overlay)",
-    "nba_split_clip": "same split-clip format but NBA viral-pod soundbite \u2014 algorithm finds the audience"
+    "nba_split_clip": "split-clip from a viral NBA clip/soundbite \u2014 algorithm finds the audience"
   }
 }

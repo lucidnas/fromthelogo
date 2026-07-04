@@ -56,6 +56,8 @@ def scan_youtube(days, per):
                 continue
             vid, vc, dur, title = p[0], _views(p[1]), p[2], p[3]
             cc = any(k in title.lower() for k in kw)
+            if ch["lane"] == "mixed" and not cc:
+                continue  # general channel (ESPN/Herd): keep only CC/WNBA
             rows.append({"channel": h, "lane": ch["lane"], "id": vid, "views": vc,
                          "dur": dur, "title": title, "cc_relevant": cc})
             n += 1
@@ -102,25 +104,98 @@ def report(days, top):
     return path
 
 
-def x_plan():
+def x_scan(rounds=6):
+    """Scan each X account's /media feed AND the user's bookmarks for VIDEO posts,
+    collecting view counts + links + text. Uses the cloned Tales profile (real
+    logged-in X session, headed). Returns rows ranked by views."""
+    import re
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from yt_studio_upload import _persistent
+    from playwright.sync_api import sync_playwright
     c = cfg()
-    print("X accounts to scan (open in the logged-in browser, grab high-view video posts):")
-    for h in c["x_accounts"]:
-        print(f"  https://x.com/{h}/media   (@{h})")
-    print("\nFor each: bookmark or note viral video posts (>100k views) about Caitlin/WNBA/NBA;")
-    print("download headless with yt-dlp, then build split-clips or slow-mo highlights.")
+    targets = [(a["handle"], a["lane"], f"https://x.com/{a['handle']}") for a in c["x_accounts"]]
+    if c.get("scan_bookmarks"):
+        targets.append(("bookmarks", "mixed", "https://x.com/i/bookmarks"))
+    found = []
+    with sync_playwright() as p:
+        ctx = _persistent(p, headed=True)
+        page = ctx.pages[0] if ctx.pages else ctx.new_page()
+        page.goto("https://x.com/home", wait_until="domcontentloaded"); page.wait_for_timeout(5000)
+        if "/login" in page.url or "i/flow" in page.url:
+            print("  [warn] X not logged in on the Tales clone", file=sys.stderr)
+        for handle, lane, url in targets:
+            try:
+                page.goto(url, wait_until="domcontentloaded"); page.wait_for_timeout(5000)
+            except Exception:
+                print(f"  [skip] @{handle}", file=sys.stderr); continue
+            seen = set()
+            for _ in range(rounds):
+                arts = page.locator("article")
+                for i in range(min(arts.count(), 30)):
+                    a = arts.nth(i)
+                    try:
+                        if not a.locator('[data-testid="videoComponent"], [data-testid="videoPlayer"]').count():
+                            continue
+                        href = a.locator('a[href*="/status/"]').first.get_attribute("href", timeout=800) or ""
+                    except Exception:
+                        continue
+                    if "/status/" not in href:
+                        continue
+                    sid = href.split("/status/")[1].split("/")[0].split("?")[0]
+                    if sid in seen:
+                        continue
+                    seen.add(sid)
+                    views = 0
+                    try:
+                        al = a.locator('a[href$="/analytics"], [aria-label*="views"]').first.get_attribute("aria-label", timeout=800) or ""
+                        m = re.search(r"([\d,]+)\s+views", al)
+                        if m:
+                            views = int(m.group(1).replace(",", ""))
+                    except Exception:
+                        pass
+                    try:
+                        text = a.locator('[data-testid="tweetText"]').first.inner_text(timeout=600).replace("\n", " ")[:110]
+                    except Exception:
+                        text = ""
+                    found.append({"handle": handle, "lane": lane, "sid": sid,
+                                  "url": "https://x.com" + href.split("?")[0], "views": views, "text": text})
+                page.mouse.wheel(0, 4000); page.wait_for_timeout(2500)
+            print(f"  @{handle}: {len(seen)} video posts", file=sys.stderr)
+        ctx.close()
+    found.sort(key=lambda r: r["views"], reverse=True)
+    return found
+
+
+def x_report(rounds=6, top=40):
+    rows = x_scan(rounds)
+    SPORTS = ("caitlin","clark","fever","wnba","nba","sophie","aliyah","kelsey",
+              "boston","basketball","dunk","lebron","jokic","curry","hoop","playoff",
+              "all-star","allstar","mvp","reese","bueckers","referee","ref ")
+    rows = [r for r in rows if r["lane"] in ("nba","wnba")
+            or any(k in (r["text"] or "").lower() for k in SPORTS)]
+    today = datetime.date.today().isoformat()
+    path = os.path.join(REPO, "research", f"{today}-x-clips.md")
+    lines = [f"# FTL X Viral Clips — {today}", "",
+             f"Video posts from {len(cfg()['x_accounts'])} accounts + bookmarks, ranked by views. "
+             "Download headless (yt-dlp) and build slow-mo highlights (game/fan clips) or split-clips.", ""]
+    for r in rows[:top]:
+        v = f"{r['views']:,}" if r["views"] else "?"
+        lines.append(f"- **{v} views** · @{r['handle']} · [{(r['text'] or r['url'])[:75]}]({r['url']})")
+    open(path, "w").write("\n".join(lines))
+    print(f"wrote {path}  ({len(rows)} video posts)")
+    return path
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); sub = ap.add_subparsers(dest="cmd", required=True)
     y = sub.add_parser("youtube"); y.add_argument("--days", type=int, default=14); y.add_argument("--per", type=int, default=15)
     r = sub.add_parser("report"); r.add_argument("--days", type=int, default=14); r.add_argument("--top", type=int, default=40)
-    sub.add_parser("x-plan")
+    xs = sub.add_parser("x-scan"); xs.add_argument("--rounds", type=int, default=6); xs.add_argument("--top", type=int, default=40)
     a = ap.parse_args()
     if a.cmd == "youtube":
         for row in scan_youtube(a.days, a.per):
             print(f"{row['views']:>10,}  @{row['channel']:<18} {row['title'][:70]}")
     elif a.cmd == "report":
         report(a.days, a.top)
-    elif a.cmd == "x-plan":
-        x_plan()
+    elif a.cmd == "x-scan":
+        x_report(a.rounds, a.top)
