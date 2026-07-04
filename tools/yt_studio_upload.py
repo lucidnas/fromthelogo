@@ -529,17 +529,27 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
         if needs_verify(page):
             shot(page, "needs-verify")
             sys.exit("NEEDS_VERIFY: Google 'Verify it's you' prompt mid-upload — clear via `verify-identity`.")
-        # Title (first #textbox) — select-all then type
+        # Title (first #textbox) — select-all then type. The Studio auto-save
+        # ("Saving…") overlay can fail the click actionability check, so fall
+        # back to a force click / focus (visible field, just guarded).
         tb = page.locator("#textbox").first
         tb.wait_for(state="visible", timeout=30000)
-        tb.click()
+        try:
+            tb.click(timeout=8000)
+        except Exception:
+            try: tb.click(force=True, timeout=5000)
+            except Exception: tb.focus()
         page.keyboard.press("Meta+a")
         page.keyboard.type(title, delay=10)
 
         # Description (second #textbox)
         if desc:
             db = page.locator("#textbox").nth(1)
-            db.click()
+            try:
+                db.click(timeout=8000)
+            except Exception:
+                try: db.click(force=True, timeout=5000)
+                except Exception: db.focus()
             page.keyboard.type(desc, delay=5)
 
         # Audience: not made for kids
