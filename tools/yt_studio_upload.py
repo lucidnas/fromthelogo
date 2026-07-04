@@ -498,11 +498,30 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
         page.wait_for_timeout(4000)
         shot(page, "upload-dialog")
 
-        # Feed the file (input is inside the upload dialog / shadow DOM;
-        # Playwright pierces shadow DOM for input[type=file]).
-        inp = page.locator("input[type=file]").first
-        inp.wait_for(state="attached", timeout=30000)
-        inp.set_input_files(file)
+        # Over a CDP-attached (keep-open) browser, Playwright caps file transfer
+        # at 50MB. YouTube re-encodes on upload anyway, so feed a lightly
+        # compressed <50MB copy when the render is bigger.
+        upload_file = file
+        if os.path.getsize(file) > 48 * 1024 * 1024:
+            tmp = os.path.join(SHOTS_DIR, "_upl_" + os.path.basename(file))
+            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", file,
+                            "-c:v", "libx264", "-crf", "24", "-preset", "fast",
+                            "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", tmp],
+                           capture_output=True)
+            if os.path.isfile(tmp) and os.path.getsize(tmp) < 50 * 1024 * 1024:
+                upload_file = tmp
+                print(f"compressed for upload: {os.path.getsize(tmp)//1024//1024}MB")
+
+        # Feed the file via the file-chooser event (visible "Select files"),
+        # with the direct hidden-input as fallback.
+        try:
+            with page.expect_file_chooser(timeout=15000) as fc:
+                page.get_by_role("button", name="Select files").first.click(timeout=8000)
+            fc.value.set_files(upload_file)
+        except Exception:
+            inp = page.locator("input[type=file]").first
+            inp.wait_for(state="attached", timeout=15000)
+            inp.set_input_files(upload_file)
         print("file handed to uploader:", os.path.basename(file))
         page.wait_for_timeout(8000)
         shot(page, "after-file")
