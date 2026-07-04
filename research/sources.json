@@ -64,14 +64,14 @@
       "note": "CC commentary/clips"
     },
     {
-      "handle": "NBACentral",
+      "handle": "TheDunkCentral",
       "lane": "nba",
-      "note": "NBA Central \u2014 viral NBA clips (verify handle)"
+      "note": "NBA Central (big viral news/clips \u2014 legacy @)"
     },
     {
-      "handle": "TheNBACentral",
+      "handle": "ThrowbackHoops",
       "lane": "nba",
-      "note": "NBA Central \u2014 viral NBA clips (verify handle)"
+      "note": "throwback NBA clips"
     }
   ],
   "scan_bookmarks": true,
