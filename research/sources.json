@@ -30,14 +30,13 @@
       "handle": "ESPN",
       "lane": "mixed",
       "note": "ESPN \u2014 keep only Caitlin/WNBA"
+    },
+    {
+      "handle": "MickTalksHoops",
+      "lane": "wnba"
     }
   ],
   "x_accounts": [
-    {
-      "handle": "DunkCentral",
-      "lane": "nba",
-      "note": "viral NBA video clips"
-    },
     {
       "handle": "LegionHoops",
       "lane": "nba",
@@ -72,6 +71,16 @@
       "handle": "ThrowbackHoops",
       "lane": "nba",
       "note": "throwback NBA clips"
+    },
+    {
+      "handle": "kenswift",
+      "lane": "nba",
+      "note": "user-requested source"
+    },
+    {
+      "handle": "MickTalksHoops",
+      "lane": "wnba",
+      "note": "Caitlin stories"
     }
   ],
   "scan_bookmarks": true,
