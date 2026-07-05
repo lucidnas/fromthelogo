@@ -138,18 +138,26 @@ class _Ctx:
 
 
 class _CdpCtx:
-    """Attached to a running keep-open window over CDP. close() only cleans up
-    the pages THIS command opened — it never closes the shared window."""
+    """Attached to a running keep-open window over CDP. Callers ALWAYS get a fresh
+    throwaway tab (via new_page) — we never reuse or touch the keep-open's own tab,
+    so the two playwright drivers never fight over the same page and the shared
+    window stays open. close() closes only our throwaway tabs; NEVER the browser."""
     def __init__(self, browser, context):
         self._b, self._c = browser, context; self._opened = []
+    @property
+    def pages(self):
+        return []  # force `pages[0] if pages else new_page()` -> new_page()
     def new_page(self):
         pg = self._c.new_page(); self._opened.append(pg); return pg
+    def add_cookies(self, *a, **k):
+        return self._c.add_cookies(*a, **k)
     def __getattr__(self, n):
         return getattr(self._c, n)
     def close(self):
         for pg in self._opened:
             try: pg.close()
             except Exception: pass
+        # deliberately do NOT close self._b (the keep-open browser)
 
 
 def ctx(p, headed=False):
