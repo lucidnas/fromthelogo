@@ -24,6 +24,11 @@ from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 PROFILE_DIR = "/Volumes/SSK SSD/fromthelogo-cache/yt-uploader-profile"
 SHOTS_DIR = "/Volumes/SSK SSD/fromthelogo-cache/yt-uploader-shots"
 STUDIO = "https://studio.youtube.com"
+# Always enter Studio via the FTL channel URL — a bare studio.youtube.com/ can
+# redirect to the personal account (no channel) and pop a "create channel"
+# dialog, which breaks the Create button. The channel URL forces FTL context.
+FTL_CHANNEL = "UCvWdLRqA7R2Gggisxn4Xkhg"
+STUDIO_HOME = f"{STUDIO}/channel/{FTL_CHANNEL}"
 CHROME_PROFILE = "Profile 3"  # Tales — holds the FTL brand channel
 YTDLP = "/opt/homebrew/bin/yt-dlp"
 
@@ -482,8 +487,24 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
     with sync_playwright() as p:
         c = ctx(p, headed)
         page = c.pages[0] if c.pages else c.new_page()
-        page.goto(STUDIO + "/", wait_until="domcontentloaded")
+        page.goto(STUDIO, wait_until="domcontentloaded")
         page.wait_for_timeout(5000)
+        # HARD GUARD: From The Logo must ONLY be touched from the Tales/FTL session.
+        # If a bare Studio load redirects off Studio (personal account) or pops the
+        # "How you'll appear" create-channel dialog, or lands on the WRONG channel,
+        # ABORT — do NOT force the FTL channel URL from another account.
+        if page.get_by_text("How you'll appear", exact=False).count():
+            shot(page, "wrong-account")
+            sys.exit("WRONG PROFILE: Studio opened the create-channel dialog (personal/AYM account). "
+                     "From The Logo must only be accessed from the Tales profile. ABORTING — nothing uploaded.")
+        if "studio.youtube.com" not in page.url:
+            shot(page, "wrong-account")
+            sys.exit(f"WRONG PROFILE: Studio redirected to {page.url} (not the FTL/Tales channel). ABORTING.")
+        if FTL_CHANNEL not in page.url:
+            # resolve the active channel; must be FTL
+            if f"/channel/{FTL_CHANNEL}" not in page.url and "/channel/" in page.url:
+                shot(page, "wrong-account")
+                sys.exit(f"WRONG CHANNEL: on {page.url}, not From The Logo ({FTL_CHANNEL}). ABORTING.")
         if "accounts.google.com" in page.url:
             shot(page, "needs-login")
             sys.exit("Not logged in — run `login` mode first.")
