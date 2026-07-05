@@ -61,7 +61,7 @@ def save_state():
         c.close()
 
 
-CDP_URL = "http://127.0.0.1:9222"
+CDP_URL = "http://127.0.0.1:9337"
 
 
 def _persistent(p, headed=False, debug_port=None):
@@ -82,16 +82,16 @@ def _persistent(p, headed=False, debug_port=None):
 
 def keep_open():
     """Launch ONE long-lived browser window (clone profile, real Keychain) with a
-    CDP endpoint on :9222, and HOLD it open. Leave this running in the background;
+    CDP endpoint on :9337, and HOLD it open. Leave this running in the background;
     every other command (upload/list/verify/publish/post-next) will attach to
     this window instead of opening a new one. Ctrl-C / kill to stop."""
     with sync_playwright() as p:
-        c = _persistent(p, headed=True, debug_port=9222)
+        c = _persistent(p, headed=True, debug_port=9337)
         page = c.pages[0] if c.pages else c.new_page()
         page.goto(STUDIO_HOME, wait_until="domcontentloaded")  # Tales account + FTL channel
         page.wait_for_timeout(5000)
         ok = FTL_CHANNEL in page.url and "How you'll appear" not in page.content()
-        print(f"Browser open on :9222 ({'FTL/Tales ready' if ok else 'WRONG ACCOUNT url='+page.url}).")
+        print(f"Browser open on :9337 ({'FTL/Tales ready' if ok else 'WRONG ACCOUNT url='+page.url}).")
         if not ok:
             print("!! Not on From The Logo/Tales — do NOT upload; check the account.")
         print("Leave this running — other commands attach here. Ctrl-C to stop.")
@@ -153,7 +153,7 @@ class _CdpCtx:
 
 
 def ctx(p, headed=False):
-    """Attach to a running keep-open window (CDP :9222) if present — reuses the
+    """Attach to a running keep-open window (CDP :9337) if present — reuses the
     SAME warm session. Otherwise: saved storage_state, then the persistent clone."""
     os.makedirs(SHOTS_DIR, exist_ok=True)
     try:
