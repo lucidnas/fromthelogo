@@ -24,11 +24,15 @@ from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 PROFILE_DIR = "/Volumes/SSK SSD/fromthelogo-cache/yt-uploader-profile"
 SHOTS_DIR = "/Volumes/SSK SSD/fromthelogo-cache/yt-uploader-shots"
 STUDIO = "https://studio.youtube.com"
-# Always enter Studio via the FTL channel URL — a bare studio.youtube.com/ can
-# redirect to the personal account (no channel) and pop a "create channel"
-# dialog, which breaks the Create button. The channel URL forces FTL context.
+# From The Logo (@fromthelogo22) is a BRAND channel owned by the Tales account
+# talesfromthenba@gmail.com. The clone profile also has nas2663@gmail.com and an
+# "Abdul M" (AYM) account logged in — a bare studio.youtube.com/ can default to
+# the wrong one (AYM has no channel -> "create channel" dialog). ALWAYS enter via
+# the FTL channel URL WITH authuser=<Tales account> so the correct account is
+# selected; the guard in upload() aborts if it still isn't FTL. NEVER AYM.
 FTL_CHANNEL = "UCvWdLRqA7R2Gggisxn4Xkhg"
-STUDIO_HOME = f"{STUDIO}/channel/{FTL_CHANNEL}"
+FTL_ACCOUNT = "talesfromthenba@gmail.com"
+STUDIO_HOME = f"{STUDIO}/channel/{FTL_CHANNEL}?authuser={FTL_ACCOUNT}"
 CHROME_PROFILE = "Profile 3"  # Tales — holds the FTL brand channel
 YTDLP = "/opt/homebrew/bin/yt-dlp"
 
@@ -84,10 +88,12 @@ def keep_open():
     with sync_playwright() as p:
         c = _persistent(p, headed=True, debug_port=9222)
         page = c.pages[0] if c.pages else c.new_page()
-        page.goto(STUDIO, wait_until="domcontentloaded")
+        page.goto(STUDIO_HOME, wait_until="domcontentloaded")  # Tales account + FTL channel
         page.wait_for_timeout(5000)
-        ok = "studio.youtube.com/channel/" in page.url
-        print(f"Browser open on :9222 (studio {'ready' if ok else 'url='+page.url}).")
+        ok = FTL_CHANNEL in page.url and "How you'll appear" not in page.content()
+        print(f"Browser open on :9222 ({'FTL/Tales ready' if ok else 'WRONG ACCOUNT url='+page.url}).")
+        if not ok:
+            print("!! Not on From The Logo/Tales — do NOT upload; check the account.")
         print("Leave this running — other commands attach here. Ctrl-C to stop.")
         try:
             while True:
@@ -487,12 +493,11 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
     with sync_playwright() as p:
         c = ctx(p, headed)
         page = c.pages[0] if c.pages else c.new_page()
-        page.goto(STUDIO, wait_until="domcontentloaded")
+        # Select the Tales account (talesfromthenba) + FTL channel explicitly.
+        page.goto(STUDIO_HOME, wait_until="domcontentloaded")
         page.wait_for_timeout(5000)
-        # HARD GUARD: From The Logo must ONLY be touched from the Tales/FTL session.
-        # If a bare Studio load redirects off Studio (personal account) or pops the
-        # "How you'll appear" create-channel dialog, or lands on the WRONG channel,
-        # ABORT — do NOT force the FTL channel URL from another account.
+        # HARD GUARD: even with authuser set, verify we landed on From The Logo and
+        # NOT a create-channel dialog / wrong account. Abort rather than risk AYM.
         if page.get_by_text("How you'll appear", exact=False).count():
             shot(page, "wrong-account")
             sys.exit("WRONG PROFILE: Studio opened the create-channel dialog (personal/AYM account). "
