@@ -95,9 +95,12 @@ def keep_open():
         if not ok:
             print("!! Not on From The Logo/Tales — do NOT upload; check the account.")
         print("Leave this running — other commands attach here. Ctrl-C to stop.")
+        # Hold the browser open WITHOUT driving the page — so an attached upload
+        # can reuse this same Studio tab without two drivers fighting over it.
+        import time
         try:
             while True:
-                page.wait_for_timeout(600000)  # keepalive tick
+                time.sleep(600)
         except KeyboardInterrupt:
             print("closing keep-open window")
         c.close()
@@ -138,26 +141,16 @@ class _Ctx:
 
 
 class _CdpCtx:
-    """Attached to a running keep-open window over CDP. Callers ALWAYS get a fresh
-    throwaway tab (via new_page) — we never reuse or touch the keep-open's own tab,
-    so the two playwright drivers never fight over the same page and the shared
-    window stays open. close() closes only our throwaway tabs; NEVER the browser."""
+    """Attached to a running keep-open window over CDP. Reuses the keep-open's own
+    Studio tab (keep-open just holds the browser open via time.sleep — it doesn't
+    drive the page, so there's no two-driver fight). close() does NOTHING — it must
+    never close the shared tab or the browser (that would kill the keep-open window)."""
     def __init__(self, browser, context):
-        self._b, self._c = browser, context; self._opened = []
-    @property
-    def pages(self):
-        return []  # force `pages[0] if pages else new_page()` -> new_page()
-    def new_page(self):
-        pg = self._c.new_page(); self._opened.append(pg); return pg
-    def add_cookies(self, *a, **k):
-        return self._c.add_cookies(*a, **k)
+        self._b, self._c = browser, context
     def __getattr__(self, n):
         return getattr(self._c, n)
     def close(self):
-        for pg in self._opened:
-            try: pg.close()
-            except Exception: pass
-        # deliberately do NOT close self._b (the keep-open browser)
+        pass  # leave the shared window + its tab exactly as they were
 
 
 def ctx(p, headed=False):
@@ -501,9 +494,13 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
     with sync_playwright() as p:
         c = ctx(p, headed)
         page = c.pages[0] if c.pages else c.new_page()
-        # Select the Tales account (talesfromthenba) + FTL channel explicitly.
-        page.goto(STUDIO_HOME, wait_until="domcontentloaded")
-        page.wait_for_timeout(5000)
+        # Only navigate if we're NOT already on the FTL Studio tab — reusing the
+        # keep-open's warm Studio page avoids a full reload just to drop in a file.
+        if FTL_CHANNEL not in page.url:
+            page.goto(STUDIO_HOME, wait_until="domcontentloaded")  # Tales account + FTL channel
+            page.wait_for_timeout(5000)
+        else:
+            page.wait_for_timeout(500)
         # HARD GUARD: even with authuser set, verify we landed on From The Logo and
         # NOT a create-channel dialog / wrong account. Abort rather than risk AYM.
         if page.get_by_text("How you'll appear", exact=False).count():
