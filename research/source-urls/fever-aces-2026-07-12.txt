@@ -43,3 +43,5 @@ official | IndianaFever | https://x.com/IndianaFever/status/2076503200216101131/
 official | IndianaFever | https://x.com/IndianaFever/status/2076501861423608000/video/1
 official | IndianaFever | https://x.com/IndianaFever/status/2076498284600783271/video/1
 official | IndianaFever | https://x.com/IndianaFever/status/2076497221785141678/video/1
+official | IndianaFever | https://fever.wnba.com/watch/video/clark-hits-600-career-assists
+official | IndianaFever | https://videos.nba.com/wordpress/uploads/media/sites/fever/2026/07/7.12cctomo/hls/7.12cctomo.m3u8
