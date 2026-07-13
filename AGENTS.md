@@ -31,6 +31,18 @@ FTL is a faceless YouTube channel covering the WNBA every day from the Caitlin C
 
 ---
 
+## Video rendering default — HyperFrames only
+
+HyperFrames is the default and final renderer for every FTL video asset: Shorts, long-form videos, split screens, caption stories, quote cards, overlays, motion graphics, and revisions. Format-specific FTL skills define the editorial, framing, caption, color, and audio rules, but they do not replace HyperFrames as the render owner.
+
+- A deliverable may be described as a HyperFrames render only when its final MP4 was produced by `npx hyperframes render` from an inspectable HyperFrames HTML composition.
+- Run `npx hyperframes check` and visually inspect representative snapshots before the final render.
+- FFmpeg, Python, and legacy FTL render scripts may prepare sources, cut clips, transcode media, mix audio, or create QC artifacts. They must not produce the final authored video unless the user explicitly requests a legacy or non-HyperFrames renderer.
+- When an older FTL skill or script conflicts with this rule, keep its creative doctrine and rebuild the output in HyperFrames.
+- Never silently fall back from HyperFrames. If HyperFrames is blocked, report the blocker and wait for direction.
+
+---
+
 ## Format-Specific Playbooks
 
 Each FTL production lane has its own doc. Load the one that matches the work; do not pre-load all of them.
