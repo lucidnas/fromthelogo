@@ -1,0 +1,15 @@
+# sophie-cunningham-dana-white-ufc329
+# Game/source clip list.
+# Format: type | account | URL
+
+# Manual seed URLs, 2026-07-13T04:10:09.719Z
+seed | manual | https://www.youtube.com/watch?v=QXqf9WPPABg
+seed | manual | https://www.youtube.com/watch?v=KuFXRhXwZpM
+seed | manual | https://www.youtube.com/watch?v=Zc-APeL_rb4
+
+# Nitter discovery: IndianaFever | timeline | match-any: dana white, sophie cunningham, sophie, ufc 329, ring girl | 2026-07-13T04:10:10.360Z
+official | IndianaFever | https://x.com/IndianaFever/status/2076517000558301405/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2076516787676484058/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2076503200216101131/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2076501861423608000/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2076497221785141678/video/1
