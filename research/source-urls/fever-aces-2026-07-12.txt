@@ -1,0 +1,45 @@
+# fever-aces-2026-07-12
+# Game/source clip list.
+# Format: type | account | URL
+
+# Nitter discovery: IndianaFever | timeline | match-any: caitlin clark, clark, cc, sophie cunningham, sophie, indiana, fever, aces, las vegas, three, assist, dime, bucket, pregame, postgame | 2026-07-13T04:02:21.917Z
+official | IndianaFever | https://x.com/IndianaFever/status/2076355054836043785/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2076094186944606226/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2075664376120426848/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2075656985995874640/video/1
+
+# Nitter discovery: WNBA | timeline | match-any: caitlin clark, clark, cc, sophie cunningham, sophie, indiana, fever, aces, las vegas, three, assist, dime, bucket, pregame, postgame | 2026-07-13T04:02:23.198Z
+official | WNBA | https://x.com/WNBA/status/2076515290473476521/video/1
+official | WNBA | https://x.com/WNBA/status/2076514369853104570/video/1
+official | WNBA | https://x.com/WNBA/status/2076507832438956456/video/1
+official | WNBA | https://x.com/WNBA/status/2076506220324692192/video/1
+official | WNBA | https://x.com/WNBA/status/2076498900047798716/video/1
+official | WNBA | https://x.com/WNBA/status/2076496169849520445/video/1
+official | WNBA | https://x.com/WNBA/status/2076494513309180086/video/1
+official | WNBA | https://x.com/WNBA/status/2076492779484586065/video/1
+official | WNBA | https://x.com/WNBA/status/2076492410108916074/video/1
+official | WNBA | https://x.com/WNBA/status/2076491688441208969/video/1
+official | WNBA | https://x.com/WNBA/status/2076488000603648457/video/1
+official | WNBA | https://x.com/WNBA/status/2076482273096900706/video/1
+
+# Nitter discovery: LVAces | timeline | match-any: caitlin clark, clark, cc, sophie cunningham, sophie, indiana, fever, aces, las vegas, three, assist, dime, bucket, pregame, postgame | 2026-07-13T04:02:24.537Z
+official | LVAces | https://x.com/LVAces/status/1976838327509946625/video/1
+official | LVAces | https://x.com/LVAces/status/2076508275034792194/video/1
+official | LVAces | https://x.com/LVAces/status/2076486039821320320/video/1
+official | LVAces | https://x.com/LVAces/status/2076479914799398963/video/1
+official | LVAces | https://x.com/LVAces/status/2076477228632904012/video/1
+official | LVAces | https://x.com/LVAces/status/2076474338631700656/video/1
+
+# Manual seed URLs, 2026-07-13T04:04:08.731Z
+seed | manual | https://www.youtube.com/watch?v=HTyYLSKEcik
+seed | manual | https://www.youtube.com/watch?v=UQBKkDbRSqM
+seed | manual | https://www.youtube.com/watch?v=3TR8QvgDzmg
+seed | manual | https://www.youtube.com/watch?v=k5WeI-ZzyeM
+
+# Nitter discovery: IndianaFever | timeline | match-any: caitlin clark, clark, sophie cunningham, sophie, aces, las vegas, postgame, pregame, shootaround | 2026-07-13T04:04:10.148Z
+official | IndianaFever | https://x.com/IndianaFever/status/2076517000558301405/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2076516787676484058/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2076503200216101131/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2076501861423608000/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2076498284600783271/video/1
+official | IndianaFever | https://x.com/IndianaFever/status/2076497221785141678/video/1
