@@ -474,6 +474,11 @@ def scan(args) -> int:
                 try:
                     page.goto(target["url"], wait_until="domcontentloaded", timeout=45_000)
                     page.wait_for_timeout(4_000)
+                    if page.locator("article").count() == 0:
+                        try:
+                            page.locator("article").first.wait_for(state="visible", timeout=12_000)
+                        except Exception:
+                            pass
                 except Exception as exc:
                     print(f"[skip] {target['handle']}: navigation failed: {exc}", file=sys.stderr)
                     continue

@@ -78,3 +78,58 @@ Disable:
 ```bash
 launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.ftl.x-hourly-collector.plist
 ```
+
+## Hourly X queue production agent
+
+`com.ftl.x-queue-agent` runs at `:37`, after the collector. It atomically claims at
+most one new candidate, checks the processed-source ledger, inspects the actual
+downloaded video with Gemini, authors and validates the Short in HyperFrames, and
+uploads an upload-gate-approved result to YouTube Studio as a **Draft**. It never
+publishes or schedules.
+
+The downloaded video decides the authoritative format; the collector label is only
+a preliminary hint:
+
+- `split_short`: an attributable person delivers a complete thought. Preserve the
+  thought (normally 30–45 seconds), put the speaker on top, and use specifically
+  relevant verified footage below.
+- `caption_story`: the footage itself is the story (play, performance, record,
+  arrival, celebration, or news event). Use timed FTL story-caption beats and keep
+  the important action zoomed out and visible.
+- Reject or hold anything unusable, misleading, duplicated, or missing necessary
+  split-screen footage.
+
+Queue state, attempts, result JSON, final paths, hashes, and the processed-source
+ledger are stored in `candidates.sqlite3`. A six-hour stale claim is safely reset;
+failed jobs retry at most three times.
+
+Phone notifications use a local, untracked ntfy config at
+`~/.config/fromthelogo/notifications.json`:
+
+```json
+{
+  "ntfy_server": "https://ntfy.sh",
+  "ntfy_topic": "your-private-topic"
+}
+```
+
+Install and test without claiming work:
+
+```bash
+mkdir -p "$HOME/Library/Logs/FromTheLogo"
+cp tools/launchd/com.ftl.x-queue-agent.plist ~/Library/LaunchAgents/
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.ftl.x-queue-agent.plist
+~/.pyenv/versions/tiktok-browser-agents/bin/python tools/ftl_x_queue_agent.py --dry-run
+```
+
+Run one queued job immediately:
+
+```bash
+launchctl kickstart -k gui/$(id -u)/com.ftl.x-queue-agent
+```
+
+Disable:
+
+```bash
+launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.ftl.x-queue-agent.plist
+```
