@@ -16,7 +16,7 @@
   "properties": {
     "status": {
       "type": "string",
-      "enum": ["uploaded_draft", "needs_assets", "rejected", "duplicate", "failed"]
+      "enum": ["uploaded_draft", "needs_assets", "needs_review", "rejected", "duplicate", "failed"]
     },
     "authoritativeFormat": {
       "type": "string",

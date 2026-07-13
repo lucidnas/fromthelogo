@@ -262,7 +262,8 @@ Required workflow:
    are no critical or major issues. Revise within this job when safe; otherwise return failed.
 7. Generate lean Shorts metadata with Caitlin Clark and WNBA hashtags when the topic is WNBA/FTL.
    Upload through tools/yt_studio_upload.py as a headed DRAFT only. Verify the exact title appears as
-   Draft on the Shorts tab. Never click Publish and never schedule.
+   Draft on the Shorts tab. Attempt the upload at most once. If verification is uncertain, return
+   needs_review and do not upload again. Never click Publish and never schedule.
 8. Return only the JSON object required by the provided output schema. draftVerified may be true only
    after the Studio verification command explicitly confirms Draft. Include absolute paths and SHA-256.
 """.strip()
@@ -284,15 +285,21 @@ def run_codex(candidate: dict, job_dir: Path) -> tuple[int, dict | None, str]:
         prompt,
     ]
     with transcript_path.open("w") as transcript:
-        process = subprocess.run(
-            command,
-            cwd=REPO,
-            stdout=transcript,
-            stderr=subprocess.STDOUT,
-            text=True,
-            timeout=55 * 60,
-            env={**os.environ, "HOME": str(Path.home()), "CODEX_HOME": str(Path.home() / ".codex")},
-        )
+        try:
+            process = subprocess.run(
+                command,
+                cwd=REPO,
+                stdout=transcript,
+                stderr=subprocess.STDOUT,
+                text=True,
+                timeout=70 * 60,
+                env={**os.environ, "HOME": str(Path.home()), "CODEX_HOME": str(Path.home() / ".codex")},
+            )
+        except subprocess.TimeoutExpired:
+            return 124, None, (
+                "Codex timed out after 70 minutes; upload state may be uncertain and requires review; "
+                f"see {transcript_path}"
+            )
     if not result_path.exists():
         return process.returncode, None, f"Codex produced no result file; see {transcript_path}"
     raw = result_path.read_text().strip()
@@ -306,7 +313,9 @@ def finish_candidate(conn: sqlite3.Connection, candidate: dict, result: dict | N
     status_id = candidate["status_id"]
     attempts = candidate["attempts"]
     if result is None:
-        next_state = "new" if attempts < 3 else "failed"
+        next_state = "needs_review" if "upload state may be uncertain" in error else (
+            "new" if attempts < 3 else "failed"
+        )
         conn.execute(
             "UPDATE candidates SET state=?, claimed_at=NULL, last_error=? WHERE status_id=?",
             (next_state, error[:2000], status_id),
@@ -348,6 +357,7 @@ def finish_candidate(conn: sqlite3.Connection, candidate: dict, result: dict | N
 
     state_map = {
         "needs_assets": "needs_assets",
+        "needs_review": "needs_review",
         "rejected": "rejected",
         "duplicate": "duplicate",
         "failed": "new" if attempts < 3 else "failed",
@@ -437,10 +447,10 @@ def main() -> int:
                 priority="high",
                 tags="white_check_mark,basketball",
             )
-        elif final_state == "needs_assets":
+        elif final_state in ("needs_assets", "needs_review"):
             notify(
-                "FTL clip needs assets",
-                f"{candidate['tweet_text'][:120]}\n{candidate['canonical_url']}",
+                "FTL clip needs review" if final_state == "needs_review" else "FTL clip needs assets",
+                f"{candidate['tweet_text'][:120]}\n{error or (result or {}).get('reason', '')}\n{candidate['canonical_url']}",
                 tags="warning,basketball",
             )
         elif final_state in ("failed", "new"):
