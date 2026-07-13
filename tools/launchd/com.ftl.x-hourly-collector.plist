@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.ftl.x-hourly-collector</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/abdul/.pyenv/versions/tiktok-browser-agents/bin/python</string>
+    <string>/Users/abdul/code/fromthelogo/tools/ftl_x_hourly_collector.py</string>
+    <string>--rounds</string>
+    <string>2</string>
+    <string>--max-age-hours</string>
+    <string>72</string>
+    <string>--min-views</string>
+    <string>5000</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/bin:/bin:/usr/local/bin</string>
+    <key>PYTHONUNBUFFERED</key>
+    <string>1</string>
+  </dict>
+  <!-- Minute-only CalendarInterval runs once every hour at :17. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Minute</key>
+    <integer>17</integer>
+  </dict>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>WorkingDirectory</key>
+  <string>/Users/abdul/code/fromthelogo</string>
+  <key>Nice</key>
+  <integer>5</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/abdul/Library/Logs/FromTheLogo/x-hourly-collector.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/abdul/Library/Logs/FromTheLogo/x-hourly-collector.err.log</string>
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>

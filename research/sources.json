@@ -97,6 +97,7 @@
   ],
   "formats": {
     "split_clip": "podcast/pundit soundbite (top) + action (bottom) \u2014 ftl-split-short default",
+    "caption_story": "native game, record, performance, or breaking-news clip \u2014 timed FTL caption story rendered in HyperFrames",
     "slowmo_highlight": "slow-motion / close-up Caitlin Clark highlight (game replay or fan clip), vertical, music \u2014 TOP performer",
     "play_ranking": "ranked list of Caitlin Clark plays (multiple clips + rank overlay)",
     "nba_split_clip": "split-clip from a viral NBA clip/soundbite \u2014 algorithm finds the audience"
