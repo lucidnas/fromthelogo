@@ -20,6 +20,8 @@ import subprocess
 import sys
 import urllib.request
 
+from ftl_x_backlog_policy import refresh_backlog_policy, write_backlog_manifests
+
 
 REPO = Path(__file__).resolve().parents[1]
 CACHE = Path("/Volumes/SSK SSD/fromthelogo-cache/x-hourly-collector")
@@ -94,6 +96,49 @@ def reset_stale_claims(conn: sqlite3.Connection, hours: int = 6) -> int:
     return cursor.rowcount
 
 
+def preferred_lane(conn: sqlite3.Connection) -> str:
+    """Keep an approximately 3:1 WNBA-to-NBA production mix."""
+    recent = [
+        row[0]
+        for row in conn.execute(
+            """
+            SELECT c.lane
+            FROM processed_sources p
+            JOIN candidates c ON c.status_id=p.status_id
+            ORDER BY p.processed_at DESC
+            LIMIT 3
+            """
+        ).fetchall()
+    ]
+    return "nba" if len(recent) >= 3 and "nba" not in recent else "wnba"
+
+
+def candidate_order_sql(lane: str = "wnba") -> str:
+    """Editorial ordering for the current From The Logo Shorts backlog."""
+    alternate = "nba" if lane == "wnba" else "wnba"
+    return """
+        COALESCE(c.priority, 0) DESC,
+        CASE c.lane
+          WHEN '{lane}' THEN 0
+          WHEN 'mixed' THEN 1
+          WHEN '{alternate}' THEN 2
+          ELSE 3
+        END,
+        CASE
+          WHEN lower(COALESCE(c.tweet_text, '')) LIKE '%sophie cunningham%' THEN 0
+          WHEN lower(COALESCE(c.tweet_text, '')) LIKE '%caitlin clark%' THEN 1
+          WHEN lower(COALESCE(c.tweet_text, '')) LIKE '%sophie%' THEN 2
+          WHEN lower(COALESCE(c.tweet_text, '')) LIKE '%caitlin%' THEN 3
+          WHEN lower(COALESCE(c.tweet_text, '')) LIKE '%indiana fever%' THEN 4
+          WHEN lower(COALESCE(c.tweet_text, '')) LIKE '%fever%' THEN 5
+          WHEN lower(COALESCE(c.tweet_text, '')) LIKE '%wnba%' THEN 6
+          ELSE 7
+        END,
+        c.views DESC,
+        c.discovered_at DESC
+    """.format(lane=lane, alternate=alternate)
+
+
 def claim_candidate(conn: sqlite3.Connection, status_id: str | None = None) -> dict | None:
     conn.execute("BEGIN IMMEDIATE")
     params: list[str] = []
@@ -115,9 +160,7 @@ def claim_candidate(conn: sqlite3.Connection, status_id: str | None = None) -> d
             WHERE p.status_id=c.status_id
                OR (c.media_fingerprint<>'' AND p.media_fingerprint=c.media_fingerprint)
           )
-        ORDER BY COALESCE(c.priority, 0) DESC,
-                 CASE c.lane WHEN 'wnba' THEN 0 WHEN 'mixed' THEN 1 ELSE 2 END,
-                 c.views DESC, c.discovered_at ASC
+        ORDER BY {candidate_order_sql(preferred_lane(conn))}
         LIMIT 1
         """,
         params,
@@ -254,6 +297,15 @@ Required workflow:
    - caption_story: the footage itself is the story, including a play, performance, record, arrival,
      celebration, news event, or other visual sequence. Use timed story-caption beats, not a single
      static headline. Use FTL navy/white/gold and keep the important action zoomed out and visible.
+     When the source contains one instantly understandable visual payoff, prefer the 6-10 second
+     view-farming lane instead: start on motion, use one persistent truthful top hook, retain the full
+     payoff, exit immediately, and make the ending loop cleanly when possible. Use the longer timed
+     caption-story treatment only when multiple beats are necessary to understand the story.
+     Treat bench/coach reactions, teammate chemistry, playful conflict, hot-mic moments, celebrity
+     and UFC crossovers, arrivals, celebrations, gestures, and useful alternate angles as first-class
+     micro-moment candidates. Crop close enough to read the expression or action, but never hide the
+     evidence. Curiosity hooks must remain literally supported; do not invent anger, beef, humiliation,
+     or causation from an ambiguous look.
    - reject: narration-only/AI material, unusable footage, misleading context, duplicate compilation,
      or a clip that supports neither treatment.
 5. Build an inspectable HyperFrames HTML composition. Run `npx hyperframes check --json --snapshots`,
@@ -261,6 +313,9 @@ Required workflow:
 6. Run Gemini upload-gate QC on the rendered MP4. Do not upload unless QC says upload-ready and there
    are no critical or major issues. Revise within this job when safe; otherwise return failed.
 7. Generate lean Shorts metadata with Caitlin Clark and WNBA hashtags when the topic is WNBA/FTL.
+   Name the actual primary subject in titles and captions. Sophie Cunningham must be called Sophie
+   Cunningham, never "Caitlin Clark's teammate" or another relationship-only label. Do not force
+   Caitlin Clark into a title when she is not materially part of that Short.
    Upload through tools/yt_studio_upload.py as a headed DRAFT only. Verify the exact title appears as
    Draft on the Shorts tab. Attempt the upload at most once. If verification is uncertain, return
    needs_review and do not upload again. Never click Publish and never schedule.
@@ -402,6 +457,12 @@ def main() -> int:
         reset = reset_stale_claims(conn)
         if reset:
             print(f"reset {reset} stale processing claim(s)")
+        policy_counts = refresh_backlog_policy(conn)
+        active_path, held_path, daily_path = write_backlog_manifests(conn, CACHE)
+        print(f"freshness policy: {policy_counts}")
+        print(f"active backlog: {active_path}")
+        print(f"held backlog: {held_path}")
+        print(f"daily production backlog: {daily_path}")
         if args.seed_url:
             status_id = seed_candidate(
                 conn,
@@ -415,12 +476,12 @@ def main() -> int:
             print(f"seeded {status_id}: {args.seed_text or args.seed_url}")
             return 0
         if args.dry_run:
-            query = "SELECT status_id, canonical_url, lane, short_format, views, priority, tweet_text FROM candidates WHERE state='new'"
+            query = "SELECT c.status_id, c.canonical_url, c.lane, c.short_format, c.views, c.priority, c.tweet_text FROM candidates c WHERE c.state='new'"
             values: tuple[str, ...] = ()
             if args.candidate:
                 query += " AND status_id=?"
                 values = (args.candidate,)
-            query += " ORDER BY priority DESC, CASE lane WHEN 'wnba' THEN 0 WHEN 'mixed' THEN 1 ELSE 2 END, views DESC LIMIT 1"
+            query += f" ORDER BY {candidate_order_sql(preferred_lane(conn))} LIMIT 1"
             row = conn.execute(query, values).fetchone()
             print(json.dumps(row, indent=2, ensure_ascii=False))
             return 0

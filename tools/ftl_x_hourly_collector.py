@@ -20,7 +20,17 @@ from pathlib import Path
 import re
 import sqlite3
 import sys
+import time
 from urllib.parse import urlsplit, urlunsplit
+
+from ftl_x_backlog_policy import (
+    COMMENTARY_MAX_AGE_HOURS,
+    editorial_class,
+    ensure_policy_schema,
+    infer_event_key,
+    refresh_backlog_policy,
+    write_backlog_manifests,
+)
 
 
 REPO = Path(__file__).resolve().parents[1]
@@ -43,14 +53,30 @@ STORY_SIGNALS = (
     "steal", "block", "breaking", "signs", "signed", "fined", "fine ",
     "suspension", "trade", "injury", "performance", "final", "wins", "win ",
     "loss", "vs ", "vs.", "stat line", "career-high", "season-high", "clutch",
+    "bench", "timeout", "hot mic", "caught", "reaction", "reacts", "laugh",
+    "smile", "stare", "gesture", "points at", "pose", "celebrates", "arrival",
+    "walkout", "ring girl", "ufc", "dana white", "celebrity", "surprises",
+    "roasts", "beef", "shove", "hard foul", "technical", "ejected",
 )
 SPORTS_SIGNALS = (
     "caitlin", "clark", "fever", "wnba", "nba", "sophie", "cunningham",
     "aliyah", "boston", "kelsey", "basketball", "dunk", "lebron", "jokic",
     "curry", "hoop", "playoff", "all-star", "allstar", "mvp", "reese",
-    "bueckers", "referee", "finals", "rookie", "trade", "coach",
+    "bueckers", "referee", "finals", "rookie", "trade", "coach", "ufc",
+    "dana white", "ring girl", "bench", "timeout", "hot mic", "hard foul",
+)
+MICRO_MOMENT_SIGNALS = (
+    "bench", "timeout", "hot mic", "caught", "reaction", "reacts", "laugh",
+    "smile", "stare", "gesture", "points at", "pose", "celebrates", "arrival",
+    "walkout", "ring girl", "ufc", "dana white", "celebrity", "surprises",
+    "roasts", "beef", "shove", "hard foul", "technical", "ejected",
 )
 OFFICIAL_ALWAYS_KEEP = {"indianafever", "wnba", "nba"}
+WNBA_LANE_SIGNALS = (
+    "caitlin clark", "caitlin", "sophie cunningham", "sophie", "wnba",
+    "indiana fever", "fever", "aliyah boston", "kelsey mitchell", "lexie hull",
+    "paige bueckers", "angel reese", "aja wilson", "a'ja wilson",
+)
 
 
 def now_utc() -> str:
@@ -124,12 +150,15 @@ def classify(text: str, context_account: bool) -> tuple[str, str]:
     lower = (text or "").lower()
     speech_hits = [signal for signal in SPEECH_SIGNALS if signal in lower]
     story_hits = [signal for signal in STORY_SIGNALS if signal in lower]
+    micro_hits = [signal for signal in MICRO_MOMENT_SIGNALS if signal in lower]
     quoted_speaker = any(mark in (text or "") for mark in ('"', "“", "”")) and " on " in lower
-    if context_account or speech_hits or quoted_speaker:
+    if context_account or quoted_speaker or (speech_hits and not micro_hits):
         reason = "speech/pundit signal" if speech_hits else "configured commentary account"
         if quoted_speaker and not context_account and not speech_hits:
             reason = "quoted player/pundit soundbite"
         return "split_short", reason
+    if micro_hits:
+        return "caption_story", f"high-retention micro-moment: {micro_hits[0]}"
     if story_hits:
         return "caption_story", f"story/play signal: {story_hits[0]}"
     return "caption_story", "native basketball video suitable for a caption-led angle"
@@ -191,6 +220,7 @@ def init_db(conn: sqlite3.Connection) -> None:
         );
         """
     )
+    ensure_policy_schema(conn)
     conn.commit()
 
 
@@ -244,11 +274,12 @@ def store_candidate(conn: sqlite3.Connection, row: dict) -> tuple[str, str | Non
         INSERT INTO candidates(
           status_id, canonical_url, handle, source_target, lane, tweet_text, views,
           posted_at, discovered_at, last_seen_at, short_format, format_reason,
-          poster_url, media_fingerprint, text_fingerprint, state
+          poster_url, media_fingerprint, text_fingerprint, state, editorial_class, event_key
         ) VALUES(
           :status_id, :canonical_url, :handle, :source_target, :lane, :tweet_text,
           :views, :posted_at, :discovered_at, :last_seen_at, :short_format,
-          :format_reason, :poster_url, :media_fingerprint, :text_fingerprint, 'new'
+          :format_reason, :poster_url, :media_fingerprint, :text_fingerprint, 'new',
+          :editorial_class, :event_key
         )
         """,
         row,
@@ -365,12 +396,15 @@ def article_row(article, target: dict, discovered_at: str) -> dict | None:
                 break
 
     short_format, format_reason = classify(text, bool(target.get("context")))
+    lane = target["lane"]
+    if any(signal in text.lower() for signal in WNBA_LANE_SIGNALS):
+        lane = "wnba"
     return {
         "status_id": status_id,
         "canonical_url": canonical_url,
         "handle": actual_handle,
         "source_target": target["handle"],
-        "lane": target["lane"],
+        "lane": lane,
         "tweet_text": text[:600],
         "views": views,
         "posted_at": posted_at or None,
@@ -384,16 +418,19 @@ def article_row(article, target: dict, discovered_at: str) -> dict | None:
     }
 
 
-def eligible(row: dict, target: dict, max_age_hours: int, min_views: int) -> bool:
+def eligible(row: dict, target: dict, highlight_max_age_hours: int, min_views: int) -> bool:
     lower = (row["tweet_text"] or "").lower()
     if target["lane"] == "mixed" and not any(signal in lower for signal in SPORTS_SIGNALS):
         return False
-    if target["handle"] != "bookmarks":
-        posted = parse_posted_at(row.get("posted_at") or "")
-        if posted:
-            age = dt.datetime.now(dt.timezone.utc) - posted
-            if age.total_seconds() > max_age_hours * 3600:
-                return False
+    posted = parse_posted_at(row.get("posted_at") or "")
+    if not posted:
+        return False
+    age = dt.datetime.now(dt.timezone.utc) - posted
+    max_age_hours_for_row = (
+        COMMENTARY_MAX_AGE_HOURS if row["short_format"] == "split_short" else highlight_max_age_hours
+    )
+    if age.total_seconds() > max_age_hours_for_row * 3600:
+        return False
     if row["views"] and row["views"] < min_views:
         if row["handle"].lower() not in OFFICIAL_ALWAYS_KEEP:
             return False
@@ -483,7 +520,11 @@ def scan(args) -> int:
                     print(f"[skip] {target['handle']}: navigation failed: {exc}", file=sys.stderr)
                     continue
 
-                for _ in range(args.rounds):
+                stagnant_rounds = 0
+                completed_rounds = 0
+                target_started = time.monotonic()
+                for round_index in range(args.rounds):
+                    before_round = len(target_seen)
                     articles = page.locator("article")
                     for index in range(min(articles.count(), args.limit_per_round)):
                         row = article_row(articles.nth(index), target, now_utc())
@@ -493,6 +534,8 @@ def scan(args) -> int:
                         scanned += 1
                         if not eligible(row, target, args.max_age_hours, args.min_views):
                             continue
+                        row["editorial_class"] = editorial_class(row["short_format"])
+                        row["event_key"] = infer_event_key(row["tweet_text"], row["lane"], row["posted_at"])
                         if args.dry_run:
                             inserted_rows.append(row)
                             continue
@@ -503,15 +546,50 @@ def scan(args) -> int:
                         elif outcome == "duplicate":
                             duplicates += 1
                             print(f"  duplicate {row['status_id']} -> {duplicate_of}")
-                    page.mouse.wheel(0, 3_600)
-                    page.wait_for_timeout(1_600)
-                print(f"  @{target['handle']}: {len(target_seen)} native-video posts inspected")
+                    completed_rounds = round_index + 1
+                    # X virtualizes its timeline. Two smaller scrolls with load
+                    # waits are more reliable than one large jump, which can
+                    # skip posts before their video components enter the DOM.
+                    for _ in range(2):
+                        page.mouse.wheel(0, 1_900)
+                        page.wait_for_timeout(1_500)
+                    try:
+                        page.wait_for_function(
+                            "count => document.querySelectorAll('article').length > count",
+                            arg=articles.count(),
+                            timeout=3_500,
+                        )
+                    except Exception:
+                        pass
+                    if len(target_seen) == before_round:
+                        stagnant_rounds += 1
+                    else:
+                        stagnant_rounds = 0
+                    elapsed = time.monotonic() - target_started
+                    if elapsed >= args.min_account_seconds and stagnant_rounds >= args.stagnant_rounds:
+                        break
+                    # A researcher should actually inhabit the feed long enough
+                    # for X to hydrate videos and counters. Never leave an
+                    # account before the configured minimum dwell time.
+                    if round_index == args.rounds - 1 and elapsed < args.min_account_seconds:
+                        page.wait_for_timeout(int((args.min_account_seconds - elapsed) * 1000))
+                print(
+                    f"  @{target['handle']}: {len(target_seen)} native-video posts inspected "
+                    f"across {completed_rounds} scroll rounds in "
+                    f"{time.monotonic() - target_started:.1f}s"
+                )
 
             if not args.dry_run:
                 conn.commit()
+                policy_counts = refresh_backlog_policy(conn)
                 append_jsonl(inserted_rows)
+                active_path, held_path, daily_path = write_backlog_manifests(conn, CACHE)
                 report_path = write_report(conn, args.report_top)
                 print(f"report: {report_path}")
+                print(f"active backlog: {active_path}")
+                print(f"held backlog: {held_path}")
+                print(f"daily production backlog: {daily_path}")
+                print(f"freshness policy: {policy_counts}")
             else:
                 print(json.dumps(inserted_rows[: args.report_top], indent=2, ensure_ascii=False))
 
@@ -551,7 +629,9 @@ def scan(args) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rounds", type=int, default=2)
+    parser.add_argument("--rounds", type=int, default=20)
+    parser.add_argument("--stagnant-rounds", type=int, default=2)
+    parser.add_argument("--min-account-seconds", type=float, default=60.0)
     parser.add_argument("--limit-per-round", type=int, default=24)
     parser.add_argument("--max-age-hours", type=int, default=72)
     parser.add_argument("--min-views", type=int, default=5_000)

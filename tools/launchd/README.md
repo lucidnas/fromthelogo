@@ -56,6 +56,18 @@ Deduplication checks the X status ID, canonical URL, X media/poster fingerprint,
 same-account normalized post text. Reposts of already queued media are written to the
 SQLite `duplicates` table and do not re-enter the candidate queue.
 
+Freshness is enforced before a candidate can enter production: visual highlights are
+eligible for 72 hours, news/commentary soundbites for 120 hours, and older material is
+held unless an editor explicitly marks it evergreen. A conservative event key keeps at
+most two candidates from the same identified event/angle. These controls are
+non-destructive: held rows remain in SQLite as `held_stale`, `held_angle`,
+`held_unverified_date`, or `held_evergreen_review`. A newly reposted clip that names a
+historical year also requires an editor to set `is_evergreen=1` before production. The
+current claimable and held inventories are exported after
+every scan/worker pass to `active-backlog.json` and `held-backlog.json`.
+`daily-production-backlog.json` is the current 20-item review batch, balanced as
+10 WNBA and 10 NBA candidates when both lanes have sufficient inventory.
+
 Install and test:
 
 ```bash
@@ -79,13 +91,20 @@ Disable:
 launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.ftl.x-hourly-collector.plist
 ```
 
-## Hourly X queue production agent
+## X queue production agent
 
-`com.ftl.x-queue-agent` runs at `:37`, after the collector. It atomically claims at
-most one new candidate, checks the processed-source ledger, inspects the actual
+`com.ftl.x-queue-agent` checks at `:07`, `:22`, `:37`, and `:52`. It atomically
+claims at most one new candidate, checks the processed-source ledger, inspects the actual
 downloaded video with Gemini, authors and validates the Short in HyperFrames, and
 uploads an upload-gate-approved result to YouTube Studio as a **Draft**. It never
 publishes or schedules.
+
+The single-job lock prevents overlapping renders. Within the WNBA lane, current
+editorial ordering promotes Sophie Cunningham, Caitlin Clark, and Indiana Fever
+clips before generic league material, then uses view count and freshness.
+After three completed non-NBA drafts, the next ordinary claim prefers the NBA lane;
+this maintains an approximately 3:1 WNBA-to-NBA mix. Explicitly prioritized breaking
+stories remain ahead of the lane rotation.
 
 The downloaded video decides the authoritative format; the collector label is only
 a preliminary hint:
@@ -95,7 +114,12 @@ a preliminary hint:
   relevant verified footage below.
 - `caption_story`: the footage itself is the story (play, performance, record,
   arrival, celebration, or news event). Use timed FTL story-caption beats and keep
-  the important action zoomed out and visible.
+  the important action zoomed out and visible. If one complete visual payoff reads
+  instantly, use the 6–10 second view-farming treatment: one truthful persistent
+  hook, immediate payoff, no dead air, and a clean loop when possible.
+- Name recognizable subjects directly. Use `Sophie Cunningham`, never `Caitlin
+  Clark's teammate`; do not force Caitlin into metadata when she is not materially
+  part of the clip.
 - Reject or hold anything unusable, misleading, duplicated, or missing necessary
   split-screen footage.
 
