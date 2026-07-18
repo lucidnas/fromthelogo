@@ -33,6 +33,7 @@ PROFILE_DIR = Path("/Volumes/SSK SSD/fromthelogo-cache/tiktok-uploader-profile")
 TRACE_ROOT = Path("/Volumes/SSK SSD/fromthelogo-cache/tiktok-uploader-traces")
 UPLOAD_URL = "https://www.tiktok.com/tiktokstudio/upload?lang=en"
 FALLBACK_UPLOAD_URL = "https://www.tiktok.com/upload?lang=en"
+DEFAULT_CDP_URL = os.environ.get("TIKTOK_CDP_URL", "")
 
 
 def now_slug() -> str:
@@ -70,6 +71,33 @@ def launch_context(playwright, profile_dir: Path, headed: bool = True):
         viewport={"width": 1440, "height": 1000},
         args=["--disable-blink-features=AutomationControlled"],
     )
+
+
+class AttachedContext:
+    """A shared Chrome context reached over CDP.
+
+    Commands may close pages they create, but must never close the shared browser
+    or context that owns the user's warm Tales session.
+    """
+
+    def __init__(self, browser, context) -> None:
+        self.browser = browser
+        self.context = context
+
+    def close(self) -> None:
+        pass
+
+
+def browser_context(playwright, profile_dir: Path, headed: bool, cdp_url: str):
+    if cdp_url:
+        browser = playwright.chromium.connect_over_cdp(cdp_url, timeout=20_000)
+        if not browser.contexts:
+            browser.close()
+            raise RuntimeError(f"No browser context available at {cdp_url}")
+        attached = AttachedContext(browser, browser.contexts[0])
+        return attached, attached.context, True
+    context = launch_context(playwright, profile_dir, headed=headed)
+    return context, context, False
 
 
 def page_text(page: Page) -> str:
@@ -255,19 +283,23 @@ def login(profile_dir: Path) -> None:
             context.close()
 
 
-def status(profile_dir: Path) -> None:
+def status(profile_dir: Path, cdp_url: str = "") -> None:
     trace = Trace()
     with sync_playwright() as playwright:
-        context = launch_context(playwright, profile_dir, headed=True)
+        owner, context, attached = browser_context(
+            playwright, profile_dir, headed=True, cdp_url=cdp_url
+        )
+        page = context.new_page() if attached else (context.pages[0] if context.pages else context.new_page())
         try:
-            page = context.pages[0] if context.pages else context.new_page()
             open_upload(page)
             trace.save(page, "status")
             state = "LOGIN REQUIRED" if looks_logged_out(page) else "READY"
             print(f"TIKTOK {state}: {page.url}")
             print(f"trace={trace.path}")
         finally:
-            context.close()
+            if attached:
+                page.close()
+            owner.close()
 
 
 def upload(
@@ -278,6 +310,7 @@ def upload(
     confirm: bool,
     dry_run: bool,
     keep_open: bool,
+    cdp_url: str = "",
 ) -> None:
     if not file_path.is_file():
         raise FileNotFoundError(f"Video not found: {file_path}")
@@ -299,8 +332,10 @@ def upload(
 
     trace = Trace()
     with sync_playwright() as playwright:
-        context = launch_context(playwright, profile_dir, headed=True)
-        page = context.pages[0] if context.pages else context.new_page()
+        owner, context, attached = browser_context(
+            playwright, profile_dir, headed=True, cdp_url=cdp_url
+        )
+        page = context.new_page() if attached else (context.pages[0] if context.pages else context.new_page())
         try:
             open_upload(page)
             trace.save(page, "01-upload-opened")
@@ -321,12 +356,19 @@ def upload(
                     time.sleep(60)
         finally:
             if not keep_open:
-                context.close()
+                if attached:
+                    page.close()
+                owner.close()
 
 
 def parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="From The Logo TikTok Studio uploader")
     ap.add_argument("--profile-dir", type=Path, default=PROFILE_DIR)
+    ap.add_argument(
+        "--cdp-url",
+        default=DEFAULT_CDP_URL,
+        help="attach to an existing Playwright/Chrome CDP session instead of launching a profile",
+    )
     sub = ap.add_subparsers(dest="command", required=True)
     sub.add_parser("login", help="open the persistent profile for one-time TikTok login")
     sub.add_parser("status", help="check whether the persistent TikTok profile is ready")
@@ -347,7 +389,7 @@ def main() -> None:
     if args.command == "login":
         login(args.profile_dir)
     elif args.command == "status":
-        status(args.profile_dir)
+        status(args.profile_dir, cdp_url=args.cdp_url)
     elif args.command == "upload":
         upload(
             file_path=args.file.expanduser().resolve(),
@@ -357,6 +399,7 @@ def main() -> None:
             confirm=args.confirm,
             dry_run=args.dry_run,
             keep_open=args.keep_open,
+            cdp_url=args.cdp_url,
         )
 
 

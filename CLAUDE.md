@@ -45,6 +45,14 @@ Shorts may run **60 seconds or longer (1 min+)** when the play, multi-angle trea
 
 After every Hyperframes render, run the stale render-process check documented in `AGENTS.md` and kill leftover Hyperframes/Puppeteer/Chrome/ffmpeg workers before starting another render.
 
+## Publishing Shorts to YouTube and TikTok
+
+When the user asks to upload, publish, schedule, cross-post, verify, or check the status of an FTL Short on YouTube Shorts or TikTok, use the `ftl-publish-shorts` skill at `~/.codex/skills/ftl-publish-shorts/SKILL.md`.
+
+Use the existing repo Playwright uploaders for file injection: `tools/yt_studio_upload.py` for YouTube and `tools/tiktok_studio_upload.py` for TikTok. Reuse the warm Tales Chrome session on CDP `:9337` and the signed-in `Profile 3`; do not repeatedly launch browser windows. After upload, use the `chrome:control-chrome` skill and its Playwright interface against the existing Studio tabs for metadata, visibility, scheduling, publishing, and verification. Always verify the active YouTube channel is **From The Logo** / `@fromthelogo22`, not Tales From Hollywood.
+
+Before uploading, check both platform lists for a duplicate and confirm the canonical approved MP4 under `/Volumes/SSK SSD/clip-library/ftl-shorts/`. TikTok captions must replace the filename/default text and appear exactly once. Treat TikTok `Content under review` + `Only me` as submitted but not public; only `Everyone` is public. Never report success from a click alone—verify the resulting YouTube Shorts or TikTok Posts row.
+
 ## News Recap (trending-story, image-led)
 
 For trending-news Caitlin Clark videos — where the day's story is a news beat (a quote, ruling, report, or social post) rather than a clip-worthy play — use the `ftl-news-recap` skill and `docs/formats/news-recap.md`. This is an additional lane, not a replacement for Clip-First Celebration or the compilation lanes. Pipeline: `node tools/ftl-news-scan.mjs` (scan Yahoo/SI/Athlon/Sporting News/USA Today/IndyStar/The Athletic/ESPN/CBS/B-R/ClutchPoints + CC/Sophie social) → `node tools/ftl-script-pipeline.mjs --mode news` (no `--clips`, ~700–900 words, Roast + Codex fact-check gate) → `/ftl-vo` → `node tools/ftl-news-build-beats.mjs` (hybrid beats: AI images + factual receipt cards + Caitlin Clark b-roll, still and moving) → `node tools/ftl-render-news-recap.mjs` (Hyperframes) → Gemini QC. The title may be more sensational than the outlet's but must stay strictly factual — every on-screen claim traces to a real source, and the Codex fact-check is a hard gate. Receipt beats render as factual headline/quote cards by default; swap in the literal outlet screenshot only when you keep the on-screen attribution.
