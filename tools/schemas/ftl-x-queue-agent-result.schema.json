@@ -9,14 +9,14 @@
     "sourcePath",
     "sourceSha256",
     "finalVideo",
-    "youtubeTitle",
-    "draftVerified",
+    "proposedTitle",
+    "reviewUrl",
     "qcSummary"
   ],
   "properties": {
     "status": {
       "type": "string",
-      "enum": ["uploaded_draft", "needs_assets", "needs_review", "rejected", "duplicate", "failed"]
+      "enum": ["review_ready", "needs_assets", "needs_review", "rejected", "duplicate", "failed"]
     },
     "authoritativeFormat": {
       "type": "string",
@@ -26,8 +26,8 @@
     "sourcePath": { "type": "string" },
     "sourceSha256": { "type": "string" },
     "finalVideo": { "type": "string" },
-    "youtubeTitle": { "type": "string" },
-    "draftVerified": { "type": "boolean" },
+    "proposedTitle": { "type": "string" },
+    "reviewUrl": { "type": "string" },
     "qcSummary": { "type": "string" }
   }
 }

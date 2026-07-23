@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Claim and process one queued X candidate through the FTL Codex workflow.
+"""Claim and process one queued X candidate into a private review render.
 
 The worker owns queue state and deduplication. Codex owns media inspection,
-HyperFrames authoring/QC, and draft-only YouTube Studio upload. One launchd run
-handles at most one candidate so jobs never overlap or flood Studio.
+HyperFrames authoring/QC, Tailscale review hosting, and ntfy notification.
+The worker never uploads to YouTube, TikTok, or any other publishing platform.
+One invocation handles at most one candidate so jobs never overlap.
 """
 
 from __future__ import annotations
@@ -45,6 +46,20 @@ def sha256_file(path: str) -> str:
     return digest.hexdigest()
 
 
+def review_url_reachable(url: str) -> bool:
+    if not url.startswith("https://mac-mini.tail3f9a7b.ts.net/"):
+        return False
+    for method in ("HEAD", "GET"):
+        try:
+            request = urllib.request.Request(url, method=method)
+            with urllib.request.urlopen(request, timeout=15) as response:
+                if 200 <= response.status < 400:
+                    return True
+        except Exception:
+            continue
+    return False
+
+
 def ensure_worker_schema(conn: sqlite3.Connection) -> None:
     columns = {row[1] for row in conn.execute("PRAGMA table_info(candidates)")}
     additions = {
@@ -55,6 +70,8 @@ def ensure_worker_schema(conn: sqlite3.Connection) -> None:
         "last_error": "TEXT",
         "final_video": "TEXT",
         "youtube_title": "TEXT",
+        "proposed_title": "TEXT",
+        "review_url": "TEXT",
         "priority": "INTEGER NOT NULL DEFAULT 0",
         "source_path": "TEXT",
     }
@@ -82,6 +99,11 @@ def ensure_worker_schema(conn: sqlite3.Connection) -> None:
           ON processed_sources(source_sha256);
         """
     )
+    processed_columns = {row[1] for row in conn.execute("PRAGMA table_info(processed_sources)")}
+    if "proposed_title" not in processed_columns:
+        conn.execute("ALTER TABLE processed_sources ADD COLUMN proposed_title TEXT")
+    if "review_url" not in processed_columns:
+        conn.execute("ALTER TABLE processed_sources ADD COLUMN review_url TEXT")
     conn.commit()
 
 
@@ -187,7 +209,14 @@ def claim_candidate(conn: sqlite3.Connection, status_id: str | None = None) -> d
     return candidate
 
 
-def notify(title: str, message: str, *, priority: str = "default", tags: str = "basketball") -> bool:
+def notify(
+    title: str,
+    message: str,
+    *,
+    priority: str = "default",
+    tags: str = "basketball",
+    click_url: str = "",
+) -> bool:
     if not NOTIFY_CONFIG.exists():
         print(f"ntfy config missing: {NOTIFY_CONFIG}", file=sys.stderr)
         return False
@@ -197,11 +226,15 @@ def notify(title: str, message: str, *, priority: str = "default", tags: str = "
     if not topic:
         print("ntfy_topic is empty", file=sys.stderr)
         return False
+    headers = {"Title": title, "Priority": priority, "Tags": tags}
+    if click_url:
+        headers["Click"] = click_url
+        headers["Actions"] = f"view, Open review, {click_url}"
     request = urllib.request.Request(
         f"{server}/{topic}",
         data=message.encode(),
         method="POST",
-        headers={"Title": title, "Priority": priority, "Tags": tags},
+        headers=headers,
     )
     try:
         with urllib.request.urlopen(request, timeout=15) as response:
@@ -231,7 +264,7 @@ def seed_candidate(
             "UPDATE candidates SET priority=MAX(COALESCE(priority,0), ?), "
             "tweet_text=CASE WHEN ?<>'' THEN ? ELSE tweet_text END, "
             "short_format=?, source_path=CASE WHEN ?<>'' THEN ? ELSE source_path END, "
-            "state=CASE WHEN state IN ('uploaded_draft','processing') THEN state ELSE 'new' END, "
+            "state=CASE WHEN state IN ('review_ready','uploaded_draft','processing') THEN state ELSE 'new' END, "
             "last_seen_at=? WHERE status_id=?",
             (priority, text, text, short_format, source_path, source_path, now_utc(), existing[0]),
         )
@@ -252,7 +285,7 @@ def seed_candidate(
           short_format=excluded.short_format,
           priority=MAX(candidates.priority, excluded.priority),
           source_path=CASE WHEN excluded.source_path<>'' THEN excluded.source_path ELSE candidates.source_path END,
-          state=CASE WHEN candidates.state IN ('uploaded_draft','processing') THEN candidates.state ELSE 'new' END,
+          state=CASE WHEN candidates.state IN ('review_ready','uploaded_draft','processing') THEN candidates.state ELSE 'new' END,
           last_seen_at=excluded.last_seen_at
         """,
         (
@@ -267,9 +300,15 @@ def seed_candidate(
 def agent_prompt(candidate: dict, job_dir: Path) -> str:
     candidate_json = json.dumps(candidate, indent=2, ensure_ascii=False)
     return f"""
-Process exactly one From The Logo X candidate end to end. The user explicitly authorizes:
-downloading this public X media, creating a finished Short, uploading it to the From The Logo
-YouTube Studio channel as a DRAFT, and verifying that draft. Never publish or schedule it.
+Process exactly one From The Logo X candidate into a private review-ready video. The user explicitly
+authorizes downloading this public X media, creating a finished Short, running independent QC,
+hosting the review on the user's private Tailscale tailnet, and returning the review link.
+
+ABSOLUTE PUBLISHING BOUNDARY:
+- Do not upload to YouTube, YouTube Studio, TikTok, Instagram, or any other platform.
+- Do not create a draft, schedule a post, publish a post, or open any platform upload workflow.
+- Do not call yt_studio_upload.py, tiktok_studio_upload.py, or browser upload controls.
+- Stop after the private Tailscale review is reachable. Only the user may authorize a later upload.
 
 Read and obey /Users/abdul/code/fromthelogo/AGENTS.md and the relevant format docs first.
 HyperFrames is mandatory for the final authored MP4. FFmpeg may only prepare media.
@@ -283,12 +322,13 @@ Candidate database: {DB_PATH}
 Required workflow:
 1. Recheck the candidates, duplicates, and processed_sources tables before doing work. If this
    status ID, canonical URL, media fingerprint, or downloaded source SHA-256 was already processed,
-   return status=duplicate without rendering or uploading.
+   return status=duplicate without rendering.
 2. Download the exact public source URL into the job directory, or copy candidate.source_path when
    it points to an existing verified local source. Prefer yt-dlp or the established FTL social-source
    workflow. Do not substitute a different post or video.
-3. Run Gemini 2.5 Pro on the actual downloaded video before deciding the format. The preliminary
-   database label is only a hint.
+3. Inspect the actual downloaded video before deciding the format. The preliminary database label
+   is only a hint. Use an independent Codex subagent for the final editorial/QC review so the same
+   agent that authored the video is not the only reviewer.
 4. Authoritative format rules:
    - split_short: a visible, attributable person is speaking, reacting, debating, explaining, or
      delivering a complete thought. Preserve the complete thought, normally 30-45 seconds. Put the
@@ -308,19 +348,20 @@ Required workflow:
      or causation from an ambiguous look.
    - reject: narration-only/AI material, unusable footage, misleading context, duplicate compilation,
      or a clip that supports neither treatment.
-5. Build an inspectable HyperFrames HTML composition. Run `npx hyperframes check --json --snapshots`,
-   inspect representative snapshots, and render the final MP4 with `npx hyperframes render`.
-6. Run Gemini upload-gate QC on the rendered MP4. Do not upload unless QC says upload-ready and there
-   are no critical or major issues. Revise within this job when safe; otherwise return failed.
-7. Generate lean Shorts metadata with Caitlin Clark and WNBA hashtags when the topic is WNBA/FTL.
-   Name the actual primary subject in titles and captions. Sophie Cunningham must be called Sophie
-   Cunningham, never "Caitlin Clark's teammate" or another relationship-only label. Do not force
-   Caitlin Clark into a title when she is not materially part of that Short.
-   Upload through tools/yt_studio_upload.py as a headed DRAFT only. Verify the exact title appears as
-   Draft on the Shorts tab. Attempt the upload at most once. If verification is uncertain, return
-   needs_review and do not upload again. Never click Publish and never schedule.
-8. Return only the JSON object required by the provided output schema. draftVerified may be true only
-   after the Studio verification command explicitly confirms Draft. Include absolute paths and SHA-256.
+5. Build an inspectable HyperFrames HTML composition. Because the external SSD may create AppleDouble
+   `._*` sidecars, run `dot_clean` on the project and remove any remaining `._*` files before each
+   HyperFrames check/render. Run `npx hyperframes check --json --snapshots`, inspect representative
+   snapshots, and render the final MP4 with `npx hyperframes render`.
+6. Have the independent QC subagent inspect the rendered MP4, representative frames, caption
+   accuracy, source/context fidelity, crop, audio, pacing, and full visible payoff. Revise within
+   this job when safe. Return failed or needs_review if any critical or major issue remains.
+7. Generate a lean proposed Shorts title. Name the actual primary subject. Sophie Cunningham must be
+   called Sophie Cunningham, never "Caitlin Clark's teammate" or another relationship-only label.
+8. Host the approved MP4 through the established Tailscale review workflow. Verify the HTTPS URL
+   responds successfully from this Mac and points to the exact final video or review page.
+9. Return only the JSON object required by the provided output schema. status=review_ready is valid
+   only when finalVideo exists, reviewUrl is reachable, and qcSummary records the independent review.
+   Include absolute paths and SHA-256. Do not perform any upload or publishing action.
 """.strip()
 
 
@@ -351,10 +392,7 @@ def run_codex(candidate: dict, job_dir: Path) -> tuple[int, dict | None, str]:
                 env={**os.environ, "HOME": str(Path.home()), "CODEX_HOME": str(Path.home() / ".codex")},
             )
         except subprocess.TimeoutExpired:
-            return 124, None, (
-                "Codex timed out after 70 minutes; upload state may be uncertain and requires review; "
-                f"see {transcript_path}"
-            )
+            return 124, None, f"Codex timed out after 70 minutes; see {transcript_path}"
     if not result_path.exists():
         return process.returncode, None, f"Codex produced no result file; see {transcript_path}"
     raw = result_path.read_text().strip()
@@ -368,9 +406,7 @@ def finish_candidate(conn: sqlite3.Connection, candidate: dict, result: dict | N
     status_id = candidate["status_id"]
     attempts = candidate["attempts"]
     if result is None:
-        next_state = "needs_review" if "upload state may be uncertain" in error else (
-            "new" if attempts < 3 else "failed"
-        )
+        next_state = "new" if attempts < 3 else "failed"
         conn.execute(
             "UPDATE candidates SET state=?, claimed_at=NULL, last_error=? WHERE status_id=?",
             (next_state, error[:2000], status_id),
@@ -380,11 +416,22 @@ def finish_candidate(conn: sqlite3.Connection, candidate: dict, result: dict | N
 
     status = result["status"]
     result_json = json.dumps(result, ensure_ascii=False)
-    if status == "uploaded_draft":
+    if status == "review_ready":
         final_video = result.get("finalVideo", "")
-        if not result.get("draftVerified") or not final_video or not Path(final_video).is_file():
+        review_url = result.get("reviewUrl", "")
+        proposed_title = result.get("proposedTitle", "")
+        if (
+            not final_video
+            or not Path(final_video).is_file()
+            or not review_url_reachable(review_url)
+            or not proposed_title
+            or not result.get("qcSummary", "").strip()
+        ):
             status = "failed"
-            error = "agent claimed uploaded_draft without a verified draft and existing final video"
+            error = (
+                "agent claimed review_ready without an existing final video, proposed title, "
+                "reachable private Tailscale review URL, and QC summary"
+            )
         else:
             final_sha = sha256_file(final_video)
             conn.execute(
@@ -392,23 +439,24 @@ def finish_candidate(conn: sqlite3.Connection, candidate: dict, result: dict | N
                 INSERT OR REPLACE INTO processed_sources(
                   status_id, canonical_url, media_fingerprint, source_sha256, final_sha256,
                   authoritative_format, final_video, youtube_title, draft_verified,
-                  processed_at, result_json
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                  processed_at, result_json, proposed_title, review_url
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 (
                     status_id, candidate["canonical_url"], candidate["media_fingerprint"],
                     result.get("sourceSha256", ""), final_sha,
-                    result["authoritativeFormat"], final_video, result.get("youtubeTitle", ""),
-                    1, now_utc(), result_json,
+                    result["authoritativeFormat"], final_video, proposed_title,
+                    0, now_utc(), result_json, proposed_title, review_url,
                 ),
             )
             conn.execute(
-                "UPDATE candidates SET state='uploaded_draft', processed_at=?, claimed_at=NULL, "
-                "result_json=?, final_video=?, youtube_title=?, last_error=NULL WHERE status_id=?",
-                (now_utc(), result_json, final_video, result.get("youtubeTitle", ""), status_id),
+                "UPDATE candidates SET state='review_ready', processed_at=?, claimed_at=NULL, "
+                "result_json=?, final_video=?, proposed_title=?, review_url=?, "
+                "youtube_title=NULL, last_error=NULL WHERE status_id=?",
+                (now_utc(), result_json, final_video, proposed_title, review_url, status_id),
             )
             conn.commit()
-            return "uploaded_draft"
+            return "review_ready"
 
     state_map = {
         "needs_assets": "needs_assets",
@@ -500,13 +548,15 @@ def main() -> int:
             error = f"Codex exited {returncode}"
         final_state = finish_candidate(conn, candidate, result, error)
 
-        if final_state == "uploaded_draft" and result:
-            title = result.get("youtubeTitle") or candidate["tweet_text"][:70]
+        if final_state == "review_ready" and result:
+            title = result.get("proposedTitle") or candidate["tweet_text"][:70]
+            review_url = result.get("reviewUrl", "")
             notify(
-                "FTL draft ready",
-                f"{title}\nFormat: {result['authoritativeFormat']}\nSource: {candidate['canonical_url']}",
+                "FTL video ready for review",
+                f"{title}\nFormat: {result['authoritativeFormat']}\nTap to review privately.",
                 priority="high",
                 tags="white_check_mark,basketball",
+                click_url=review_url,
             )
         elif final_state in ("needs_assets", "needs_review"):
             notify(

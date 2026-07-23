@@ -35,6 +35,7 @@ NOTIFY_CONFIG = Path.home() / ".config" / "fromthelogo" / "notifications.json"
 PYTHON = Path("/Users/abdul/.pyenv/versions/tiktok-browser-agents/bin/python")
 NODE = Path("/opt/homebrew/bin/node")
 CDP_VERSION_URL = "http://127.0.0.1:9337/json/version"
+PROCESSOR_LOG = Path.home() / "Library" / "Logs" / "FromTheLogo" / "hourly-review-processor.log"
 
 
 def local_now() -> dt.datetime:
@@ -127,6 +128,40 @@ def run_command(command: list[str], timeout: int) -> dict:
         }
 
 
+def trigger_review_processor() -> dict:
+    """Launch the separate review-only worker after the research commit.
+
+    The worker's own fcntl lock is the concurrency guard. Starting another
+    invocation is therefore safe even when a previous render is still active.
+    """
+    PROCESSOR_LOG.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        log = PROCESSOR_LOG.open("a")
+        process = subprocess.Popen(
+            [str(PYTHON), str(REPO / "tools" / "ftl_x_queue_agent.py")],
+            cwd=REPO,
+            stdin=subprocess.DEVNULL,
+            stdout=log,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+            close_fds=True,
+            env={
+                **os.environ,
+                "HOME": str(Path.home()),
+                "CODEX_HOME": str(Path.home() / ".codex"),
+                "PATH": (
+                    "/Users/abdul/.nvm/versions/node/v20.19.0/bin:"
+                    "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+                ),
+                "PYTHONUNBUFFERED": "1",
+            },
+        )
+        log.close()
+        return {"status": "started", "pid": process.pid, "log": str(PROCESSOR_LOG)}
+    except OSError as exc:
+        return {"status": "error", "error": str(exc), "log": str(PROCESSOR_LOG)}
+
+
 def parse_ranked_stories(markdown_path: Path) -> list[dict]:
     try:
         text = markdown_path.read_text()
@@ -175,6 +210,7 @@ def check_environment() -> int:
         or Path("/Users/abdul/.nvm/versions/node/v20.19.0/bin/codex").is_file(),
         "news_scanner": (REPO / "tools" / "ftl-news-scan.mjs").is_file(),
         "x_collector": (REPO / "tools" / "ftl_x_hourly_collector.py").is_file(),
+        "review_processor": (REPO / "tools" / "ftl_x_queue_agent.py").is_file(),
         "ntfy_config": NOTIFY_CONFIG.is_file(),
         "warm_tales_browser": warm_tales_browser_ready(),
     }
@@ -262,6 +298,11 @@ def run_monitor() -> int:
     for story in stories:
         state["seen_urls"][story["url"]] = now.isoformat(timespec="seconds")
 
+    processor = trigger_review_processor()
+    report["review_processor"] = processor
+    if processor["status"] != "started":
+        failures.append("review processor could not be started")
+
     cutoff = now - dt.timedelta(days=14)
     state["seen_urls"] = {
         url: seen_at
@@ -307,6 +348,7 @@ def run_monitor() -> int:
                 "new_stories": len(new_stories),
                 "x_status": report["x_scan"].get("status"),
                 "x_inserted": report["x_scan"].get("inserted", 0),
+                "review_processor": report["review_processor"],
             },
             indent=2,
         )
