@@ -30,6 +30,7 @@ DB_PATH = CACHE / "candidates.sqlite3"
 JOBS_DIR = CACHE / "jobs"
 LOCK_PATH = CACHE / "queue-agent.lock"
 SCHEMA_PATH = REPO / "tools" / "schemas" / "ftl-x-queue-agent-result.schema.json"
+BATCH_SCHEMA_PATH = REPO / "tools" / "schemas" / "ftl-x-queue-batch-result.schema.json"
 NOTIFY_CONFIG = Path.home() / ".config" / "fromthelogo" / "notifications.json"
 CODEX = Path("/Users/abdul/.nvm/versions/node/v20.19.0/bin/codex")
 
@@ -337,9 +338,13 @@ Required workflow:
    - caption_story: the footage itself is the story, including a play, performance, record, arrival,
      celebration, news event, or other visual sequence. Use timed story-caption beats, not a single
      static headline. Use FTL navy/white/gold and keep the important action zoomed out and visible.
-     When the source contains one instantly understandable visual payoff, prefer the 6-10 second
-     view-farming lane instead: start on motion, use one persistent truthful top hook, retain the full
-     payoff, exit immediately, and make the ending loop cleanly when possible. Use the longer timed
+     When the source contains one instantly understandable visual payoff, prefer the 6-15 second
+     micro-Short lane instead. Use 6-10 seconds for an instantaneous play/reaction and 8-15 seconds
+     for a complete comedy, fake-out, celebrity interaction, or reveal micro-story. Select the
+     shortest complete arc: preserve the setup needed to understand it, the turn, the full payoff,
+     and only the useful reaction. Start on motion, use one persistent truthful top hook, remove all
+     orientation delay and dead aftermath, and make the ending loop cleanly when possible. Never hit
+     a duration target by cutting off the punch line or visible result. Use the longer timed
      caption-story treatment only when multiple beats are necessary to understand the story.
      Treat bench/coach reactions, teammate chemistry, playful conflict, hot-mic moments, celebrity
      and UFC crossovers, arrivals, celebrations, gestures, and useful alternate angles as first-class
@@ -357,8 +362,10 @@ Required workflow:
    this job when safe. Return failed or needs_review if any critical or major issue remains.
 7. Generate a lean proposed Shorts title. Name the actual primary subject. Sophie Cunningham must be
    called Sophie Cunningham, never "Caitlin Clark's teammate" or another relationship-only label.
-8. Host the approved MP4 through the established Tailscale review workflow. Verify the HTTPS URL
-   responds successfully from this Mac and points to the exact final video or review page.
+8. Host the approved MP4 through the established Tailscale review workflow. On this Mac, invoke the
+   tailscale-host Python helper with /usr/bin/python3; the Homebrew python3 currently has a broken
+   pyexpat linkage. Verify the HTTPS URL responds successfully from this Mac and points to the exact
+   final video or review page.
 9. Return only the JSON object required by the provided output schema. status=review_ready is valid
    only when finalVideo exists, reviewUrl is reachable, and qcSummary records the independent review.
    Include absolute paths and SHA-256. Do not perform any upload or publishing action.
@@ -400,6 +407,75 @@ def run_codex(candidate: dict, job_dir: Path) -> tuple[int, dict | None, str]:
         return process.returncode, json.loads(raw), ""
     except json.JSONDecodeError as exc:
         return process.returncode, None, f"invalid agent result JSON: {exc}; see {result_path}"
+
+
+def batch_agent_prompt(candidates: list[dict], batch_dir: Path) -> str:
+    candidate_json = json.dumps(candidates, indent=2, ensure_ascii=False)
+    return f"""
+Process one From The Logo review batch containing {len(candidates)} queued candidates.
+This must be ONE coordinated production session, not {len(candidates)} concurrent worker agents.
+
+Read and obey /Users/abdul/code/fromthelogo/AGENTS.md, docs/formats/shorts.md, and the complete
+single-candidate production doctrine in tools/ftl_x_queue_agent.py::agent_prompt before acting.
+
+ABSOLUTE PUBLISHING BOUNDARY:
+- Do not upload to YouTube, TikTok, Instagram, or any other platform.
+- Do not create platform drafts, schedule posts, or publish.
+- Stop after each approved MP4 is privately hosted on Tailscale for user review.
+
+Batch directory: {batch_dir}
+Candidate database: {DB_PATH}
+Candidates:
+{candidate_json}
+
+Batch execution rules:
+1. Recheck SQLite deduplication and downloaded source SHA-256 for every candidate.
+2. Inspect every actual source before locking split_short versus caption_story.
+3. Prepare sources sequentially. Reuse downloads and verified lower-panel footage across the batch
+   when appropriate, but never use irrelevant filler.
+4. Author the candidates as one HyperFrames batch whenever their formats are compatible. It is fine
+   to use separate compositions when formats differ, but do not launch independent producer agents.
+5. Run HyperFrames check, representative snapshot review, final render, and independent QC for every
+   output. A single independent QC subagent may review the completed batch.
+6. Host each passing video privately through tailscale-host using /usr/bin/python3.
+7. Return one result per candidate, preserving each exact statusId. A result may be review_ready only
+   when its final video exists, its private review URL is reachable, and its QC summary is complete.
+""".strip()
+
+
+def run_codex_batch(candidates: list[dict], batch_dir: Path) -> tuple[int, dict | None, str]:
+    result_path = batch_dir / "agent-results.json"
+    transcript_path = batch_dir / "codex-events.jsonl"
+    command = [
+        str(CODEX), "exec",
+        "--ephemeral",
+        "--json",
+        "--sandbox", "danger-full-access",
+        "--cd", str(REPO),
+        "--add-dir", "/Volumes/SSK SSD",
+        "--output-schema", str(BATCH_SCHEMA_PATH),
+        "--output-last-message", str(result_path),
+        batch_agent_prompt(candidates, batch_dir),
+    ]
+    with transcript_path.open("w") as transcript:
+        try:
+            process = subprocess.run(
+                command,
+                cwd=REPO,
+                stdout=transcript,
+                stderr=subprocess.STDOUT,
+                text=True,
+                timeout=3 * 60 * 60,
+                env={**os.environ, "HOME": str(Path.home()), "CODEX_HOME": str(Path.home() / ".codex")},
+            )
+        except subprocess.TimeoutExpired:
+            return 124, None, f"Codex batch timed out after 3 hours; see {transcript_path}"
+    if not result_path.exists():
+        return process.returncode, None, f"Codex produced no batch result file; see {transcript_path}"
+    try:
+        return process.returncode, json.loads(result_path.read_text().strip()), ""
+    except json.JSONDecodeError as exc:
+        return process.returncode, None, f"invalid batch result JSON: {exc}; see {result_path}"
 
 
 def finish_candidate(conn: sqlite3.Connection, candidate: dict, result: dict | None, error: str) -> str:
@@ -485,7 +561,10 @@ def main() -> int:
     parser.add_argument("--seed-format", choices=("split_short", "caption_story"), default="caption_story")
     parser.add_argument("--seed-priority", type=int, default=100)
     parser.add_argument("--seed-source", default="", help="optional verified local source path")
+    parser.add_argument("--batch-size", type=int, default=5, help="candidates handled in one production session")
     args = parser.parse_args()
+    if not 1 <= args.batch_size <= 10:
+        parser.error("--batch-size must be between 1 and 10")
 
     CACHE.mkdir(parents=True, exist_ok=True)
     JOBS_DIR.mkdir(parents=True, exist_ok=True)
@@ -496,7 +575,7 @@ def main() -> int:
     try:
         fcntl.flock(lock_handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
-        print("queue agent already running; invocation skipped")
+        print("queue batch agent already running; invocation skipped")
         return 0
 
     conn = sqlite3.connect(DB_PATH)
@@ -534,45 +613,74 @@ def main() -> int:
             print(json.dumps(row, indent=2, ensure_ascii=False))
             return 0
 
-        candidate = claim_candidate(conn, args.candidate)
-        if not candidate:
+        batch_size = 1 if args.candidate else args.batch_size
+        candidates: list[dict] = []
+        for _ in range(batch_size):
+            candidate = claim_candidate(conn, args.candidate if not candidates else None)
+            if not candidate:
+                break
+            candidates.append(candidate)
+            if args.candidate:
+                break
+        if not candidates:
             print("queue empty — nothing new to process")
             return 0
 
-        job_dir = JOBS_DIR / f"{candidate['status_id']}-attempt-{candidate['attempts']}"
-        job_dir.mkdir(parents=True, exist_ok=True)
-        (job_dir / "candidate.json").write_text(json.dumps(candidate, indent=2, ensure_ascii=False) + "\n")
-        print(f"claimed {candidate['status_id']} ({candidate['lane']}, {candidate['preliminary_format']})")
-        returncode, result, error = run_codex(candidate, job_dir)
-        if returncode and not error:
-            error = f"Codex exited {returncode}"
-        final_state = finish_candidate(conn, candidate, result, error)
+        batch_id = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
+        batch_dir = JOBS_DIR / f"batch-{batch_id}-{len(candidates)}"
+        batch_dir.mkdir(parents=True, exist_ok=True)
+        (batch_dir / "candidates.json").write_text(
+            json.dumps(candidates, indent=2, ensure_ascii=False) + "\n"
+        )
+        print(f"claimed one production batch with {len(candidates)} candidate(s)")
+        for candidate in candidates:
+            print(
+                f"  {candidate['status_id']} "
+                f"({candidate['lane']}, {candidate['preliminary_format']})"
+            )
 
-        if final_state == "review_ready" and result:
-            title = result.get("proposedTitle") or candidate["tweet_text"][:70]
-            review_url = result.get("reviewUrl", "")
-            notify(
-                "FTL video ready for review",
-                f"{title}\nFormat: {result['authoritativeFormat']}\nTap to review privately.",
-                priority="high",
-                tags="white_check_mark,basketball",
-                click_url=review_url,
+        returncode, batch_result, error = run_codex_batch(candidates, batch_dir)
+        if returncode and not error:
+            error = f"Codex batch exited {returncode}"
+        result_rows = (batch_result or {}).get("results", [])
+        result_by_id = {row.get("statusId"): row for row in result_rows if row.get("statusId")}
+        final_states: list[str] = []
+        for candidate in candidates:
+            result = result_by_id.get(candidate["status_id"])
+            candidate_error = error or (
+                "" if result else f"batch result omitted candidate {candidate['status_id']}"
             )
-        elif final_state in ("needs_assets", "needs_review"):
-            notify(
-                "FTL clip needs review" if final_state == "needs_review" else "FTL clip needs assets",
-                f"{candidate['tweet_text'][:120]}\n{error or (result or {}).get('reason', '')}\n{candidate['canonical_url']}",
-                tags="warning,basketball",
-            )
-        elif final_state in ("failed", "new"):
-            notify(
-                "FTL queue worker issue",
-                f"Candidate {candidate['status_id']}: {error or (result or {}).get('reason', 'failed')}",
-                priority="high",
-                tags="x,basketball",
-            )
-        print(f"candidate {candidate['status_id']} -> {final_state}")
-        return 0 if final_state not in ("failed",) else 1
+            final_state = finish_candidate(conn, candidate, result, candidate_error)
+            final_states.append(final_state)
+
+            if final_state == "review_ready" and result:
+                title = result.get("proposedTitle") or candidate["tweet_text"][:70]
+                review_url = result.get("reviewUrl", "")
+                notify(
+                    "FTL video ready for review",
+                    f"{title}\nFormat: {result['authoritativeFormat']}\nTap to review privately.",
+                    priority="high",
+                    tags="white_check_mark,basketball",
+                    click_url=review_url,
+                )
+            elif final_state in ("needs_assets", "needs_review"):
+                notify(
+                    "FTL clip needs review" if final_state == "needs_review" else "FTL clip needs assets",
+                    f"{candidate['tweet_text'][:120]}\n"
+                    f"{candidate_error or (result or {}).get('reason', '')}\n"
+                    f"{candidate['canonical_url']}",
+                    tags="warning,basketball",
+                )
+            elif final_state in ("failed", "new"):
+                notify(
+                    "FTL queue worker issue",
+                    f"Candidate {candidate['status_id']}: "
+                    f"{candidate_error or (result or {}).get('reason', 'failed')}",
+                    priority="high",
+                    tags="x,basketball",
+                )
+            print(f"candidate {candidate['status_id']} -> {final_state}")
+        return 1 if "failed" in final_states else 0
     finally:
         conn.close()
         lock_handle.close()

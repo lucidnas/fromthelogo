@@ -43,9 +43,9 @@ block with `crontab -e` to disable it.
 ## Hourly review processor
 
 `tools/ftl_x_queue_agent.py` is the separate production worker. After each
-hourly discovery transaction, the research monitor launches this worker in a
-detached process. It atomically claims at most one `new` candidate from
-`candidates.sqlite3`.
+hourly discovery transaction, the research monitor launches one detached batch
+worker. That worker atomically claims up to five `new` candidates from
+`candidates.sqlite3` and handles them in one coordinated production session.
 
 The worker may:
 
@@ -63,9 +63,10 @@ The worker must not call YouTube Studio, TikTok Studio, an uploader script, or
 any publish/schedule control. Publishing remains a separate user-approved
 action.
 
-The worker's `queue-agent.lock` prevents overlapping renders. If a previous
-hour's render is still active, the newly triggered worker exits without
-claiming another candidate. Logs are written to:
+The single `queue-agent.lock` prevents overlapping production batches. A later
+hourly trigger skips while the current batch is active. SQLite claim
+transactions and the processed-source ledger prevent duplicate production.
+Logs are written to:
 
 ```text
 ~/Library/Logs/FromTheLogo/hourly-review-processor.log

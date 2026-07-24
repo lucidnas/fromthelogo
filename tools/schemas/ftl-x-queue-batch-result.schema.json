@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["results"],
+  "properties": {
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "statusId",
+          "status",
+          "authoritativeFormat",
+          "reason",
+          "sourcePath",
+          "sourceSha256",
+          "finalVideo",
+          "proposedTitle",
+          "reviewUrl",
+          "qcSummary"
+        ],
+        "properties": {
+          "statusId": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["review_ready", "needs_assets", "needs_review", "rejected", "duplicate", "failed"]
+          },
+          "authoritativeFormat": {
+            "type": "string",
+            "enum": ["split_short", "caption_story", "reject"]
+          },
+          "reason": { "type": "string" },
+          "sourcePath": { "type": "string" },
+          "sourceSha256": { "type": "string" },
+          "finalVideo": { "type": "string" },
+          "proposedTitle": { "type": "string" },
+          "reviewUrl": { "type": "string" },
+          "qcSummary": { "type": "string" }
+        }
+      }
+    }
+  }
+}

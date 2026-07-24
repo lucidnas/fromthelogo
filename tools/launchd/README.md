@@ -52,6 +52,14 @@ The collector does not render, upload, or publish. Its durable queue lives at:
 Launchd stdout/stderr live in `~/Library/Logs/FromTheLogo/x-hourly-collector.*.log`;
 the candidate database and reports remain on the SSD.
 
+Keep the single shared Tales browser session available on CDP `:9337` so the
+hourly monitor can scan X without repeatedly opening and closing Chrome:
+
+```bash
+cp tools/launchd/com.ftl.tales-keep-open.plist ~/Library/LaunchAgents/
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.ftl.tales-keep-open.plist
+```
+
 Deduplication checks the X status ID, canonical URL, X media/poster fingerprint, and
 same-account normalized post text. Reposts of already queued media are written to the
 SQLite `duplicates` table and do not re-enter the candidate queue.
@@ -93,13 +101,14 @@ launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.ftl.x-hourly-collector
 
 ## X queue production agent
 
-`com.ftl.x-queue-agent` checks at `:07`, `:22`, `:37`, and `:52`. It atomically
-claims at most one new candidate, checks the processed-source ledger, inspects the actual
-downloaded video with Gemini, authors and validates the Short in HyperFrames, and
-uploads an upload-gate-approved result to YouTube Studio as a **Draft**. It never
-publishes or schedules.
+The hourly news monitor launches one batch worker after each discovery pass.
+That worker atomically claims up to five new candidates, checks the
+processed-source ledger, inspects the downloaded videos, authors and validates
+the Shorts in one coordinated HyperFrames production session, and hosts each
+passing result privately for review. It never uploads, publishes, or schedules.
 
-The single-job lock prevents overlapping renders. Within the WNBA lane, current
+The single batch lock prevents overlapping production sessions while SQLite
+protects claims and deduplication. Within the WNBA lane, current
 editorial ordering promotes Sophie Cunningham, Caitlin Clark, and Indiana Fever
 clips before generic league material, then uses view count and freshness.
 After three completed non-NBA drafts, the next ordinary claim prefers the NBA lane;
@@ -113,10 +122,13 @@ a preliminary hint:
   thought (normally 30–45 seconds), put the speaker on top, and use specifically
   relevant verified footage below.
 - `caption_story`: the footage itself is the story (play, performance, record,
-  arrival, celebration, or news event). Use timed FTL story-caption beats and keep
-  the important action zoomed out and visible. If one complete visual payoff reads
-  instantly, use the 6–10 second view-farming treatment: one truthful persistent
-  hook, immediate payoff, no dead air, and a clean loop when possible.
+  arrival, celebration, comedy, celebrity interaction, reveal, or news event). Use
+  timed FTL story-caption beats and keep the important action zoomed out and visible.
+  If one complete visual payoff reads instantly, use the 6–15 second micro-Short
+  treatment: 6–10 seconds for an instantaneous moment or 8–15 seconds for a complete
+  setup-turn-payoff micro-story. Use one truthful persistent hook, no dead air, only
+  the useful reaction, and a clean loop when possible. Never cut off the punch line
+  or visible payoff to force the duration.
 - Name recognizable subjects directly. Use `Sophie Cunningham`, never `Caitlin
   Clark's teammate`; do not force Caitlin into metadata when she is not materially
   part of the clip.

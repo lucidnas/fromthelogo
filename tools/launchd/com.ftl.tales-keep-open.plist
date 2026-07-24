@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.ftl.tales-keep-open</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/abdul/.pyenv/versions/tiktok-browser-agents/bin/python</string>
+    <string>/Users/abdul/code/fromthelogo/tools/yt_studio_upload.py</string>
+    <string>keep-open</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>/Users/abdul</string>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>PYTHONUNBUFFERED</key>
+    <string>1</string>
+  </dict>
+  <key>WorkingDirectory</key>
+  <string>/Users/abdul/code/fromthelogo</string>
+  <key>ProcessType</key>
+  <string>Interactive</string>
+  <key>KeepAlive</key>
+  <true/>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/abdul/Library/Logs/FromTheLogo/tales-keep-open.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/abdul/Library/Logs/FromTheLogo/tales-keep-open.err.log</string>
+</dict>
+</plist>

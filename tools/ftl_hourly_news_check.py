@@ -128,17 +128,23 @@ def run_command(command: list[str], timeout: int) -> dict:
         }
 
 
-def trigger_review_processor() -> dict:
-    """Launch the separate review-only worker after the research commit.
+def trigger_review_processor(batch_size: int = 5) -> dict:
+    """Launch one review-only batch worker after the research commit.
 
-    The worker's own fcntl lock is the concurrency guard. Starting another
-    invocation is therefore safe even when a previous render is still active.
+    A single fcntl lock prevents overlapping production sessions. The worker
+    claims up to ``batch_size`` candidates and handles them in one coordinated
+    Codex/HyperFrames session rather than launching competing render agents.
     """
     PROCESSOR_LOG.parent.mkdir(parents=True, exist_ok=True)
     try:
         log = PROCESSOR_LOG.open("a")
         process = subprocess.Popen(
-            [str(PYTHON), str(REPO / "tools" / "ftl_x_queue_agent.py")],
+            [
+                str(PYTHON),
+                str(REPO / "tools" / "ftl_x_queue_agent.py"),
+                "--batch-size",
+                str(batch_size),
+            ],
             cwd=REPO,
             stdin=subprocess.DEVNULL,
             stdout=log,
@@ -157,7 +163,12 @@ def trigger_review_processor() -> dict:
             },
         )
         log.close()
-        return {"status": "started", "pid": process.pid, "log": str(PROCESSOR_LOG)}
+        return {
+            "status": "started",
+            "batch_size": batch_size,
+            "pid": process.pid,
+            "log": str(PROCESSOR_LOG),
+        }
     except OSError as exc:
         return {"status": "error", "error": str(exc), "log": str(PROCESSOR_LOG)}
 
@@ -298,7 +309,7 @@ def run_monitor() -> int:
     for story in stories:
         state["seen_urls"][story["url"]] = now.isoformat(timespec="seconds")
 
-    processor = trigger_review_processor()
+    processor = trigger_review_processor(batch_size=5)
     report["review_processor"] = processor
     if processor["status"] != "started":
         failures.append("review processor could not be started")
