@@ -41,6 +41,16 @@ HyperFrames is the default and final renderer for every FTL video asset: Shorts,
 - When an older FTL skill or script conflicts with this rule, keep its creative doctrine and rebuild the output in HyperFrames.
 - Never silently fall back from HyperFrames. If HyperFrames is blocked, report the blocker and wait for direction.
 
+## Review hosting default — Tailscale only
+
+Every user-facing FTL preview, review page, rendered video, and downloadable artifact must be hosted through the `tailscale-host` skill by default. A `localhost`, `127.0.0.1`, or `file://` URL may be used internally for authoring and validation, but it must never be the only link given to the user.
+
+- When the user asks to see, watch, host, preview, or review an artifact, stage only that exact file or review directory with the Tailscale host manager and return its private Tailscale HTTPS URL.
+- Verify the hosted route with the manager's `status` command and an HTTP request before reporting it ready. For MP4 video, also require a successful byte-range response (`206`) so seeking and playback work.
+- Prefer the Mac's stable MagicDNS/Tailscale HTTPS hostname over a raw local-network address. Never use Tailscale Funnel unless the user explicitly requests public internet access.
+- If a HyperFrames Studio preview is running only on localhost, create or expose a Tailscale-accessible review artifact before handing it off. Do not ask the user to open the localhost Studio URL.
+- State that the link is tailnet-only and requires the Mac to remain powered on, logged in, and connected to Tailscale.
+
 ## Shorts publishing cadence
 
 For every batch of two or more newly approved Shorts, publish exactly one immediately and schedule every remaining Short at the next open hourly slots in the channel timezone. “Upload and publish all” follows this cadence by default; it does not authorize simultaneous release. Only publish multiple new Shorts together when the user explicitly overrides the cadence for that specific batch. If a platform cannot schedule reliably, keep the remaining items as drafts and report the limitation instead of publishing them together.
