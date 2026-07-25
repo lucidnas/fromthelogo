@@ -41,6 +41,10 @@ HyperFrames is the default and final renderer for every FTL video asset: Shorts,
 - When an older FTL skill or script conflicts with this rule, keep its creative doctrine and rebuild the output in HyperFrames.
 - Never silently fall back from HyperFrames. If HyperFrames is blocked, report the blocker and wait for direction.
 
+## Shorts publishing cadence
+
+For every batch of two or more newly approved Shorts, publish exactly one immediately and schedule every remaining Short at the next open hourly slots in the channel timezone. “Upload and publish all” follows this cadence by default; it does not authorize simultaneous release. Only publish multiple new Shorts together when the user explicitly overrides the cadence for that specific batch. If a platform cannot schedule reliably, keep the remaining items as drafts and report the limitation instead of publishing them together.
+
 ---
 
 ## Format-Specific Playbooks
