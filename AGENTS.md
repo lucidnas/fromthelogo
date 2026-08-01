@@ -55,6 +55,17 @@ Every user-facing FTL preview, review page, rendered video, and downloadable art
 
 For every batch of two or more newly approved Shorts, publish exactly one immediately and schedule every remaining Short at the next open hourly slots in the channel timezone. “Upload and publish all” follows this cadence by default; it does not authorize simultaneous release. Only publish multiple new Shorts together when the user explicitly overrides the cadence for that specific batch. If a platform cannot schedule reliably, keep the remaining items as drafts and report the limitation instead of publishing them together.
 
+## Game-footage sourcing default — official Fever X + YouTube first
+
+Every Indiana Fever game research package must begin by collecting footage from both official Indiana Fever channels: the live/recent media feed on `x.com/IndianaFever` and the Indiana Fever YouTube channel. This is mandatory for Shorts and long-form work.
+
+- Use official Fever X posts for immediate game moments, vertical or close-up cuts, bench reactions, celebrations, and same-night clips.
+- Use the official Fever YouTube channel for full highlights, longer sequences, alternate angles, postgame interviews, press conferences, and reusable long-form source coverage.
+- Save the official assets into the dated game source folder and ledger them before building edits. Deduplicate by source URL/status ID and media identity.
+- Prefer the cleanest, highest-resolution official angle. Do not substitute an old, unrelated, watermarked, or low-resolution fan clip when the official game footage exists.
+- Media, opponent, and fan accounts are supplemental lanes for missing angles, controversy context, and reactions. They do not replace the two official Fever checks.
+- Research the whole game as a reusable footage pool, not only the first proposed Short. Preserve useful Clark plays, Sophie Cunningham moments, reactions, officiating sequences, records, and postgame material for future Shorts and 1–3 minute or longer videos.
+
 ---
 
 ## Format-Specific Playbooks
