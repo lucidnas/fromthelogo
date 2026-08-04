@@ -44,6 +44,13 @@ def fetch_json(url):
     req=urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0"})
     with urllib.request.urlopen(req, timeout=30) as r: return json.load(r)
 
+def iso_date(value):
+    if not value: return None
+    for fmt in ("%b %d, %Y", "%Y-%m-%d"):
+        try: return dt.datetime.strptime(value.title(),fmt).date().isoformat()
+        except ValueError: pass
+    return value
+
 def game_rows(season, season_type):
     helper=os.path.join(os.path.dirname(__file__),"ftl-fetch-team-games.mjs")
     out=subprocess.check_output(["node",helper,"--season",str(season),"--season-type",season_type,"--team",FEVER_ID],text=True)
@@ -74,7 +81,7 @@ def sync(db, seasons):
             opp=next((t for t in teams if str(t.get("teamId"))!=FEVER_ID),{})
             players=fever.get("players",[]); played=any(p.get("personId")==CLARK_ID and p.get("played") != "0" for p in players)
             db.execute("""INSERT OR REPLACE INTO games VALUES(?,?,?,?,?,?,?,?,?,?,?)""",
-              (gid,season,season_type,g.get("date"),g.get("matchup"),opp.get("teamTricode"),g.get("wl"),int(played),box_url,pbp_url,now))
+              (gid,season,season_type,iso_date(g.get("date")),g.get("matchup"),opp.get("teamTricode"),g.get("wl"),int(played),box_url,pbp_url,now))
             actions=pbp.get("game",{}).get("actions",[])
             for a in actions:
                 db.execute("""INSERT OR REPLACE INTO plays VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",(
