@@ -11,26 +11,28 @@ Persistent title bank for calm, possession-led Caitlin Clark breakdowns packaged
 - Every title must correspond to visible evidence in the selected possessions.
 - Adapt successful title *structures* from basketball creators; never copy a creator's full title-and-story combination.
 - Caitlin Clark's full name should appear in every long-form title.
-- Repetition is allowed and encouraged. The same play, game, thesis, or family of observations may support many videos when the title, opening promise, clip order, or analytical emphasis changes.
-- Do not reject an idea merely because FTL has covered similar material before. Block only an exact duplicate upload or a materially identical edit with no new packaging or viewing angle.
+- Repetition of a **story, skill, or analytical thesis** is allowed and encouraged. Caitlin Clark's passing, vision, range, pace, gravity, and defensive manipulation can each support many videos under different titles.
+- Prefer fresh possessions for every new treatment. Repeating the subject does not mean recycling the same plays; it means proving the familiar thesis with new evidence.
+- Do not reject an idea merely because FTL has covered the same skill before. Block exact duplicate uploads and avoid materially identical play selections unless a prior possession is essential for a callback or comparison.
 
 ## Repetition doctrine
 
-FTL is a Caitlin Clark hype machine. Familiarity helps establish the channel's identity, and most viewers will not encounter every upload. A productive concept can therefore be revisited dozens or hundreds of times.
+FTL is a Caitlin Clark hype machine. Familiarity helps establish the channel's identity, and most viewers will not encounter every upload. A productive **concept** can therefore be revisited dozens or hundreds of times while the supporting possessions remain fresh.
 
-Ways to repackage the same underlying footage include:
+Ways to revisit the same underlying story include:
 
 - A different title promise: intelligence, range, vision, pace, confidence, gravity, or dominance.
 - A different opening possession or cold-open question.
-- A different analytical detail within the same possession.
-- A different sequence of examples.
+- A fresh group of possessions demonstrating the same skill.
+- A different analytical detail or defensive response.
+- A different sequence and escalation of examples.
 - A single-play micro-breakdown versus a multi-play thesis video.
 - A defensive perspective: drop coverage, blitz, switch, help rotation, or transition collapse.
 - A player perspective: eyes, footwork, change of pace, handle, passing window, or shot preparation.
 - A consequence perspective: the open teammate, distorted spacing, defender reaction, bench reaction, or later adjustment.
-- A fresh title and thumbnail applied to a proven evergreen Caitlin Clark theme.
+- A fresh title and thumbnail applied to a proven evergreen Caitlin Clark theme, supported by newly sourced plays.
 
-The production question is not, "Have we discussed this before?" It is, "Can this version make the viewer notice or feel something clearly?"
+The production question is not, "Have we discussed Caitlin Clark's passing before?" It is, "Do we have fresh plays and a clear angle that make the viewer notice something in her passing?"
 
 ## Daniel Li-inspired analytical titles
 
@@ -181,4 +183,4 @@ Before approving a title:
 3. Is the title strongly pro-Caitlin without making a false factual claim?
 4. Does the opening pose the exact question the title promises to answer?
 5. Does the ending return to that question with a satisfying visual proof?
-6. Is this an exact duplicate upload? Similar titles, repeated theses, and reused possessions are acceptable; an indistinguishable edit is not.
+6. Is this an exact duplicate upload or substantially the same play package? Similar titles and repeated theses are acceptable, but new videos should normally use fresh possessions.
