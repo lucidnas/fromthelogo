@@ -19,11 +19,34 @@ Source checked with `yt-dlp` on `https://www.youtube.com/@DanielLi7/videos` and 
 
 For FTL, keep Caitlin as the emotional center and use Daniel Li structure underneath:
 
-1. Start with the Clark moment the audience already wants to celebrate.
-2. Ask a curiosity question about the read, not a documentary question.
-3. Rewind to the earlier plays that made the final read possible.
-4. Use arrows/rings/freeze frames to show what Caitlin saw.
-5. Land the hype: Caitlin did not just make a shot; she controlled the possession.
+1. Do **not** use a detached cold open, payoff-first teaser, or unresolved highlight montage.
+2. Begin immediately with Caitlin, the relevant context, and the video's tactical premise.
+3. Establish the apparent contradiction or curiosity question before beginning the detailed evidence.
+4. Enter the first possession only after the audience knows what analytical detail to watch for.
+5. Use arrows/rings/freeze frames to show what Caitlin saw.
+6. Let the play resolve with deliberate narration-free space and selective court/broadcast audio.
+7. Progress through fresh possessions that establish the baseline read, defensive adjustment, and Caitlin's counter.
+8. Land the hype through the conclusion: Caitlin did not merely produce the result; she controlled the possession.
+
+## Opening structure — verified August 4, 2026
+
+Gemini URL-context review of three representative Daniel Li videos found conventional thesis-first introductions rather than detached cold opens:
+
+- `How LeBron James Uses His Basketball IQ to Control the Game`: player and IQ thesis arrive in roughly the first 8.5 seconds; the first analyzed possession begins around 11 seconds.
+- `How Jimmy Butler Uses His Basketball IQ to Control the Game`: context and fit questions occupy the opening; the thesis is stated around 29–35 seconds; detailed possession analysis begins later.
+- `How 5'8" Yuki Kawamura Dominates Without Scoring`: player context, statistical contradiction, and central passing thesis run through roughly 49 seconds; the first proving possession follows around 52 seconds.
+
+Reusable FTL opening:
+
+```text
+name Caitlin and state the timely context
+-> establish the surprising contrast or tactical problem
+-> ask or state the single analytical thesis
+-> use related footage only as supporting B-roll
+-> transition directly into the first proving possession
+```
+
+The first shown footage may be exciting, but it must support the spoken introduction. It is not a separate payoff that the video later rewinds to explain.
 
 ## Current 1,000 Point Video Fit
 
