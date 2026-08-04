@@ -24,7 +24,7 @@ For FTL, keep Caitlin as the emotional center and use Daniel Li structure undern
 3. Establish the apparent contradiction or curiosity question before beginning the detailed evidence.
 4. Enter the first possession only after the audience knows what analytical detail to watch for.
 5. Use arrows/rings/freeze frames to show what Caitlin saw.
-6. Let the play resolve with deliberate narration-free space and selective court/broadcast audio.
+6. Let the play resolve with deliberate narration-free space. For the FTL video-essay treatment, source/broadcast audio is muted by default; possessions remain continuous analytical B-roll.
 7. Progress through fresh possessions that establish the baseline read, defensive adjustment, and Caitlin's counter.
 8. Land the hype through the conclusion: Caitlin did not merely produce the result; she controlled the possession.
 
@@ -47,6 +47,15 @@ name Caitlin and state the timely context
 ```
 
 The first shown footage may be exciting, but it must support the spoken introduction. It is not a separate payoff that the video later rewinds to explain.
+
+## FTL video-essay audio and footage rule
+
+- Treat game footage as continuous B-roll evidence, not as clips that pause the essay for their original audio.
+- Keep broadcast, announcer, crowd, and court audio muted by default.
+- Use no background music for this calm analysis lane.
+- Preserve genuine silent visual windows between narration beats.
+- Focus each visual passage on a specific possession, decision point, replay, or defensive response.
+- Source audio is an exception reserved for a quote or audible event that the thesis specifically requires.
 
 ## Current 1,000 Point Video Fit
 

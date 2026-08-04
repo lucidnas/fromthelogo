@@ -2,15 +2,20 @@ Excellent. Here is a precise, reusable Voice & Tone Profile for Daniel Li's bask
 
 # Daniel Li — Voice & Tone Profile
 
-## FTL production voice selection
+## FTL production voice finalists
 
-- Voice: ElevenLabs **Abe - Steady & Natural**
-- Voice ID: `Vu5z07e69ap1J77WEReV`
+- Voice A: ElevenLabs **Josh - Warm Conversational Australian**
+- Voice ID: `YCMlNeY0UBmxCWADNMyB`
+- Voice B: ElevenLabs **Jack - Natural**
+- Voice ID: `KRsa88U2fyUVkEtVYXDw`
+- Model: `eleven_v3`
 - Use for FTL calm possession-analysis videos.
 - Direction: natural conversational delivery, restrained energy, deliberate pauses, and no sports-announcer performance.
-- Background music: none. Let narration, silence, court sound, and selective announcer payoff carry the edit.
-- Silence is an editorial beat, not merely punctuation inside the TTS. Leave narration-free windows for viewers to inspect freezes, anticipate the read, watch the action resolve, and hear the court or broadcast payoff.
-- Default possession rhythm: setup narration -> 0.7–1.5 seconds of silent inspection -> prediction -> 0.5–1.0 seconds of anticipation -> 2–4 seconds of narration-free play payoff -> optional 1–3 second narration-free replay detail -> concise takeaway.
+- Background music: none.
+- Source audio: muted by default. These are video essays, so game possessions and replays function as continuous analytical B-roll rather than standalone clips with broadcast or court audio.
+- Narration and true silence carry the audio track. Source audio may return only when a future script explicitly depends on a spoken quote or audible event.
+- Silence is an editorial beat, not merely punctuation inside the TTS. Leave narration-free windows for viewers to inspect freezes, anticipate the read, watch the action resolve, and study the replay.
+- Default possession rhythm: setup narration -> 0.7–1.5 seconds of silent inspection -> prediction -> 0.5–1.0 seconds of anticipation -> 2–4 seconds of silent visual payoff -> optional 1–3 second silent replay detail -> concise takeaway.
 - The narrator should not fill every second of the timeline.
 - This selection borrows only high-level calm film-room delivery traits; it does not imitate another creator's voice identity.
 
