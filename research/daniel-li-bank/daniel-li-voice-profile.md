@@ -13,10 +13,10 @@ Excellent. Here is a precise, reusable Voice & Tone Profile for Daniel Li's bask
 - Direction: natural conversational delivery, restrained energy, deliberate pauses, and no sports-announcer performance.
 - Background music: none.
 - Source audio: muted by default. These are video essays, so game possessions and replays function as continuous analytical B-roll rather than standalone clips with broadcast or court audio.
-- Narration and true silence carry the audio track. Source audio may return only when a future script explicitly depends on a spoken quote or audible event.
-- Silence is an editorial beat, not merely punctuation inside the TTS. Leave narration-free windows for viewers to inspect freezes, anticipate the read, watch the action resolve, and study the replay.
-- Default possession rhythm: setup narration -> 0.7–1.5 seconds of silent inspection -> prediction -> 0.5–1.0 seconds of anticipation -> 2–4 seconds of silent visual payoff -> optional 1–3 second silent replay detail -> concise takeaway.
-- The narrator should not fill every second of the timeline.
+- Narration carries the essay almost continuously. Source audio may return only when a future script explicitly depends on a spoken quote or audible event.
+- Silence should sound like ordinary conversational breathing, usually about 0.15–0.6 seconds. Do not insert 2–10 second blank viewing windows by default.
+- Default possession rhythm: setup -> problem -> subtle read -> consequence, linked with conversational connectors while live action, freeze frames, and replays continue underneath.
+- The narrator may pause briefly for emphasis, but the viewer should never be left watching an unexplained muted clip.
 - This selection borrows only high-level calm film-room delivery traits; it does not imitate another creator's voice identity.
 
 ## 1. Overall delivery (audio)
