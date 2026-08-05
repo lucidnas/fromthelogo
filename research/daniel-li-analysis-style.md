@@ -114,3 +114,15 @@ For FTL, this means repeated Caitlin Clark clips are fine only if the repeat has
 - slow replay payoff
 
 For section 1, the Daniel Li-style fix is to freeze before the spin and make the audience see the logo-three temptation versus the open lane before the VO says the conclusion.
+
+## Selection-First Video Essay Rule
+
+Choose the evidence set before writing or editing. A video begins with a small bank of genuinely interesting Caitlin Clark possessions, normally three to five, and the thesis is written to connect and explain those chosen plays.
+
+- Broad thesis narration uses continuously moving, relevant B-roll: threes for range, assists for decision-making, defensive reactions for pressure.
+- Never freeze generic B-roll merely because the narration needs a visual.
+- Each proof possession begins by playing live so the viewer understands the action.
+- Freeze or slow only at the exact decision named by the narration, normally for no more than two seconds.
+- Every analytical freeze must come from a possession selected before scripting and must reveal a specific read, manipulation, timing window, or defensive mistake.
+- Resume the action immediately after the annotation so the viewer receives the payoff.
+- If the visual does not prove the current sentence, replace it; do not force it into the timeline.
