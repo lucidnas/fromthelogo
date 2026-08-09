@@ -87,7 +87,8 @@ visuals.push(freeze("atl-read", "atl", starts[4] + 10.0, voiceDurations[4] - 10.
 // Minnesota: let the action establish before any pause, then explain the loaded help.
 visuals.push(video("min-establish", "min", starts[5], 5.0, 0.0, 5.0));
 visuals.push(freeze("min-load", "min", starts[5] + 5.0, 5.1, 1.35, minLoad));
-visuals.push(video("min-turn", "min", starts[5] + 10.1, 2.3, 1.35, 3.65));
+const minTurnSpan = starts[6] - (starts[5] + 10.1);
+visuals.push(video("min-turn", "min", starts[5] + 10.1, minTurnSpan, 1.35, 1.35 + minTurnSpan));
 visuals.push(freeze("min-window", "min", starts[6], 6.0, 2.05, minWindow));
 visuals.push(video("min-payoff", "min", starts[6] + 6.0, 5.9, 2.05, 7.95));
 visuals.push(video("min-aftermath", "min", starts[6] + 11.9, Math.max(1.0, starts[7] - (starts[6] + 11.9)), 7.95, 10.1, "crop-c"));
