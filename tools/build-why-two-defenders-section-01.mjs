@@ -38,7 +38,7 @@ function video(id, src, start, span, trimStart, trimEnd, cls = "") {
 }
 
 function freeze(id, src, start, span, at, svg, cls = "") {
-  return `${video(`${id}-frame`, src, start, span, at, at + 0.035, `freeze ${cls}`)}\n<section id="${id}-draw" class="clip drawing" ${attrs(start, span, 2)}>${svg}</section>`;
+  return video(`${id}-frame`, src, start, span, at, at + 0.035, `freeze ${cls}`);
 }
 
 function circle(cx, cy, rx = 62, ry = 86) {
@@ -97,9 +97,10 @@ visuals.push(video("atl-compare", "atl", starts[7], 4.1, 18.1, 22.2, "crop-c"));
 visuals.push(video("min-compare", "min", starts[7] + 4.1, voiceDurations[7] - 4.1, 1.0, 5.7, "crop-d"));
 visuals.push(video("atl-final-compare", "atl", starts[8], 4.0, 19.0, 23.0, "crop-a"));
 visuals.push(video("min-final-compare", "min", starts[8] + 4.0, 4.0, 1.2, 5.2, "crop-b"));
-visuals.push(video("con-establish", "con", starts[8] + 8.0, 2.2, 0.0, 2.2));
-visuals.push(freeze("con-third", "con", starts[8] + 10.2, 6.3, 2.2, conThird));
-visuals.push(video("con-payoff", "con", starts[8] + 16.5, Math.max(.2, total - (starts[8] + 16.5)), 2.2, 6.61, "crop-a"));
+visuals.push(video("deep-stay-home", "deepEvent", starts[8] + 8.0, 5.0, 0.2, 5.2, "crop-b"));
+visuals.push(video("con-establish", "con", starts[8] + 13.0, 2.2, 0.0, 2.2));
+visuals.push(freeze("con-third", "con", starts[8] + 15.2, 3.0, 2.2, conThird));
+visuals.push(video("con-payoff", "con", starts[8] + 18.2, Math.max(.2, total - (starts[8] + 18.2)), 2.2, 6.61, "crop-a"));
 
 const audios = voiceFiles.map((_, index) => `<audio id="voice-${index}" class="clip" ${attrs(starts[index], voiceDurations[index], 10)} src="assets/vo-${index}.mp3" data-volume="1"></audio>`).join("\n");
 
