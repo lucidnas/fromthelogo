@@ -51,9 +51,9 @@ function arrow(id, d) {
 
 const atlHigh = `<svg viewBox="0 0 1920 1080">${circle(1432, 565)}${circle(1300, 563)}<path class="shade" d="M1110 460 L1325 460 L1238 814 L1020 814 Z"/><text x="1160" y="440">SPACE BEHIND THE SHOW</text></svg>`;
 const atlLane = `<svg viewBox="0 0 1920 1080">${circle(1320, 558)}${circle(1192, 585)}${circle(1002, 614, 58, 82)}${arrow("atl-pass", "M1280 600 C1200 650 1110 670 1038 646")}<text x="930" y="520">BOSTON SLIPS BEHIND BOTH</text></svg>`;
-const minLoad = `<svg viewBox="0 0 1920 1080">${circle(785, 346, 68, 92)}${circle(716, 373, 68, 92)}<path class="shade" d="M555 330 L835 330 L760 690 L500 690 Z"/><text x="500" y="285">TWO DEFENDERS ORIENT TO CLARK</text></svg>`;
-const minWindow = `<svg viewBox="0 0 1920 1080">${circle(792, 350, 66, 90)}${circle(690, 392, 66, 90)}${circle(565, 470, 55, 78)}${arrow("min-pass", "M805 414 C738 450 646 474 600 486")}<text x="470" y="300">THE WINDOW OPENS BEHIND THEM</text></svg>`;
-const conThird = `<svg viewBox="0 0 1920 1080">${circle(1248, 530, 58, 82)}${circle(1118, 554, 58, 82)}${circle(855, 560, 58, 82)}${arrow("third-read", "M1190 580 C1080 610 960 610 900 584")}<text x="790" y="450">NOW READ THE THIRD DEFENDER</text></svg>`;
+const minLoad = `<svg viewBox="0 0 1920 1080">${circle(1245, 500, 78, 112)}${circle(1035, 575, 78, 112)}<path class="shade" d="M825 430 L1190 430 L1040 820 L755 820 Z"/><text x="790" y="350">TWO DEFENDERS ORIENT TO CLARK</text></svg>`;
+const minWindow = `<svg viewBox="0 0 1920 1080">${circle(1245, 500, 76, 108)}${circle(1035, 575, 76, 108)}${circle(825, 690, 66, 96)}${arrow("min-pass", "M1165 555 C1070 600 940 665 875 684")}<text x="720" y="375">THE WINDOW OPENS BEHIND THEM</text></svg>`;
+const conThird = `<svg viewBox="0 0 1920 1080">${circle(720, 500, 66, 94)}${circle(790, 500, 66, 94)}${circle(1260, 530, 66, 94)}${arrow("third-read", "M1260 610 C1230 660 1180 695 1110 720")}<text x="1030" y="395">NOW READ THE THIRD DEFENDER</text></svg>`;
 
 fs.mkdirSync(path.join(ROOT, "assets"), { recursive: true });
 for (const [name, source] of Object.entries(SOURCES)) link(source, path.join(ROOT, "assets", `${name}.mp4`));
@@ -94,10 +94,11 @@ visuals.push(video("min-aftermath", "min", starts[6] + 11.9, Math.max(1.0, start
 // Compare the two geometries, then hand off to the third-defender section.
 visuals.push(video("atl-compare", "atl", starts[7], 4.1, 18.1, 22.2, "crop-c"));
 visuals.push(video("min-compare", "min", starts[7] + 4.1, voiceDurations[7] - 4.1, 1.0, 5.7, "crop-d"));
-visuals.push(video("con-lead", "con", starts[8], 7.2, 0.0, 7.2));
-visuals.push(freeze("con-third", "con", starts[8] + 7.2, 7.0, 3.2, conThird));
-visuals.push(video("con-payoff", "con", starts[8] + 14.2, 6.3, 3.2, 9.5, "crop-a"));
-visuals.push(freeze("con-end", "con", starts[8] + 20.5, Math.max(.2, total - (starts[8] + 20.5)), 3.2, conThird, "crop-a"));
+visuals.push(video("atl-final-compare", "atl", starts[8], 4.0, 19.0, 23.0, "crop-a"));
+visuals.push(video("min-final-compare", "min", starts[8] + 4.0, 4.0, 1.2, 5.2, "crop-b"));
+visuals.push(video("con-establish", "con", starts[8] + 8.0, 2.2, 0.0, 2.2));
+visuals.push(freeze("con-third", "con", starts[8] + 10.2, 6.3, 2.2, conThird));
+visuals.push(video("con-payoff", "con", starts[8] + 16.5, Math.max(.2, total - (starts[8] + 16.5)), 2.2, 6.61, "crop-a"));
 
 const audios = voiceFiles.map((_, index) => `<audio id="voice-${index}" class="clip" ${attrs(starts[index], voiceDurations[index], 10)} src="assets/vo-${index}.mp3" data-volume="1"></audio>`).join("\n");
 
