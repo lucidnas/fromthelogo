@@ -15,7 +15,7 @@ const SOURCES = {
   min: "/Volumes/SSK SSD/ftl-data/caitlin-clark-clip-bank/v2/1022400204/226.mp4",
   con: "/Volumes/SSK SSD/ftl-data/caitlin-clark-clip-bank/v2/1022600201/397.mp4",
 };
-const GAP = 0.18;
+const GAP = 0;
 
 function duration(file) {
   const result = spawnSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "default=nw=1:nk=1", file], { encoding: "utf8" });
