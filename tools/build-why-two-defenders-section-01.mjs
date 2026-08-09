@@ -102,7 +102,7 @@ visuals.push(video("con-establish", "con", starts[8] + 13.0, 2.2, 0.0, 2.2));
 visuals.push(freeze("con-third", "con", starts[8] + 15.2, 3.0, 2.2, conThird));
 visuals.push(video("con-payoff", "con", starts[8] + 18.2, Math.max(.2, total - (starts[8] + 18.2)), 2.2, 6.61, "crop-a"));
 
-const audios = voiceFiles.map((_, index) => `<audio id="voice-${index}" class="clip" ${attrs(starts[index], voiceDurations[index], 10)} src="assets/vo-${index}.mp3" data-volume="1"></audio>`).join("\n");
+const audios = voiceFiles.map((_, index) => `<audio id="voice-${index}" class="clip" ${attrs(starts[index], voiceDurations[index], 10 + index)} src="assets/vo-${index}.mp3" data-volume="1"></audio>`).join("\n");
 
 const html = `<!doctype html>
 <html lang="en">
