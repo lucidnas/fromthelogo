@@ -1,0 +1,75 @@
+{
+  "slug": "why-two-defenders-still-doesnt-work",
+  "title": "Why Guarding Caitlin Clark With Two Defenders Still Doesn't Work",
+  "format": "FTL calm tactical video essay",
+  "player": "Caitlin Clark",
+  "editorialRule": "No play row, no narration beat. Tactical language must match verified footage, not an assumed coverage label.",
+  "sourceReceipts": [
+    {
+      "id": "con-2026-official-fever-recap",
+      "url": "https://www.youtube.com/watch?v=yFs4tjhvJ58",
+      "publisher": "Indiana Fever",
+      "localPath": "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/why-two-defenders-still-doesnt-work/sources/source-yFs4tjhvJ58.mp4"
+    },
+    {
+      "id": "atl-2025-official-fever-recap",
+      "url": "https://www.youtube.com/watch?v=LFC6S3BV5iE",
+      "publisher": "Indiana Fever",
+      "localPath": "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/why-two-defenders-still-doesnt-work/sources/clip-4-20-4-54-LFC6S3BV5iE.mp4"
+    },
+    {
+      "id": "min-2024-verified-event-video",
+      "publisher": "WNBA Advanced Stats",
+      "localPath": "/Volumes/SSK SSD/ftl-data/caitlin-clark-clip-bank/v2/1022400204/226.mp4"
+    }
+  ],
+  "plays": [
+    {
+      "order": 1,
+      "gameId": "1022600201",
+      "date": "2026-07-22",
+      "opponent": "Connecticut Sun",
+      "actionNumber": 55,
+      "quarter": 1,
+      "officialEvent": "Caitlin Clark made 29.99-foot three-point shot",
+      "purpose": "Establish why the screen defender cannot remain near the paint",
+      "coverageClaim": "Range pressure only; no unverified coverage label"
+    },
+    {
+      "order": 2,
+      "gameId": "1022500011",
+      "date": "2025-05-20",
+      "opponent": "Atlanta Dream",
+      "actionNumber": 579,
+      "quarter": 4,
+      "clock": "1:21",
+      "officialEvent": "Aliyah Boston cutting layup, Caitlin Clark assist",
+      "purpose": "Show the high big creating space behind the coverage",
+      "coverageClaim": "Drag screen in semi-transition; Clark's defender trails and Atlanta's big shows high"
+    },
+    {
+      "order": 3,
+      "gameId": "1022400204",
+      "date": "2024-09-06",
+      "opponent": "Minnesota Lynx",
+      "actionNumber": 226,
+      "quarter": 2,
+      "clock": "3:28",
+      "officialEvent": "Aliyah Boston cutting layup, Caitlin Clark assist",
+      "purpose": "Show a second defender loaded toward the nail and the pass behind that help",
+      "coverageClaim": "Loaded nail/help coverage; explicitly not described as a high trap"
+    },
+    {
+      "order": 4,
+      "gameId": "1022600201",
+      "date": "2026-07-22",
+      "opponent": "Connecticut Sun",
+      "actionNumber": 397,
+      "quarter": 3,
+      "clock": "4:12",
+      "officialEvent": "Lexie Hull reverse layup, Caitlin Clark assist",
+      "purpose": "Transition into Section 02 about Clark reading the third defender",
+      "coverageClaim": "Rejected spread pick-and-roll; the low defender rotates toward Clark"
+    }
+  ]
+}
