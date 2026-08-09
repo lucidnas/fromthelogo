@@ -51,9 +51,10 @@ function arrow(id, d) {
 
 const atlHigh = `<svg viewBox="0 0 1920 1080">${circle(1432, 565)}${circle(1300, 563)}<path class="shade" d="M1110 460 L1325 460 L1238 814 L1020 814 Z"/><text x="1160" y="440">SPACE BEHIND THE SHOW</text></svg>`;
 const atlLane = `<svg viewBox="0 0 1920 1080">${circle(1320, 558)}${circle(1192, 585)}${circle(1002, 614, 58, 82)}${arrow("atl-pass", "M1280 600 C1200 650 1110 670 1038 646")}<text x="930" y="520">BOSTON SLIPS BEHIND BOTH</text></svg>`;
+const atlRead = `<svg viewBox="0 0 1920 1080">${circle(1432, 565)}${circle(1300, 563)}<path class="shade" d="M1110 460 L1325 460 L1238 814 L1020 814 Z"/></svg>`;
 const minLoad = `<svg viewBox="0 0 1920 1080">${circle(1245, 500, 78, 112)}${circle(1035, 575, 78, 112)}<path class="shade" d="M825 430 L1190 430 L1040 820 L755 820 Z"/><text x="790" y="350">TWO DEFENDERS ORIENT TO CLARK</text></svg>`;
 const minWindow = `<svg viewBox="0 0 1920 1080">${circle(1245, 500, 76, 108)}${circle(1035, 575, 76, 108)}${circle(825, 690, 66, 96)}${arrow("min-pass", "M1165 555 C1070 600 940 665 875 684")}<text x="720" y="375">THE WINDOW OPENS BEHIND THEM</text></svg>`;
-const conThird = `<svg viewBox="0 0 1920 1080">${circle(720, 500, 66, 94)}${circle(790, 500, 66, 94)}${circle(1260, 530, 66, 94)}${arrow("third-read", "M1260 610 C1230 660 1180 695 1110 720")}<text x="1030" y="395">NOW READ THE THIRD DEFENDER</text></svg>`;
+const conThird = `<svg viewBox="0 0 1920 1080">${circle(720, 500, 66, 94)}${circle(790, 500, 66, 94)}${circle(1260, 530, 66, 94)}<text x="1030" y="395">NOW READ THE THIRD DEFENDER</text></svg>`;
 
 fs.mkdirSync(path.join(ROOT, "assets"), { recursive: true });
 for (const [name, source] of Object.entries(SOURCES)) link(source, path.join(ROOT, "assets", `${name}.mp4`));
@@ -81,7 +82,7 @@ visuals.push(freeze("atl-lane", "atl", starts[2] + 15.5, 6.0, 20.25, atlLane));
 visuals.push(video("atl-payoff", "atl", starts[2] + 21.5, 3.2, 20.25, 23.45));
 visuals.push(video("atl-reaction", "atl", starts[2] + 24.7, starts[4] - (starts[2] + 24.7), 23.45, 26.07, "crop-a"));
 visuals.push(video("atl-replay", "atl", starts[4], 10.0, 23.8, 33.8, "crop-b"));
-visuals.push(freeze("atl-read", "atl", starts[4] + 10.0, voiceDurations[4] - 10.0, 19.55, atlHigh, "crop-b"));
+visuals.push(freeze("atl-read", "atl", starts[4] + 10.0, voiceDurations[4] - 10.0, 19.55, atlRead, "crop-b"));
 
 // Minnesota: let the action establish before any pause, then explain the loaded help.
 visuals.push(video("min-establish", "min", starts[5], 5.0, 0.0, 5.0));
