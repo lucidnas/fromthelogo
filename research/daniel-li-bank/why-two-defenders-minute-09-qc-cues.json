@@ -1,0 +1,8 @@
+{
+  "cues": [
+    {"time":"00:00-00:13.20","vo":"Clark controls above the arc as help shifts and Timpson cuts through the pocket.","expected":"Exact Portland clincher: live setup, help freeze, slow window, then a short route hold before payoff."},
+    {"time":"00:13.20-00:26.72","vo":"Clark takes the simple window and the layup gives her the tenth assist and triple-double.","expected":"Resume the same possession through pass, catch, finish and reaction once. No next-play footage."},
+    {"time":"00:26.72-00:41.44","vo":"Range, drive, timing and passing angle create the same defensive problem.","expected":"Four concise verified receipts from distinct possessions, each directly supporting one synthesis beat."},
+    {"time":"00:41.44-01:03.04","vo":"Every reasonable adjustment has a cost, and Clark finds it before the defense can guard her twice.","expected":"Sequential verified conclusion montage ending on the Portland clincher payoff and reaction. No unrelated play or audio."}
+  ]
+}

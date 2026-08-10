@@ -1,0 +1,94 @@
+{
+  "overallVerdict": "Unedited raw clip repetitions disrupt pacing; lacks required freeze-frame and slow-motion breakdowns.",
+  "topProblems": [
+    {
+      "severity": "critical",
+      "time": "00:00-00:23",
+      "problem": "First play repeats raw twice without analytical freeze-frame or slow-motion breakdown.",
+      "fix": "Apply live-to-freeze-to-slowmo sequence on pass release and finish."
+    },
+    {
+      "severity": "major",
+      "time": "00:44-01:03",
+      "problem": "Comparison section uses raw looped clips instead of a clear split-screen or freeze-frame overlay.",
+      "fix": "Build a side-by-side or synchronized sequential comparison with targeted freeze frames."
+    }
+  ],
+  "timelineFixes": [
+    {
+      "time": "00:00-00:11",
+      "severity": "major",
+      "whatIsOnScreen": "Clark receives ball in backcourt and throws full-court pass to Mitchell for layup.",
+      "voAlignment": "matched",
+      "problem": "Plays continuously as raw broadcast footage without film-room breakdown.",
+      "exactFix": "Add freeze frame at pass release (00:03) and slow-motion zoom on the lead pass.",
+      "fairUseTreatment": "freeze-frame and slowmo"
+    },
+    {
+      "time": "00:11-00:23",
+      "severity": "critical",
+      "whatIsOnScreen": "Exact same Q1 play repeated twice back-to-back.",
+      "voAlignment": "partially matched",
+      "problem": "Redundant raw repetition causes visual pacing lag.",
+      "exactFix": "Trim second raw loop; replace with slow-motion angle of Mitchell's catch and finish.",
+      "fairUseTreatment": "replay and slowmo"
+    },
+    {
+      "time": "00:23-00:43",
+      "severity": "ok",
+      "whatIsOnScreen": "Q4 play: Clark drives right, bounce passes to Mitchell cutting baseline for reverse finish.",
+      "voAlignment": "matched",
+      "problem": "Good play execution, but missing breakdown freeze frame at help defense reaction.",
+      "exactFix": "Insert 1-second freeze frame when defender commits to Clark before the bounce pass.",
+      "fairUseTreatment": "freeze-frame"
+    },
+    {
+      "time": "00:44-01:03",
+      "severity": "major",
+      "whatIsOnScreen": "Sequential raw re-runs of Q1 hit-ahead pass and Q4 bounce pass.",
+      "voAlignment": "matched",
+      "problem": "Raw looping lacks analytical comparison value.",
+      "exactFix": "Construct side-by-side frame showing both read moments simultaneously.",
+      "fairUseTreatment": "split-screen replay"
+    }
+  ],
+  "clipReuseAudit": [
+    {
+      "clipOrMoment": "Q1 5:10 Indiana vs Minnesota transition pass",
+      "whereItAppears": "00:00-00:23, 00:44-00:50",
+      "verdict": "trim",
+      "reason": "Repeated raw without dynamic treatment or zoom."
+    },
+    {
+      "clipOrMoment": "Q4 3:39 Indiana vs Minnesota baseline bounce pass",
+      "whereItAppears": "00:23-00:43, 00:51-01:03",
+      "verdict": "needs alternate angle",
+      "reason": "Re-used end clip needs analytical freeze frame or side-by-side split."
+    }
+  ],
+  "sourceDiversityAudit": {
+    "individualGameHighlightCountEstimate": 2,
+    "sourceOrGameRepetitionProblems": [
+      {
+        "time": "00:00-01:03",
+        "problem": "Only two plays from a single game used across the whole breakdown.",
+        "fix": "Intentional two-play comparative structure; maintain but enhance visual breakdown tools."
+      }
+    ]
+  },
+  "sourceQualityAudit": [
+    {
+      "time": "00:00-01:03",
+      "quality": "high",
+      "problem": "Clean 1080p broadcast footage.",
+      "replacementNeeded": false
+    }
+  ],
+  "interviewUsageAudit": [],
+  "labelAccuracyAudit": [],
+  "recommendedRepairOrder": [
+    "Cut redundant unedited loops in 00:11-00:23 and insert freeze/slow-mo on Clark's release.",
+    "Add help-reaction freeze frame at 00:35 during the baseline drive.",
+    "Convert 00:44-01:03 into a split-screen or side-by-side comparative breakdown."
+  ]
+}

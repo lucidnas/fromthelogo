@@ -1,0 +1,8 @@
+{
+  "cues": [
+    {"time":"00:00-00:15.60","vo":"Clark releases a one-handed lead pass before Minnesota can set its shell.","expected":"Exact Minnesota hit-ahead: moving setup, release freeze, slow resume, catch and finish."},
+    {"time":"00:15.60-00:29.44","vo":"The pass travels almost the full court because Clark recognizes the opening immediately.","expected":"Hit-ahead payoff and aftermath, then a brief bridge into a distinct late-game Minnesota possession."},
+    {"time":"00:29.44-00:43.84","vo":"Clark drives right and drops the bounce pass into Mitchell's baseline route.","expected":"Exact Minnesota backdoor/reverse play: live drive, help freeze, slow pass, reverse finish."},
+    {"time":"00:43.84-01:03.12","vo":"The full-court pass and short bounce pass come from the same habit.","expected":"Sequential comparison of the two verified plays, then a short final teaching hold. No unrelated possession."}
+  ]
+}

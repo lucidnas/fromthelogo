@@ -36,10 +36,10 @@ const visuals=[
 
   // Study the same geometry through distinct views rather than restarting the live angle.
   freeze("portland-cushion-analysis","cushion",starts[1],3.0,"wide"),
-  video("portland-alternate","portlandAlt",starts[1]+3.0,3.54,0),
-  video("connecticut-range-study","conDeep",starts[1]+6.54,5.0,31.55),
-  freeze("atlanta-high-show-study","atlHigh",starts[1]+11.54,3.0),
-  video("portland-reaction-study","portland",starts[1]+14.54,voiceDurations[1]-14.54,8.5),
+  video("portland-release-study","portlandSlow",starts[1]+3.0,5.03,0),
+  video("connecticut-range-study","conDeep",starts[1]+8.03,4.0,31.55),
+  freeze("atlanta-high-show-study","atlHigh",starts[1]+12.03,3.0),
+  video("portland-reaction-study","portland",starts[1]+15.03,voiceDurations[1]-15.03,8.5),
 
   // Three concise receipts for the synthesis: range, high show, result.
   video("atlanta-space-payoff","atlLive",starts[2],6.5,0),
