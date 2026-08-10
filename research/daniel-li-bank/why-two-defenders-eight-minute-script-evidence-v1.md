@@ -173,28 +173,28 @@ This is why some of Clark’s best passes can look almost too early. She is not 
 
 ---
 
-## Section 7 — Change the passing angle (6:00–7:00)
+## Section 7 — Change the passing route (6:00–7:00)
 
 ### Paragraph 21 — VO
 
-Early in the third quarter against Portland, Clark attacks along the baseline. The help defender steps toward her path, and the direct passing lane becomes crowded. Clark does not force the ball through that lane. She changes the angle of the delivery.
+Against Chicago, the post defender stands between Clark and Aliyah Boston. The direct entry is closed at chest height. Clark does not try to force the ball through that body. She changes the route of the delivery.
 
-**Evidence:** Indiana Fever at Portland, 2026-07-31, Q3 9:21, action 331; Kelsey Mitchell running reverse layup, Clark’s fourth assist. Exact official league event source: <https://videos.nba.com/wnba/pbp/media/2026/07/31/1022600215/331/b07691eb-187c-e70e-4502-41461854aa2a_1280x720.mp4>.  
-**Visual grammar:** play live to source `2.60`; freeze after Clark establishes the baseline attack; resume at `2.65`; freeze at `4.10` when the help visibly commits. Keep the complete baseline and Mitchell’s route in view.
+**Evidence:** Indiana Fever at Chicago Sky, 2024-06-23, Q3 `1:56`, action `362` — `A. Boston cutting Layup (15 PTS) (C. Clark 13 AST)`; score after the make: Indiana 68, Chicago 57. Exact official league event source: <https://videos.nba.com/wnba/pbp/media/2024/06/23/1022400096/362/f97d57e5-b8cc-078f-f56d-7d3ad910fb31_1280x720.mp4>.
+**Visual grammar:** play source `5.800–6.600` live to establish Clark, Boston, and the defender between them. Hold a clean frame at `6.200`; no player-tracking graphics or claims about intent.
 
 ### Paragraph 22 — VO
 
-Clark sends a hook pass around the help and reaches Mitchell behind the play. Mitchell finishes on the reverse side. The baseline drive created the defensive movement, but the delivery is what completes the solution. Clark finds a passing line that the defender’s position cannot close.
+Clark lifts a one-handed lob over the front, and Boston catches at the rim for the layup. The defender has taken away the straight line; the ball reaches Boston on a higher one instead.
 
-**Evidence:** same Portland Q3 9:21 action 331. Exact official league event source: <https://videos.nba.com/wnba/pbp/media/2026/07/31/1022600215/331/b07691eb-187c-e70e-4502-41461854aa2a_1280x720.mp4>.  
-**Visual grammar:** resume at `4.15`; freeze at `4.60` when the hook delivery’s changed angle is visible; resume `4.65–6.80` through Mitchell’s reverse finish. Each freeze follows motion and continues from the identical frame.
+**Evidence:** same Chicago Q3 `1:56`, action `362`; the raised pass visibly clears the defender’s line to Boston. Exact official league event source: <https://videos.nba.com/wnba/pbp/media/2024/06/23/1022400096/362/f97d57e5-b8cc-078f-f56d-7d3ad910fb31_1280x720.mp4>.
+**Visual grammar:** continue through the pass’s upward route at `6.800–7.200`; hold the lob in flight at `7.200`; resume `7.200–8.350` through Boston’s catch and finish. Each freeze follows motion and continues from the identical frame.
 
 ### Paragraph 23 — VO
 
-That is a more precise definition of vision. It is not just seeing every player. It is understanding how their positions are changing, where the next route is opening, and which kind of pass can reach it. The defense may take away the obvious window. Clark keeps looking for another one.
+That is a more precise definition of vision. It is not just seeing every player. It is recognizing which route the defense has closed, then choosing the delivery that still reaches the target. The defense may take away the obvious window. Clark keeps finding another one.
 
-**Evidence:** synthesis of the verified Portland hook pass, Q3 9:21 action 331, and Portland bounce pass, Q2 6:21 action 215. Sources: <https://videos.nba.com/wnba/pbp/media/2026/07/31/1022600215/331/b07691eb-187c-e70e-4502-41461854aa2a_1280x720.mp4> and <https://www.youtube.com/shorts/-emBYtRIIn8>.  
-**Visual grammar:** hold two distinct teaching frames—the crowded direct lane on the hook pass and the developing cut on the bounce pass—then pay off with the hook-pass finish. No arrows yet.
+**Evidence:** synthesis restricted to Chicago Q3 `1:56`, action `362`, with its official event receipt above.
+**Visual grammar:** hold the fronted-post frame and the ball-in-flight frame, then pay off with Boston’s finish. No arrows yet.
 
 ---
 

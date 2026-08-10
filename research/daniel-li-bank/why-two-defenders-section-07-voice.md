@@ -2,8 +2,8 @@
 
 ## Script
 
-Early in the third quarter against Portland, Clark attacks along the baseline. The help defender steps toward her path, and the direct passing lane becomes crowded. Clark does not force the ball through that lane. She changes the angle of the delivery.
+Against Chicago, the post defender stands between Clark and Aliyah Boston. The direct entry is closed at chest height. Clark does not try to force the ball through that body. She changes the route of the delivery.
 
-Clark sends a hook pass around the help and reaches Mitchell behind the play. Mitchell finishes on the reverse side. The baseline drive created the defensive movement, but the delivery is what completes the solution. Clark finds a passing line that the defender's position cannot close.
+Clark lifts a one-handed lob over the front, and Boston catches at the rim for the layup. The defender has taken away the straight line; the ball reaches Boston on a higher one instead.
 
-That is a more precise definition of vision. It is not just seeing every player. It is understanding how their positions are changing, where the next route is opening, and which kind of pass can reach it. The defense may take away the obvious window. Clark keeps looking for another one.
+That is a more precise definition of vision. It is not just seeing every player. It is recognizing which route the defense has closed, then choosing the delivery that still reaches the target. The defense may take away the obvious window. Clark keeps finding another one.
