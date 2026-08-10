@@ -1,0 +1,109 @@
+{
+  "overallVerdict": "Solid film-room cut with accurate plays, but reuses the Portland clip excessively without sufficient breakdown overlays or freeze-frame analytical enhancements.",
+  "topProblems": [
+    {
+      "severity": "major",
+      "time": "00:00-00:10",
+      "problem": "Portland clip uses cropped 9:16 social footage with lower bitrate and visible UI crop artifacting.",
+      "fix": "Replace with clean 1080p horizontal broadcast footage or apply consistent letterboxing and zoom-crop treatment."
+    },
+    {
+      "severity": "major",
+      "time": "00:36-00:48",
+      "problem": "Unmodified third replay of the Portland clip at the end adds minimal new analytical value.",
+      "fix": "Add a freeze frame at the moment of release with a highlighted pass lane, or trim the full play rerun to focus tightly on the release and defender reaction."
+    }
+  ],
+  "timelineFixes": [
+    {
+      "time": "00:00-00:13",
+      "severity": "minor",
+      "whatIsOnScreen": "Clark drives left and hits Mitchell with a lead bounce pass against Portland.",
+      "voAlignment": "matched",
+      "problem": "Source clip is vertically cropped with visible UI elements and soft resolution.",
+      "exactFix": "Swap source to native 1080p broadcast master and apply slow-motion zoom on Clark's release.",
+      "fairUseTreatment": "Freeze frame at 00:03 on pass release with slow-motion continuation."
+    },
+    {
+      "time": "00:13-00:21",
+      "severity": "ok",
+      "whatIsOnScreen": "Replay breakdown of Mitchell catching in stride, followed by transition to Atlanta sequence.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "Keep sequence; tighten transition by 0.5 seconds into the Atlanta clip.",
+      "fairUseTreatment": "Slow-motion replay on catch point."
+    },
+    {
+      "time": "00:21-00:31",
+      "severity": "ok",
+      "whatIsOnScreen": "Wide broadcast view of Clark finding Mitchell in transition against Atlanta, followed by court-level low angle.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "Maintain current edit; dynamic angle shift works well for fair-use and analysis.",
+      "fairUseTreatment": "Alternate camera angle replay."
+    },
+    {
+      "time": "00:31-00:36",
+      "severity": "ok",
+      "whatIsOnScreen": "Court-level slow-motion view of Clark's bounce pass through traffic vs Atlanta.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "Keep low-angle payoff replay.",
+      "fairUseTreatment": "Low-angle slow-motion zoom."
+    },
+    {
+      "time": "00:36-00:48",
+      "severity": "minor",
+      "whatIsOnScreen": "Return to Portland play showing initial pass and cut, ending on player reaction.",
+      "voAlignment": "partially matched",
+      "problem": "Repeat of earlier Portland clip without new visual breakdown or annotations.",
+      "exactFix": "Crop tight on the defender's hips/head orientation to visually illustrate 'before the defense recognizes the destination'.",
+      "fairUseTreatment": "Tight zoom and freeze frame on defensive reaction."
+    }
+  ],
+  "clipReuseAudit": [
+    {
+      "clipOrMoment": "Portland bounce pass to Mitchell",
+      "whereItAppears": "00:00-00:10, 00:10-00:18, 00:36-00:48",
+      "verdict": "trim",
+      "reason": "Used three times across 49 seconds. Third instance needs tighter crop or analytical freeze to justify repetition."
+    },
+    {
+      "clipOrMoment": "Atlanta transition pass to Mitchell",
+      "whereItAppears": "00:21-00:36",
+      "verdict": "keep",
+      "reason": "Good mix of standard broadcast and low-angle court replay."
+    }
+  ],
+  "sourceDiversityAudit": {
+    "individualGameHighlightCountEstimate": 2,
+    "sourceOrGameRepetitionProblems": [
+      {
+        "time": "00:36-00:48",
+        "problem": "Over-reliance on Portland clip reuse in a short runtime.",
+        "fix": "Shorten tail end of Portland clip and insert a second angle or fresh 1-second freeze frame."
+      }
+    ]
+  },
+  "sourceQualityAudit": [
+    {
+      "time": "00:00-00:13",
+      "quality": "acceptable",
+      "problem": "Vertical 9:16 mobile crop with reduced clarity.",
+      "replacementNeeded": false
+    },
+    {
+      "time": "00:21-00:36",
+      "quality": "high",
+      "problem": "Clean broadcast HD and floor camera angle.",
+      "replacementNeeded": false
+    }
+  ],
+  "interviewUsageAudit": [],
+  "labelAccuracyAudit": [],
+  "recommendedRepairOrder": [
+    "Upgrade Portland opening clip to highest available broadcast resolution.",
+    "Apply zoom freeze on Portland clip at 00:38 focusing on defender orientation to match VO.",
+    "Trim trailing player reaction footage at 00:44-00:48 to tighten video pacing."
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "overallVerdict": "Solid analytical structure, but relies too heavily on static holds and unannotated clip repetition.",
+  "topProblems": [
+    {
+      "severity": "critical",
+      "time": "00:17-00:36",
+      "problem": "Portland play repeats statically with prolonged freeze frames lacking visual callouts.",
+      "fix": "Crop tightly on defender cushion and add distance/gravity visual overlays."
+    },
+    {
+      "severity": "major",
+      "time": "00:37-00:44",
+      "problem": "Connecticut and Atlanta cutaway clips pass too quickly without showing defensive line distortion.",
+      "fix": "Add high-pickup markers and freeze briefly on defender commitment."
+    }
+  ],
+  "timelineFixes": [
+    {
+      "time": "00:00-00:17",
+      "severity": "ok",
+      "whatIsOnScreen": "Transition play vs Portland ending in 29ft 3-pointer",
+      "voAlignment": "matched",
+      "problem": "Unannotated freeze hold at 00:06 is slightly too long",
+      "exactFix": "Shorten freeze at 00:06 and add subtle shot distance callout",
+      "fairUseTreatment": "Freeze frame with shot distance overlay"
+    },
+    {
+      "time": "00:17-00:36",
+      "severity": "critical",
+      "whatIsOnScreen": "Replay of same Portland transition possession and defender retreat",
+      "voAlignment": "matched",
+      "problem": "Clip reuses full play without dynamic zoom or analytical telestration",
+      "exactFix": "Zoom in on defender's drop angle and overlay cushion measurement text",
+      "fairUseTreatment": "Cropped zoom, slow-motion, graphics overlay"
+    },
+    {
+      "time": "00:36-00:50",
+      "severity": "major",
+      "whatIsOnScreen": "Brief drive clips vs CON and ATL, returning to PDX bench reaction",
+      "voAlignment": "partially matched",
+      "problem": "Floor distortion concept is voiced but not graphically illustrated",
+      "exactFix": "Add high-screen pickup line graphic during CON/ATL clips to highlight extra floor space",
+      "fairUseTreatment": "Freeze frame with floor graphic callout"
+    }
+  ],
+  "clipReuseAudit": [
+    {
+      "clipOrMoment": "Portland transition 3-pointer",
+      "whereItAppears": "00:00-00:36, 00:45-00:50",
+      "verdict": "trim",
+      "reason": "Repeated without sufficient new camera angles or visual overlays to justify runtime."
+    }
+  ],
+  "sourceDiversityAudit": {
+    "individualGameHighlightCountEstimate": 3,
+    "sourceOrGameRepetitionProblems": [
+      {
+        "time": "00:00-00:36",
+        "problem": "Portland game occupies over 70% of video runtime.",
+        "fix": "Integrate additional drive/pass examples from other games during synthesis."
+      }
+    ]
+  },
+  "sourceQualityAudit": [
+    {
+      "time": "00:00-00:50",
+      "quality": "high",
+      "problem": "Clean broadcast quality throughout.",
+      "replacementNeeded": false
+    }
+  ],
+  "interviewUsageAudit": [],
+  "labelAccuracyAudit": [],
+  "recommendedRepairOrder": [
+    "Trim non-functional freeze holds in 00:06-00:08 and 00:17-00:26.",
+    "Apply zoomed crop and defender cushion graphic to repeated PDX breakdown.",
+    "Add pickup line callouts on CON/ATL cutaways to clearly show floor spacing impact."
+  ]
+}

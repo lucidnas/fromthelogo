@@ -1,0 +1,74 @@
+{
+  "overallVerdict": "Good baseline play, but lacks required film-room freeze frames and visual break overlays.",
+  "topProblems": [
+    {
+      "severity": "major",
+      "time": "00:00-00:12",
+      "problem": "Missing expected clock freeze frame at catch and rightward stance setup freeze.",
+      "fix": "Add freeze frame at 3.7s catch and slow-mo on the initial rightward drive."
+    },
+    {
+      "severity": "major",
+      "time": "00:12-00:28",
+      "problem": "Behind-the-back counter and left gather lack freeze frame pause and release isolation.",
+      "fix": "Insert freeze frame on counter dribble and pause brief shot-window before release."
+    }
+  ],
+  "timelineFixes": [
+    {
+      "time": "00:00-00:12",
+      "severity": "major",
+      "whatIsOnScreen": "Broadcast angle of inbound pass, catch, and drive to the right.",
+      "voAlignment": "matched",
+      "problem": "Missing required clock freeze and initial direction highlight.",
+      "exactFix": "Freeze frame at 3.7s catch, highlight defender stance, and resume play.",
+      "fairUseTreatment": "Freeze frame and spot freeze overlay at catch point."
+    },
+    {
+      "time": "00:12-00:28",
+      "severity": "major",
+      "whatIsOnScreen": "Behind-the-back dribble, move to left, pull-up jump shot.",
+      "voAlignment": "matched",
+      "problem": "Counter move plays at full speed without analytical pause/slow-mo.",
+      "exactFix": "Apply 50% slow-mo to behind-the-back counter and add freeze frame at left gather.",
+      "fairUseTreatment": "Slow-mo transition and left-gather freeze frame."
+    },
+    {
+      "time": "00:28-00:44",
+      "severity": "ok",
+      "whatIsOnScreen": "Shot make, baseline replay angle showing contact, and CC reaction.",
+      "voAlignment": "matched",
+      "problem": "Baseline replay repeats full play without added visual callout.",
+      "exactFix": "Add brief contact zoom on baseline replay.",
+      "fairUseTreatment": "Zoom overlay on contact point."
+    }
+  ],
+  "clipReuseAudit": [
+    {
+      "clipOrMoment": "Baseline replay of shot and contact",
+      "whereItAppears": "00:31-00:37",
+      "verdict": "keep",
+      "reason": "Provides needed close-up angle of foul contact."
+    }
+  ],
+  "sourceDiversityAudit": {
+    "individualGameHighlightCountEstimate": 1,
+    "sourceOrGameRepetitionProblems": []
+  },
+  "sourceQualityAudit": [
+    {
+      "time": "00:00-00:44",
+      "quality": "high",
+      "problem": "None. Broadcast feed quality is clean 1080p.",
+      "replacementNeeded": false
+    }
+  ],
+  "interviewUsageAudit": [],
+  "labelAccuracyAudit": [],
+  "recommendedRepairOrder": [
+    "Insert freeze frame at catch (3.7s) on initial clip.",
+    "Add slow-mo treatment to behind-the-back dribble move.",
+    "Insert gather freeze frame before shot release.",
+    "Apply contact zoom on baseline replay angle."
+  ]
+}

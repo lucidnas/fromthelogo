@@ -1,0 +1,107 @@
+{
+  "overallVerdict": "Lacks required Daniel Li film-room freezes, slow-mo breakdowns, and contains redundant close-up replay loops.",
+  "topProblems": [
+    {
+      "severity": "critical",
+      "time": "00:00-00:12",
+      "problem": "Missing clock freeze at 3.7s and rightward attack slow-mo as described in VO.",
+      "fix": "Add freeze frame at 3.7s catch, highlight defender stance, and apply 50% slow-mo on rightward drive."
+    },
+    {
+      "severity": "major",
+      "time": "00:12-00:28",
+      "problem": "Behind-the-back counter and left gather happen too fast; clip desyncs from VO narrative.",
+      "fix": "Insert slow-mo on behind-the-back move and freeze on leftward gather window."
+    },
+    {
+      "severity": "major",
+      "time": "00:24-00:35",
+      "problem": "Close-up replay is shown twice back-to-back without added analytical value.",
+      "fix": "Remove second close-up repeat at 00:31; hold baseline angle for make/contact, then cut to reaction."
+    }
+  ],
+  "timelineFixes": [
+    {
+      "time": "00:00-00:06",
+      "whatIsOnScreen": "Wide shot of inbound pass and catch.",
+      "voAlignment": "matched",
+      "problem": "Plays in real time without pausing on catch.",
+      "exactFix": "Freeze frame at 00:04 when clock hits 3.7s during catch.",
+      "fairUseTreatment": "Freeze frame"
+    },
+    {
+      "time": "00:06-00:12",
+      "whatIsOnScreen": "Clark drives right towards half court.",
+      "voAlignment": "partially matched",
+      "problem": "Pacing is too fast; rightward setup passes before VO finishes.",
+      "exactFix": "Apply 50% slow-mo to rightward attack and freeze when defender opens stance.",
+      "fairUseTreatment": "Slow motion & freeze frame"
+    },
+    {
+      "time": "00:12-00:21",
+      "whatIsOnScreen": "Clark behind-the-back counter and pull-up shot.",
+      "voAlignment": "partially matched",
+      "problem": "Behind-the-back counter and left gather complete prematurely.",
+      "exactFix": "Slow down behind-the-back cross; freeze at release point to emphasize shot window.",
+      "fairUseTreatment": "Slow motion & freeze frame"
+    },
+    {
+      "time": "00:21-00:28",
+      "whatIsOnScreen": "Wide angle finish cutting to close-up contact angle.",
+      "voAlignment": "mismatched",
+      "problem": "Close-up cuts in while VO is still discussing shot gathering.",
+      "exactFix": "Sync close-up angle to match contact VO at 00:28.",
+      "fairUseTreatment": "Alternate angle swap"
+    },
+    {
+      "time": "00:28-00:35",
+      "whatIsOnScreen": "Wide angle make repeated then close-up angle repeated.",
+      "voAlignment": "partially matched",
+      "problem": "Redundant repeat of close-up shot.",
+      "exactFix": "Cut redundant repeat; show wide make once, then single close-up contact frame.",
+      "fairUseTreatment": "Trim repeated footage"
+    },
+    {
+      "time": "00:35-00:44",
+      "whatIsOnScreen": "Clark walking off court celebrating.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "Keep reaction clip, trim slightly to end sharply on VO finish.",
+      "fairUseTreatment": "Standard hold"
+    }
+  ],
+  "clipReuseAudit": [
+    {
+      "clipOrMoment": "Close-up drive and contact shot",
+      "whereItAppears": "00:24-00:28 and 00:31-00:35",
+      "verdict": "trim",
+      "reason": "Identical close-up repeated twice without new graphic or analysis."
+    }
+  ],
+  "sourceDiversityAudit": {
+    "individualGameHighlightCountEstimate": 1,
+    "sourceOrGameRepetitionProblems": [
+      {
+        "time": "00:00-00:44",
+        "problem": "Single possession play repeated across full clip.",
+        "fix": "Acceptable for single-play breakdown, but requires analytical freeze frames to justify duration."
+      }
+    ]
+  },
+  "sourceQualityAudit": [
+    {
+      "time": "00:00-00:44",
+      "quality": "high",
+      "problem": "None",
+      "replacementNeeded": false
+    }
+  ],
+  "interviewUsageAudit": [],
+  "labelAccuracyAudit": [],
+  "recommendedRepairOrder": [
+    "Add freeze frame at 3.7s inbound catch.",
+    "Apply slow-mo to rightward drive and behind-the-back counter.",
+    "Add freeze frame at leftward release point.",
+    "Remove duplicate close-up replay at 00:31."
+  ]
+}

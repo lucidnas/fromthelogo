@@ -1,0 +1,106 @@
+{
+  "overallVerdict": "Excessive full-play repeats of the Portland shot without visual breakdowns or zoom overlays; rapid late cuts need clear freezes.",
+  "topProblems": [
+    {
+      "severity": "critical",
+      "time": "00:17-00:36",
+      "problem": "Portland shot plays three consecutive times from the same main broadcast angle without alternate angles, freeze-frames, or analytical overlays.",
+      "fix": "Trim repeat loops. Add freeze-frame cushion callout at gather and slow-motion zoom on pickup point."
+    },
+    {
+      "severity": "major",
+      "time": "00:37-00:44",
+      "problem": "Connecticut and Atlanta game receipts pass by too quickly without highlight freezes on defender pick-up height.",
+      "fix": "Add brief freeze-frames on the high-show defender in both receipts to illustrate floor spacing."
+    }
+  ],
+  "timelineFixes": [
+    {
+      "time": "00:00-00:17",
+      "severity": "ok",
+      "whatIsOnScreen": "Clark advances in transition and hits deep 3-pointer against Portland.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "Keep live sequence intact.",
+      "fairUseTreatment": "Live play presentation."
+    },
+    {
+      "time": "00:17-00:26",
+      "severity": "critical",
+      "whatIsOnScreen": "Unedited second loop of the same Portland play.",
+      "voAlignment": "partially matched",
+      "problem": "Redundant play repeat with no visual breakdown.",
+      "exactFix": "Crop tight on defender's drop step; freeze frame at 29-foot gather point.",
+      "fairUseTreatment": "Freeze frame and zoom on defender distance."
+    },
+    {
+      "time": "00:27-00:36",
+      "severity": "critical",
+      "whatIsOnScreen": "Third loop of the same Portland play.",
+      "voAlignment": "partially matched",
+      "problem": "Third repetition of identical visual asset.",
+      "exactFix": "Replace full play with tight slow-mo release shot from baseline or alternate tight angle.",
+      "fairUseTreatment": "Slow-motion release point insert."
+    },
+    {
+      "time": "00:37-00:40",
+      "severity": "minor",
+      "whatIsOnScreen": "Cut to Connecticut game high pick-and-roll transition.",
+      "voAlignment": "matched",
+      "problem": "Flashes past quickly without structural emphasis.",
+      "exactFix": "Add short freeze frame when defender steps beyond 28-foot mark.",
+      "fairUseTreatment": "Freeze-frame distance highlight."
+    },
+    {
+      "time": "00:41-00:44",
+      "severity": "minor",
+      "whatIsOnScreen": "Cut to Atlanta game floor-spacing sequence.",
+      "voAlignment": "matched",
+      "problem": "Passes too fast to absorb floor position change.",
+      "exactFix": "Apply brief highlight freeze on back-line space created.",
+      "fairUseTreatment": "Freeze-frame overlay."
+    },
+    {
+      "time": "00:45-00:50",
+      "severity": "ok",
+      "whatIsOnScreen": "Return to Portland shot reaction and Clark running back.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "Maintain current closing reaction clip.",
+      "fairUseTreatment": "Reaction payoff clip."
+    }
+  ],
+  "clipReuseAudit": [
+    {
+      "clipOrMoment": "Portland deep pull-up 3",
+      "whereItAppears": "00:00-00:16, 00:17-00:26, 00:27-00:36",
+      "verdict": "trim",
+      "reason": "Repeated three times identically without edit treatments or analytical zooms."
+    }
+  ],
+  "sourceDiversityAudit": {
+    "individualGameHighlightCountEstimate": 3,
+    "sourceOrGameRepetitionProblems": [
+      {
+        "time": "00:00-00:36",
+        "problem": "First 36 seconds rely entirely on a single Portland play repeat.",
+        "fix": "Trim repetition and apply teaching breakdowns on second pass."
+      }
+    ]
+  },
+  "sourceQualityAudit": [
+    {
+      "time": "00:00-00:50",
+      "quality": "high",
+      "problem": "Broadcast source footage is clean 1080p.",
+      "replacementNeeded": false
+    }
+  ],
+  "interviewUsageAudit": [],
+  "labelAccuracyAudit": [],
+  "recommendedRepairOrder": [
+    "Trim duplicate Portland play loops from 00:17 to 00:36.",
+    "Insert freeze-frame gather callout and slow-mo zoom on 00:17-00:26 breakdown.",
+    "Add freeze frames to Connecticut (00:37) and Atlanta (00:41) spacing receipts."
+  ]
+}

@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+import fs from "node:fs";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+const ROOT="/Volumes/SSK SSD/ftl/videos/clip-first-why-two-defenders-still-doesnt-work/minute-08-josh";
+const VOICE="/Volumes/SSK SSD/ftl/videos/clip-first-why-two-defenders-still-doesnt-work/voice/josh-section-08";
+const COMPONENTS="/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/components";
+const SOURCES={
+ aLive:path.join(COMPONENTS,"s08a-hit-ahead-live.mp4"),aSlow:path.join(COMPONENTS,"s08a-hit-ahead-slow-2.800-5.600.mp4"),aPayoff:path.join(COMPONENTS,"s08a-hit-ahead-payoff.mp4"),
+ bLive:path.join(COMPONENTS,"s08b-backdoor-live.mp4"),bSlow:path.join(COMPONENTS,"s08b-backdoor-slow-4.800-5.800.mp4"),bPayoff:path.join(COMPONENTS,"s08b-backdoor-payoff.mp4"),
+ aMaster:"/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/sources/min-q1-0513-hit-ahead-landscape.mp4",
+ bMaster:"/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/sources/min-q4-0333-mitchell-reverse-landscape.mp4"
+};
+const STILLS={aFreeze:path.join(COMPONENTS,"s08a-hit-ahead-freeze-2.800.jpg"),bFreeze:path.join(COMPONENTS,"s08b-backdoor-freeze-4.800.jpg")};
+function duration(f){const r=spawnSync("ffprobe",["-v","error","-show_entries","format=duration","-of","default=nw=1:nk=1",f],{encoding:"utf8"});if(r.status!==0)throw new Error(r.stderr);return Number(r.stdout.trim());}
+function link(s,t){fs.mkdirSync(path.dirname(t),{recursive:true});try{fs.unlinkSync(t)}catch(e){if(e.code!=="ENOENT")throw e}fs.symlinkSync(s,t)}function attrs(s,d,t=0){return `data-start="${s.toFixed(3)}" data-duration="${d.toFixed(3)}" data-track-index="${t}"`}
+function video(id,src,s,d,m=0,c=""){return `<video id="${id}" class="clip footage ${c}" ${attrs(s,d)} src="assets/${src}.mp4" data-media-start="${m.toFixed(3)}" muted playsinline></video>`}function freeze(id,src,s,d,c=""){return `<img id="${id}" class="clip footage ${c}" ${attrs(s,d)} src="assets/${src}.jpg" alt="">`}
+fs.mkdirSync(path.join(ROOT,"assets"),{recursive:true});for(const[n,s]of Object.entries(SOURCES))link(s,path.join(ROOT,"assets",`${n}.mp4`));for(const[n,s]of Object.entries(STILLS))link(s,path.join(ROOT,"assets",`${n}.jpg`));
+const voiceFiles=Array.from({length:4},(_,i)=>path.join(VOICE,`continuous-${String(i).padStart(2,"0")}.mp3`));const voiceDurations=voiceFiles.map(duration);voiceFiles.forEach((s,i)=>link(s,path.join(ROOT,"assets",`vo-${i}.mp3`)));const starts=[];let cursor=0;for(const d of voiceDurations){starts.push(cursor);cursor+=d}const total=cursor+.3;
+const visuals=[
+ video("a-live","aLive",starts[0],1.8),freeze("a-release-freeze","aFreeze",starts[0]+1.8,2.5),video("a-slow","aSlow",starts[0]+4.3,4.67),video("a-payoff","aPayoff",starts[0]+8.97,1.7),freeze("a-decision-hold","aFreeze",starts[0]+10.67,voiceDurations[0]-10.67),
+ freeze("a-distance-hold","aFreeze",starts[1],3.0),video("a-payoff-review","aPayoff",starts[1]+3.0,1.7),video("a-master-aftermath","aMaster",starts[1]+4.7,2.6,4.7),video("b-setup-bridge","bLive",starts[1]+7.3,4.2),freeze("b-route-preview","bFreeze",starts[1]+11.5,voiceDurations[1]-11.5),
+ video("b-live","bLive",starts[2],4.2),freeze("b-help-freeze","bFreeze",starts[2]+4.2,2.5),video("b-slow","bSlow",starts[2]+6.7,1.82),video("b-payoff","bPayoff",starts[2]+8.52,3.6),freeze("b-finish-hold","bFreeze",starts[2]+12.12,voiceDurations[2]-12.12),
+ video("a-summary","aMaster",starts[3],7.3),video("b-summary","bMaster",starts[3]+7.3,9.4),freeze("b-summary-hold","bFreeze",starts[3]+16.7,voiceDurations[3]-16.7)
+];
+const audios=voiceFiles.map((_,i)=>`<audio id="voice-${i}" class="clip" ${attrs(starts[i],voiceDurations[i],10+i)} src="assets/vo-${i}.mp3" data-volume="1"></audio>`).join("\n");
+const html=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Why Two Defenders — Minute 08</title><script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}.composition{position:relative;width:1920px;height:1080px;overflow:hidden}.footage{position:absolute;inset:0;width:1920px;height:1080px;object-fit:cover;object-position:center;filter:saturate(1.08) contrast(1.035) brightness(1.02)}.edge{position:absolute;inset:0;box-shadow:inset 0 0 90px rgba(0,0,0,.24);pointer-events:none}</style></head><body><main id="why-two-defenders-minute-08" class="composition" data-composition-id="why-two-defenders-minute-08" data-start="0" data-duration="${total.toFixed(3)}" data-width="1920" data-height="1080"><div id="background-fill" class="clip" ${attrs(0,total,-1)} style="position:absolute;inset:0;background:#050608"></div>${visuals.join("\n")}${audios}<div id="edge-vignette" class="clip edge" ${attrs(0,total,20)}></div></main><script>window.__timelines=window.__timelines||{};window.__timelines["why-two-defenders-minute-08"]=gsap.timeline({paused:true});</script></body></html>`;
+fs.writeFileSync(path.join(ROOT,"index.html"),html);fs.writeFileSync(path.join(ROOT,"hyperframes.json"),JSON.stringify({composition:"index.html",fps:30,width:1920,height:1080},null,2));fs.writeFileSync(path.join(ROOT,"meta.json"),JSON.stringify({title:"Why Guarding Caitlin Clark With Two Defenders Still Doesn't Work",section:"minute-08",duration:total,narration:"Josh",noMusic:true,noBroadcastAudio:true,noDrawings:true},null,2));console.log(JSON.stringify({root:ROOT,duration:total,starts,voiceDurations},null,2));

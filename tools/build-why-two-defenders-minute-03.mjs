@@ -67,15 +67,15 @@ const visuals = [
   video("con-pass-slow", "conPassSlow", starts[1] + 2.0, 3.67, 0),
   video("con-finish-slow", "conFinishSlow", starts[1] + 5.67, 2.0, 0),
   video("con-payoff", "con", starts[1] + 7.67, 4.25, 5.5),
-  freeze("con-finish-hold", "conFinish", starts[1] + 11.92, 3.0),
-  freeze("con-reaction-hold", "conReaction", starts[1] + 14.92, voiceDurations[1] - 14.92, "reaction-crop"),
+  // Stay on the possession being analyzed. A clean finish hold lets the sentence
+  // resolve without replaying the layup or cutting to an unrelated possession.
+  freeze("con-finish-resolution", "conFinish", starts[1] + 11.92, voiceDurations[1] - 11.92),
 
   // Connect range and passing with two different static receipts, not another full-play loop.
   video("con-range-payoff", "conDeep", starts[2], 5.0, 31.55),
   video("atlanta-first-line", "atl", starts[2] + 5.0, 4.0, 19.0),
-  freeze("atlanta-high-show-hold", "atlHigh", starts[2] + 9.0, 2.5),
-  video("minnesota-second-line", "min", starts[2] + 11.5, 3.5, 1.35),
-  video("phoenix-range-close", "phxDeep", starts[2] + 15.0, voiceDurations[2] - 15.0, 5.0),
+  freeze("atlanta-high-show-hold", "atlHigh", starts[2] + 9.0, 3.0),
+  video("minnesota-second-line", "min", starts[2] + 12.0, voiceDurations[2] - 12.0, 1.35),
 ];
 const audios = voiceFiles.map((_, i) => `<audio id="voice-${i}" class="clip" ${attrs(starts[i], voiceDurations[i], 10 + i)} src="assets/vo-${i}.mp3" data-volume="1"></audio>`).join("\n");
 const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Why Two Defenders — Minute 03</title><script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}.composition{position:relative;width:1920px;height:1080px;overflow:hidden}.footage{position:absolute;inset:0;width:1920px;height:1080px;object-fit:cover;object-position:center;filter:saturate(1.08) contrast(1.035) brightness(1.02)}.reaction-crop{object-position:58% 50%;transform:scale(1.06)}.range-wide{object-position:50% 50%}.low-crop{object-position:57% 50%;transform:scale(1.08)}.release-crop{object-position:53% 50%;transform:scale(1.05)}.edge{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 90px rgba(0,0,0,.22)}</style></head><body><main id="why-two-defenders-minute-03" class="composition" data-composition-id="why-two-defenders-minute-03" data-start="0" data-duration="${total.toFixed(3)}" data-width="1920" data-height="1080"><div id="background-fill" class="clip" ${attrs(0,total,-1)} style="position:absolute;inset:0;background:#050608"></div>${visuals.join("\n")}${audios}<div id="edge-vignette" class="clip edge" ${attrs(0,total,20)}></div></main><script>window.__timelines=window.__timelines||{};window.__timelines["why-two-defenders-minute-03"]=gsap.timeline({paused:true});</script></body></html>`;

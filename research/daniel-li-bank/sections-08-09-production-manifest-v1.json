@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "scope": "Sections 8 and 9 source-only production handoff",
+  "renderingPerformed": false,
+  "globalAudioPolicy": {
+    "sourceAudioPresent": false,
+    "broadcastAudioAllowed": false,
+    "musicAllowed": false
+  },
+  "globalGraphicsPolicy": {
+    "arrows": false,
+    "circles": false
+  },
+  "plays": [
+    {
+      "id": "s08a-hit-ahead",
+      "section": 8,
+      "game": "Indiana Fever at Minnesota Lynx",
+      "date": "2026-08-02",
+      "gameId": "401801112",
+      "period": 1,
+      "clock": "5:13",
+      "actionNumber": 59,
+      "officialEvent": "Monique Billings cutting layup; Caitlin Clark assist 3",
+      "narrationIdentityRule": "Say runner or teammate. Do not infer identity from pixels.",
+      "officialSourceUrl": "https://www.youtube.com/watch?v=BDhTIFx4qk4",
+      "officialSourceRangeSeconds": [117.5, 124.8],
+      "masterPath": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/sources/min-q1-0513-hit-ahead-landscape.mp4",
+      "masterDurationSeconds": 7.3073,
+      "masterDimensions": "1920x1080",
+      "masterSha256": "b065ab07f39f8d8d1f2287445aefcc43c845090244ceb61eecae4a1cbfbdaa62",
+      "sequence": [
+        {"type": "live", "sourceRangeSeconds": [1.0, 2.8], "path": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/components/s08a-hit-ahead-live.mp4", "durationSeconds": 1.8018},
+        {"type": "freeze", "sourceTimeSeconds": 2.8, "path": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/components/s08a-hit-ahead-freeze-2.800.jpg", "editorHoldSeconds": "Set to narration need; do not bake into source"},
+        {"type": "slowResume", "sourceRangeSeconds": [2.8, 5.6], "speed": 0.6, "path": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/components/s08a-hit-ahead-slow-2.800-5.600.mp4", "durationSeconds": 4.637967},
+        {"type": "payoff", "sourceRangeSeconds": [5.6, 7.3], "path": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/components/s08a-hit-ahead-payoff.mp4", "durationSeconds": 1.7017}
+      ]
+    },
+    {
+      "id": "s08b-backdoor-reverse",
+      "section": 8,
+      "game": "Indiana Fever at Minnesota Lynx",
+      "date": "2026-08-02",
+      "gameId": "401801112",
+      "period": 4,
+      "clock": "3:33",
+      "actionNumber": 490,
+      "officialEvent": "Kelsey Mitchell driving reverse layup; Caitlin Clark assist 8",
+      "officialSourceUrl": "https://www.youtube.com/watch?v=BDhTIFx4qk4",
+      "officialSourceRangeSeconds": [542.8, 553.5],
+      "masterPath": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/sources/min-q4-0333-mitchell-reverse-landscape.mp4",
+      "masterDurationSeconds": 10.7107,
+      "masterDimensions": "1920x1080",
+      "masterSha256": "99cdcb154f40a231d38d5eb2b10eb399a423de0db7e752cb99a1b2bbb9c91323",
+      "sequence": [
+        {"type": "live", "sourceRangeSeconds": [0.6, 4.8], "path": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/components/s08b-backdoor-live.mp4", "durationSeconds": 4.204},
+        {"type": "freeze", "sourceTimeSeconds": 4.8, "path": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/components/s08b-backdoor-freeze-4.800.jpg", "editorHoldSeconds": "Set to narration need; do not bake into source"},
+        {"type": "slowResume", "sourceRangeSeconds": [4.8, 5.8], "speed": 0.55, "path": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/components/s08b-backdoor-slow-4.800-5.800.mp4", "durationSeconds": 1.8018},
+        {"type": "payoff", "sourceRangeSeconds": [5.8, 9.4], "path": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/components/s08b-backdoor-payoff.mp4", "durationSeconds": 3.6036}
+      ]
+    },
+    {
+      "id": "s09-triple-double-clincher",
+      "section": 9,
+      "game": "Indiana Fever at Portland Fire",
+      "date": "2026-07-31",
+      "gameId": "401801106",
+      "period": 4,
+      "clock": "0:33.8",
+      "actionNumber": 650,
+      "officialEvent": "Makayla Timpson cutting layup; Caitlin Clark assist 10, completing the triple-double",
+      "officialSourceUrl": "https://www.youtube.com/watch?v=O67thOWwNtU",
+      "officialSourceRangeSeconds": [675.5, 688.5],
+      "masterPath": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/sources/pdx-q4-00338-triple-double-clincher-landscape.mp4",
+      "masterDurationSeconds": 13.013,
+      "masterDimensions": "1920x1080",
+      "masterSha256": "cdaf9f4ce13ae2ab60c4763a2188b0e5fad6793f3cb65cb7ad0e95a180519342",
+      "sequence": [
+        {"type": "live", "sourceRangeSeconds": [1.0, 5.4], "path": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/components/s09-clincher-live.mp4", "durationSeconds": 4.4044},
+        {"type": "freeze", "sourceTimeSeconds": 5.4, "path": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/components/s09-clincher-freeze-5.400.jpg", "editorHoldSeconds": "Set to narration need; do not bake into source"},
+        {"type": "slowResume", "sourceRangeSeconds": [5.4, 7.4], "speed": 0.55, "path": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/components/s09-clincher-slow-5.400-7.400.mp4", "durationSeconds": 3.636967},
+        {"type": "payoff", "sourceRangeSeconds": [7.4, 12.0], "path": "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/components/s09-clincher-payoff.mp4", "durationSeconds": 4.6046}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "cues": [
+    {
+      "time": "00:00-00:17.04",
+      "vo": "Clark's range turns ordinary space into a shot against Portland.",
+      "expected": "Live approach, short freeze on the defender's cushion, slow release, then the made shot. The play advances once without restarting."
+    },
+    {
+      "time": "00:17.04-00:36.88",
+      "vo": "The defender is close by normal standards, but Clark's pickup compresses the contest window.",
+      "expected": "Distinct alternate view and brief teaching freezes on the cushion and gather; no unrelated possession or long unexplained still."
+    },
+    {
+      "time": "00:36.88-00:50.40",
+      "vo": "Range pulls the first line higher and changes the rest of the floor.",
+      "expected": "Concise moving Connecticut range receipt, Atlanta high-show freeze, and Portland payoff reaction. No full-play loop."
+    }
+  ]
+}

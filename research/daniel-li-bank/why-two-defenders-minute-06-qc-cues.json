@@ -1,0 +1,19 @@
+{
+  "cues": [
+    {
+      "time": "00:00-00:13.92",
+      "vo": "Clark drives as Mitchell cuts behind the defense, then sends the bounce pass into the developing route.",
+      "expected": "Restrained vertical Portland source; live setup, release freeze, slow resume, payoff, reaction, then a short pre-catch hold."
+    },
+    {
+      "time": "00:13.92-00:31.28",
+      "vo": "The pass and cut arrive together so Mitchell catches in stride.",
+      "expected": "Portland pre-catch teaching frame and payoff, followed by a distinct verified Atlanta example and fresh replay angle."
+    },
+    {
+      "time": "00:31.28-00:48.64",
+      "vo": "Clark passes to the route that is still unfolding before the defense recognizes the destination.",
+      "expected": "Fresh Atlanta replay followed by two short Portland teaching frames and moving reaction; no unrelated clip or full-play restart."
+    }
+  ]
+}

@@ -11,6 +11,8 @@ const SOURCES = {
   portlandSlow: path.join(PREP, "portland-release-slow.mp4"),
   portlandAlt: path.join(PREP, "portland-alt-slow.mp4"),
   conDeep: "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/why-two-defenders-still-doesnt-work/sources/source-yFs4tjhvJ58.mp4",
+  atlLive: "/Volumes/SSK SSD/ftl/videos/why-two-defenders-still-doesnt-work/section-06-assets/production/atl-action579-live-muted-16x9.mp4",
+  minBackdoor: "/Volumes/SSK SSD/ftl/research/daniel-li-bank/sections-08-09/sources/min-q4-0333-mitchell-reverse-landscape.mp4",
 };
 const STILLS = {
   cushion: path.join(PREP, "portland-cushion.jpg"),
@@ -33,15 +35,15 @@ const visuals=[
   video("portland-make","portland",starts[0]+14.0,voiceDurations[0]-14.0,8.5),
 
   // Study the same geometry through distinct views rather than restarting the live angle.
-  freeze("portland-cushion-analysis","cushion",starts[1],4.0,"wide"),
-  video("portland-alternate","portlandAlt",starts[1]+4.0,3.54,0),
-  freeze("portland-gather-close","gather",starts[1]+7.54,6.0,"gather-crop"),
-  freeze("portland-defender-space","cushion",starts[1]+13.54,voiceDurations[1]-13.54,"defender-crop"),
+  freeze("portland-cushion-analysis","cushion",starts[1],3.0,"wide"),
+  video("portland-alternate","portlandAlt",starts[1]+3.0,3.54,0),
+  video("connecticut-range-study","conDeep",starts[1]+6.54,5.0,31.55),
+  freeze("atlanta-high-show-study","atlHigh",starts[1]+11.54,3.0),
+  video("portland-reaction-study","portland",starts[1]+14.54,voiceDurations[1]-14.54,8.5),
 
   // Three concise receipts for the synthesis: range, high show, result.
-  video("connecticut-range-receipt","conDeep",starts[2],3.8,31.55),
-  freeze("atlanta-high-show-receipt","atlHigh",starts[2]+3.8,4.4),
-  freeze("portland-result-receipt","reaction",starts[2]+8.2,voiceDurations[2]-8.2,"reaction-crop"),
+  video("atlanta-space-payoff","atlLive",starts[2],6.5,0),
+  video("minnesota-space-payoff","minBackdoor",starts[2]+6.5,voiceDurations[2]-6.5,0),
 ];
 const audios=voiceFiles.map((_,i)=>`<audio id="voice-${i}" class="clip" ${attrs(starts[i],voiceDurations[i],10+i)} src="assets/vo-${i}.mp3" data-volume="1"></audio>`).join("\n");
 const html=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Why Two Defenders — Minute 04</title><script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}.composition{position:relative;width:1920px;height:1080px;overflow:hidden}.footage{position:absolute;inset:0;width:1920px;height:1080px;object-fit:cover;object-position:center;filter:saturate(1.08) contrast(1.035) brightness(1.02)}.gather-crop{transform:scale(1.08);object-position:46% 50%}.defender-crop{transform:scale(1.08);object-position:61% 50%}.reaction-crop{transform:scale(1.07);object-position:58% 50%}.edge{position:absolute;inset:0;box-shadow:inset 0 0 90px rgba(0,0,0,.22);pointer-events:none}</style></head><body><main id="why-two-defenders-minute-04" class="composition" data-composition-id="why-two-defenders-minute-04" data-start="0" data-duration="${total.toFixed(3)}" data-width="1920" data-height="1080"><div id="background-fill" class="clip" ${attrs(0,total,-1)} style="position:absolute;inset:0;background:#050608"></div>${visuals.join("\n")}${audios}<div id="edge-vignette" class="clip edge" ${attrs(0,total,20)}></div></main><script>window.__timelines=window.__timelines||{};window.__timelines["why-two-defenders-minute-04"]=gsap.timeline({paused:true});</script></body></html>`;

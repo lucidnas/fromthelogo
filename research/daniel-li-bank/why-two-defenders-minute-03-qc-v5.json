@@ -1,0 +1,114 @@
+{
+  "overallVerdict": "Pacing lags in first half; needs smoother transitions and clear freeze-frame callouts.",
+  "topProblems": [
+    {
+      "severity": "major",
+      "time": "00:00-00:16",
+      "problem": "Static play progression drags out unnecessarily before the pass.",
+      "fix": "Trim initial drive buildup; introduce a brief freeze frame when the low defender rotates."
+    },
+    {
+      "severity": "major",
+      "time": "00:29-00:34",
+      "problem": "Redundant replay of CON possession without added analytical value.",
+      "fix": "Cut duplicate angle replay and transition directly into the deep-three analysis."
+    },
+    {
+      "severity": "minor",
+      "time": "00:34-00:53",
+      "problem": "Rapid cuts across multiple games lack explanatory freeze frames/text.",
+      "fix": "Add short freeze-frame overlays highlighting defender positions on deep-range reads."
+    }
+  ],
+  "timelineFixes": [
+    {
+      "time": "00:00-00:08",
+      "whatIsOnScreen": "Clark handling pick-and-roll vs CON.",
+      "voAlignment": "matched",
+      "problem": "Setup play is slightly slow.",
+      "exactFix": "Trim 2 seconds off initial dribble setup.",
+      "fairUseTreatment": "crop/speed-up"
+    },
+    {
+      "time": "00:08-00:16",
+      "whatIsOnScreen": "Low defender rotating to help on drive.",
+      "voAlignment": "matched",
+      "problem": "Holds on static defender position too long.",
+      "exactFix": "Add short freeze frame with spotlight on low defender at 00:12.",
+      "fairUseTreatment": "freeze/spotlight"
+    },
+    {
+      "time": "00:16-00:28",
+      "whatIsOnScreen": "Hull cutting behind defender and finishing reverse layup.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "Keep pass release slow-mo; ensure single reverse finish.",
+      "fairUseTreatment": "slowmo"
+    },
+    {
+      "time": "00:28-00:34",
+      "whatIsOnScreen": "Replay angle of CON possession finish.",
+      "voAlignment": "partially matched",
+      "problem": "Redundant replay slows narrative momentum.",
+      "exactFix": "Remove replay; advance straight to next clip sequence.",
+      "fairUseTreatment": "trim"
+    },
+    {
+      "time": "00:34-00:39",
+      "whatIsOnScreen": "CON possession deep shot setup.",
+      "voAlignment": "matched",
+      "problem": "Lacks range highlight.",
+      "exactFix": "Add brief range line/freeze frame on release.",
+      "fairUseTreatment": "freeze"
+    },
+    {
+      "time": "00:39-00:46",
+      "whatIsOnScreen": "ATL vs IND possession drive and kick.",
+      "voAlignment": "partially matched",
+      "problem": "Fast transition without context.",
+      "exactFix": "Freeze frame second-line defender rotation.",
+      "fairUseTreatment": "freeze"
+    },
+    {
+      "time": "00:46-00:53",
+      "whatIsOnScreen": "MIN vs IND possession final read.",
+      "voAlignment": "matched",
+      "problem": "Ends abruptly.",
+      "exactFix": "Hold end frame on rim defender before fade.",
+      "fairUseTreatment": "freeze"
+    }
+  ],
+  "clipReuseAudit": [
+    {
+      "clipOrMoment": "CON possession setup and finish",
+      "whereItAppears": "00:00-00:34",
+      "verdict": "trim",
+      "reason": "Extended duration and replay repeat without new analytical overlay."
+    }
+  ],
+  "sourceDiversityAudit": {
+    "individualGameHighlightCountEstimate": 3,
+    "sourceOrGameRepetitionProblems": [
+      {
+        "time": "00:00-00:34",
+        "problem": "Over-reliance on single CON play stretch.",
+        "fix": "Tighten timing to transition smoothly to synthesis clips."
+      }
+    ]
+  },
+  "sourceQualityAudit": [
+    {
+      "time": "00:00-00:53",
+      "quality": "high",
+      "problem": "None; official broadcast feeds.",
+      "replacementNeeded": false
+    }
+  ],
+  "interviewUsageAudit": [],
+  "labelAccuracyAudit": [],
+  "recommendedRepairOrder": [
+    "Trim CON possession replay from 00:28-00:34.",
+    "Add freeze-frame highlights on low defender rotation at 00:12.",
+    "Insert freeze frames for defender line reads in 00:34-00:53 clips."
+  ]
+}

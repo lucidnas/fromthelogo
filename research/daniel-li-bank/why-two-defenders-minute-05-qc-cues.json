@@ -1,0 +1,19 @@
+{
+  "cues": [
+    {
+      "time": "00:00-00:12.80",
+      "vo": "Clark catches with 3.7 seconds and initially attacks right.",
+      "expected": "Inbound and catch move first, then a clock freeze, slow initial direction, and a freeze after the defender retreats."
+    },
+    {
+      "time": "00:12.80-00:28.96",
+      "vo": "Clark counters behind her body, gathers left, and creates a narrow shot window.",
+      "expected": "Resume from the right-path freeze, slow the counter, freeze on the leftward change, then resume through release. No restart."
+    },
+    {
+      "time": "00:28.96-00:43.92",
+      "vo": "She makes the shot and absorbs contact.",
+      "expected": "Play through make, contact, and reaction once, ending on a short relevant reaction hold rather than unrelated footage."
+    }
+  ]
+}
