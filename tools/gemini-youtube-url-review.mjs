@@ -47,7 +47,7 @@ const userPrompt = String(
 const groundedPrompt = `You are performing preliminary visual screening of a public YouTube basketball video for From The Logo.
 Current date: ${currentDate}. Historical game date: ${gameDate}.
 Watch the actual video frames and audio. Do not substitute the title, description, transcript, search results, or model memory for visual evidence.
-This is a semantic first pass, not final timestamp, identity, fact, or edit authority. Mark uncertainty explicitly. Never infer a jersey identity from memory.
+This is the visual-analysis pass. Mark uncertainty explicitly. Never infer a jersey identity from memory. Approximate timestamps from video understanding must be confirmed against extracted source frames before editing.
 
 Return valid JSON with this shape:
 {
@@ -111,7 +111,8 @@ try {
 
 const result = {
   schemaVersion: 1,
-  preliminaryOnly: true,
+  preliminaryOnly: false,
+  exactFrameConfirmationRequired: true,
   transport: "google-official-gemini-api",
   model,
   sourceUrl: String(args.url),
