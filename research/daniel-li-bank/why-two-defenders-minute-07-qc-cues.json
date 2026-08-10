@@ -1,0 +1,14 @@
+{
+  "cues": [
+    {
+      "section": "Chicago lob over the front",
+      "visualPattern": "live setup, freeze on fronting defender, slow lob route, freeze at lob decision, live finish",
+      "source": "official WNBA 1280x720 play-by-play clip, Chicago Q3 1:56 action 362"
+    },
+    {
+      "section": "delivery changes with defender",
+      "visualPattern": "targeted Chicago freeze and slow replay compared with Portland bounce pass and Atlanta delivery",
+      "purpose": "same read, different delivery; no raw-loop repetition"
+    }
+  ]
+}

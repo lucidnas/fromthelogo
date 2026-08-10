@@ -1,0 +1,88 @@
+{
+  "overallVerdict": "Solid baseline film analysis but needs graphics, freeze frames, and clear analytical treatment on repeated clips.",
+  "topProblems": [
+    {
+      "severity": "major",
+      "time": "00:17-00:24",
+      "problem": "Portland clip repeats verbatim without zoom, freeze frame, or visual distinction.",
+      "fix": "Add a zoom-in freeze frame on the defender's cushion to highlight the pickup point."
+    },
+    {
+      "severity": "minor",
+      "time": "00:25-00:36",
+      "problem": "Rapid switching between CT, ATL, and PDX lacks visual callouts for defensive positioning.",
+      "fix": "Add floor-range lines or freeze callouts showing defensive line depth."
+    }
+  ],
+  "timelineFixes": [
+    {
+      "time": "00:00-00:17",
+      "severity": "ok",
+      "whatIsOnScreen": "Caitlin Clark transition pull-up 3 vs Portland.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "Keep sequence as live introduction.",
+      "fairUseTreatment": "crop and speed up initial transition push slightly"
+    },
+    {
+      "time": "00:17-00:27",
+      "severity": "major",
+      "whatIsOnScreen": "Repeat of Portland shot into brief Connecticut clip.",
+      "voAlignment": "partially matched",
+      "problem": "Exact clip repeat lacks analytical editing or graphic focus.",
+      "fix": "Apply slow-motion zoom and freeze on defender's drop step before release.",
+      "fairUseTreatment": "freeze/slowmo zoom on pickup footwork"
+    },
+    {
+      "time": "00:27-00:36",
+      "severity": "minor",
+      "whatIsOnScreen": "Cuts from CT clip to Atlanta sequence, then back to Portland shot.",
+      "voAlignment": "matched",
+      "problem": "Pacing feels slightly disjointed across quick multi-game cuts.",
+      "fix": "Add range distance graphic on CT clip and high-pick marker on ATL clip.",
+      "fairUseTreatment": "overlay distance graphic on floor"
+    },
+    {
+      "time": "00:36-00:50",
+      "severity": "ok",
+      "whatIsOnScreen": "Atlanta drive defense sequence followed by Minnesota transition attack.",
+      "voAlignment": "matched",
+      "problem": "Good payoff visual, but backline spacing isn't highlighted.",
+      "fix": "Add short freeze-frame highlighting open lane space before drive.",
+      "fairUseTreatment": "freeze frame highlight on backline space"
+    }
+  ],
+  "clipReuseAudit": [
+    {
+      "clipOrMoment": "Portland deep 3 transition",
+      "whereItAppears": "00:00-00:16, 00:17-00:24, 00:32-00:36",
+      "verdict": "needs alternate angle",
+      "reason": "Repeated thrice without graphics or unique visual breakdowns."
+    }
+  ],
+  "sourceDiversityAudit": {
+    "individualGameHighlightCountEstimate": 4,
+    "sourceOrGameRepetitionProblems": [
+      {
+        "time": "00:17-00:36",
+        "problem": "Over-reliance on Portland play repeat within first 35 seconds.",
+        "fix": "Replace second Portland loop with zoomed breakdown or alternate angle."
+      }
+    ]
+  },
+  "sourceQualityAudit": [
+    {
+      "time": "00:00-00:50",
+      "quality": "high",
+      "problem": "None; official broadcast feeds.",
+      "replacementNeeded": false
+    }
+  ],
+  "interviewUsageAudit": [],
+  "labelAccuracyAudit": [],
+  "recommendedRepairOrder": [
+    "Apply freeze-frame and zoom treatment on the 00:17 Portland clip repeat.",
+    "Add pickup distance graphic markers during the Connecticut and Atlanta clips.",
+    "Insert freeze highlight on backline space during the Minnesota drive payoff."
+  ]
+}

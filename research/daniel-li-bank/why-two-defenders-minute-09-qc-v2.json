@@ -1,0 +1,148 @@
+{
+  "overallVerdict": "Solid essay structure with minor pacing and clip repetition issues in the conclusion reel.",
+  "topProblems": [
+    {
+      "severity": "major",
+      "time": "00:26-00:41",
+      "problem": "Rapid cuts between 4 different games lack freeze-frame indicators for range, drive, and timing points.",
+      "fix": "Add subtle freeze-frames or spotlight highlights when each tactical element is mentioned."
+    },
+    {
+      "severity": "minor",
+      "time": "00:46-00:57",
+      "problem": "Unprocessed repetition of earlier clips (Atlanta and Minnesota) without fresh analytical zoom/slow-mo.",
+      "fix": "Apply dynamic zooms on the help defender's footsteps for repeated clips."
+    }
+  ],
+  "timelineFixes": [
+    {
+      "time": "00:00-00:10",
+      "severity": "ok",
+      "whatIsOnScreen": "Clark controlling ball above top of key vs Portland.",
+      "voAlignment": "matched",
+      "problem": "None.",
+      "exactFix": "Keep as is.",
+      "fairUseTreatment": "Standard playback."
+    },
+    {
+      "time": "00:10-00:13",
+      "severity": "minor",
+      "whatIsOnScreen": "Timpson cutting through key before pass.",
+      "voAlignment": "matched",
+      "problem": "Cut happens fast without visual anchor.",
+      "exactFix": "Add a brief 0.5s freeze frame on Timpson's cut opening.",
+      "fairUseTreatment": "Freeze frame."
+    },
+    {
+      "time": "00:13-00:21",
+      "severity": "ok",
+      "whatIsOnScreen": "Clark delivers pass to Timpson for layup.",
+      "voAlignment": "matched",
+      "problem": "None.",
+      "exactFix": "Keep as is.",
+      "fairUseTreatment": "Standard playback."
+    },
+    {
+      "time": "00:21-00:26",
+      "severity": "ok",
+      "whatIsOnScreen": "Transition sequence and scoreboard update.",
+      "voAlignment": "matched",
+      "problem": "None.",
+      "exactFix": "Keep as is.",
+      "fairUseTreatment": "Standard playback."
+    },
+    {
+      "time": "00:26-00:30",
+      "severity": "minor",
+      "whatIsOnScreen": "Transition play vs Minnesota (1st Qtr).",
+      "voAlignment": "matched",
+      "problem": "Clip cuts too quickly.",
+      "exactFix": "Slow down playback to 80% to emphasize floor spacing.",
+      "fairUseTreatment": "Slow motion."
+    },
+    {
+      "time": "00:30-00:34",
+      "severity": "minor",
+      "whatIsOnScreen": "Drive and kick execution vs Atlanta.",
+      "voAlignment": "matched",
+      "problem": "Needs visual cue on defender commitment.",
+      "exactFix": "Zoom slightly on key defender shifting towards Clark.",
+      "fairUseTreatment": "Crop and zoom."
+    },
+    {
+      "time": "00:34-00:38",
+      "severity": "ok",
+      "whatIsOnScreen": "Replay angle of Portland assist.",
+      "voAlignment": "matched",
+      "problem": "None.",
+      "exactFix": "Keep as is.",
+      "fairUseTreatment": "Alternate angle/replay."
+    },
+    {
+      "time": "00:38-00:41",
+      "severity": "ok",
+      "whatIsOnScreen": "Half-court set vs Minnesota (4th Qtr).",
+      "voAlignment": "matched",
+      "problem": "None.",
+      "exactFix": "Keep as is.",
+      "fairUseTreatment": "Standard playback."
+    },
+    {
+      "time": "00:41-00:50",
+      "severity": "minor",
+      "whatIsOnScreen": "Recap montage of Minnesota/Atlanta drives.",
+      "voAlignment": "partially matched",
+      "problem": "Repeated footage lacks fresh analytical perspective.",
+      "exactFix": "Incorporate low-angle zoom on secondary defender rotations.",
+      "fairUseTreatment": "Zoom overlay."
+    },
+    {
+      "time": "00:50-01:03",
+      "severity": "ok",
+      "whatIsOnScreen": "Final Portland clincher assist payoff.",
+      "voAlignment": "matched",
+      "problem": "None.",
+      "exactFix": "Keep as is.",
+      "fairUseTreatment": "Standard playback."
+    }
+  ],
+  "clipReuseAudit": [
+    {
+      "clipOrMoment": "Portland assist to Timpson",
+      "whereItAppears": "00:00-00:21, 00:34-00:38, 00:58-01:03",
+      "verdict": "keep",
+      "reason": "Serves as anchor possession for essay framing; final occurrence acts as resolution."
+    },
+    {
+      "clipOrMoment": "Atlanta drive sequence",
+      "whereItAppears": "00:30-00:34, 00:46-00:50",
+      "verdict": "needs alternate angle",
+      "reason": "Second usage needs tighter crop to justify repetition."
+    }
+  ],
+  "sourceDiversityAudit": {
+    "individualGameHighlightCountEstimate": 3,
+    "sourceOrGameRepetitionProblems": [
+      {
+        "time": "00:26-00:50",
+        "problem": "Rapid cycling across identical 3 games without clear visual dividers.",
+        "fix": "Use brief subtle visual flashes or freeze points between distinct game sources."
+      }
+    ]
+  },
+  "sourceQualityAudit": [
+    {
+      "time": "00:00-01:03",
+      "quality": "high",
+      "problem": "None. Official 1080p broadcast clips used throughout.",
+      "replacementNeeded": false
+    }
+  ],
+  "interviewUsageAudit": [],
+  "labelAccuracyAudit": [],
+  "recommendedRepairOrder": [
+    "Add freeze frame at 00:10 to highlight Timpson's cut opening.",
+    "Apply 80% slow motion to Minnesota transition clip at 00:26.",
+    "Add dynamic zoom treatment on repeated Atlanta/Minnesota footage during final synthesis (00:46-00:50)."
+  ]
+}

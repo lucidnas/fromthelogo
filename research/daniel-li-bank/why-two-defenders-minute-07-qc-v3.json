@@ -1,0 +1,106 @@
+{
+  "overallVerdict": "Solid pass breakdown, but repeats raw Chicago footage in 00:22–00:37 without required analytical freeze/slow-mo treatments.",
+  "topProblems": [
+    {
+      "severity": "major",
+      "time": "00:22-00:37",
+      "problem": "Unedited repeat loop of Chicago wide shot during deep vision analysis.",
+      "fix": "Replace raw repetition with high-quality Chicago breakdown using freeze-frame on defender fronting, trajectory graphics, and tight zoom."
+    },
+    {
+      "severity": "minor",
+      "time": "00:00-00:22",
+      "problem": "Lack of visual callout on the fronting defender position prior to the lob pass.",
+      "fix": "Add subtle highlight/freeze on Chicago defender fronting Boston before the lob release."
+    }
+  ],
+  "timelineFixes": [
+    {
+      "time": "00:00-00:07",
+      "severity": "ok",
+      "whatIsOnScreen": "Live broadcast clip of Clark lob pass to Boston over fronting Chicago defender.",
+      "voAlignment": "matched",
+      "problem": "None; establishes play context.",
+      "exactFix": "Keep live play entry as base.",
+      "fairUseTreatment": "standard broadcast trim"
+    },
+    {
+      "time": "00:07-00:17",
+      "severity": "ok",
+      "whatIsOnScreen": "Slow-motion replay showing Clark's one-handed lob release over the defender.",
+      "voAlignment": "matched",
+      "problem": "None.",
+      "exactFix": "Retain slow-mo lob release sequence.",
+      "fairUseTreatment": "slowmo replay"
+    },
+    {
+      "time": "00:17-00:22",
+      "severity": "ok",
+      "whatIsOnScreen": "Zoomed replay on Boston receiving lob at the rim for layup finish.",
+      "voAlignment": "matched",
+      "problem": "None.",
+      "exactFix": "Retain rim finish angle.",
+      "fairUseTreatment": "cropped zoom replay"
+    },
+    {
+      "time": "00:22-00:37",
+      "severity": "major",
+      "whatIsOnScreen": "Repeated raw broadcast angle of Chicago possession without new graphical treatment.",
+      "voAlignment": "partially matched",
+      "problem": "Static loop repeating same broadcast sequence without new analytical insight.",
+      "exactFix": "Re-edit with Chicago-only breakdown: freeze frame on open window, highlight passing lane, and slow-mo zoom.",
+      "fairUseTreatment": "freeze frame, slowmo, and zoom breakdown"
+    },
+    {
+      "time": "00:37-00:44",
+      "severity": "ok",
+      "whatIsOnScreen": "Atlanta game clip showing Clark bounce pass to Boston under help defense.",
+      "voAlignment": "matched",
+      "problem": "None; illustrates contrasting bounce pass entry.",
+      "exactFix": "Keep Atlanta clip through bounce pass quote at 00:44.",
+      "fairUseTreatment": "contrast comparison clip"
+    },
+    {
+      "time": "00:44-00:52",
+      "severity": "ok",
+      "whatIsOnScreen": "Return to Chicago clip showing fronting defender and lob over top.",
+      "voAlignment": "matched",
+      "problem": "None; highlights defender adjustment and lob resolution.",
+      "exactFix": "Keep final Chicago lob payoff clip.",
+      "fairUseTreatment": "side-by-side / payoff replay"
+    }
+  ],
+  "clipReuseAudit": [
+    {
+      "clipOrMoment": "Chicago Q3 2:01 lob pass play",
+      "whereItAppears": "00:00-00:22, 00:22-00:37, 00:44-00:52",
+      "verdict": "needs alternate angle",
+      "reason": "Repeated thrice; 00:22-00:37 segment lacks new graphical breakdown or structural edit."
+    }
+  ],
+  "sourceDiversityAudit": {
+    "individualGameHighlightCountEstimate": 2,
+    "sourceOrGameRepetitionProblems": [
+      {
+        "time": "00:22-00:37",
+        "problem": "Relies heavily on raw Chicago play repetition.",
+        "fix": "Enhance segment with distinct analytical freeze/slow-mo overlays."
+      }
+    ]
+  },
+  "sourceQualityAudit": [
+    {
+      "time": "00:00-00:52",
+      "quality": "high",
+      "problem": "None; 1080p WNBA official broadcast feed.",
+      "replacementNeeded": false
+    }
+  ],
+  "interviewUsageAudit": [],
+  "labelAccuracyAudit": [],
+  "recommendedRepairOrder": [
+    "Replace raw repetition in 00:22-00:37 with dedicated freeze-frame and trajectory zoom breakdown.",
+    "Add defender focus highlight on 00:00-00:07 initial setup.",
+    "Verify precise transition cut at 00:44 between Atlanta bounce pass and Chicago lob."
+  ]
+}

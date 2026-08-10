@@ -1,0 +1,133 @@
+{
+  "overallVerdict": "Lacks structural breakdown; needs freeze-frames and slow-motion edits instead of raw play loops.",
+  "topProblems": [
+    {
+      "severity": "major",
+      "time": "00:00-00:15",
+      "problem": "First play lacks the required release freeze and slow-resume edit.",
+      "fix": "Add a freeze at pass release (00:02) and slow-motion resume through the catch."
+    },
+    {
+      "severity": "major",
+      "time": "00:43-01:03",
+      "problem": "Comparison sequence relies on raw play loops without breakdown overlays or freeze-frames.",
+      "fix": "Apply targeted freezes and side-by-side or sequential slow-motion highlights on key read moments."
+    }
+  ],
+  "timelineFixes": [
+    {
+      "time": "00:00-00:05",
+      "severity": "minor",
+      "whatIsOnScreen": "CC pushes transition in backcourt.",
+      "voAlignment": "matched",
+      "problem": "Play runs at real speed without setup breakdown.",
+      "exactFix": "Freeze frame on pass release at 00:02, slow-mo resume to 00:05.",
+      "fairUseTreatment": "freeze/slowmo"
+    },
+    {
+      "time": "00:05-00:11",
+      "severity": "ok",
+      "whatIsOnScreen": "Hit-ahead pass leads to quick layup finish.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "Keep live payoff finish.",
+      "fairUseTreatment": "replay"
+    },
+    {
+      "time": "00:11-00:15",
+      "severity": "minor",
+      "whatIsOnScreen": "Immediate unedited loop of the first play pass.",
+      "voAlignment": "partially matched",
+      "problem": "Repeats raw play without added analysis.",
+      "exactFix": "Trim raw repeat; add zoomed pass trajectory overlay or cut directly to finish.",
+      "fairUseTreatment": "crop/overlay"
+    },
+    {
+      "time": "00:15-00:22",
+      "severity": "ok",
+      "whatIsOnScreen": "Second view/continuation of hit-ahead pass.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "Maintain concise payoff bridge.",
+      "fairUseTreatment": "replay"
+    },
+    {
+      "time": "00:22-00:29",
+      "severity": "ok",
+      "whatIsOnScreen": "Transition to late 4th Q Minnesota possession.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "Keep smooth play setup.",
+      "fairUseTreatment": "none"
+    },
+    {
+      "time": "00:29-00:36",
+      "severity": "minor",
+      "whatIsOnScreen": "CC drives right in half-court.",
+      "voAlignment": "matched",
+      "problem": "Missing help-defense draw breakdown.",
+      "exactFix": "Freeze at 00:34 when help steps up, highlight Mitchell's baseline cut route.",
+      "fairUseTreatment": "freeze/slowmo"
+    },
+    {
+      "time": "00:36-00:43",
+      "severity": "ok",
+      "whatIsOnScreen": "Bounce pass lead to Mitchell reverse finish.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "Keep live finish and brief celebration reaction.",
+      "fairUseTreatment": "replay"
+    },
+    {
+      "time": "00:43-00:53",
+      "severity": "major",
+      "whatIsOnScreen": "Full repeat loop of Play 1 transition pass.",
+      "voAlignment": "partially matched",
+      "problem": "Raw repeat without comparison highlighting.",
+      "exactFix": "Add split-screen or quick side-by-side freeze comparing read timing.",
+      "fairUseTreatment": "freeze/replay"
+    },
+    {
+      "time": "00:53-01:03",
+      "severity": "major",
+      "whatIsOnScreen": "Full repeat loop of Play 2 half-court bounce pass.",
+      "voAlignment": "partially matched",
+      "problem": "Raw repeat ending without analytical conclusion.",
+      "exactFix": "Freeze on pass releases of both plays to emphasize early reaction habit.",
+      "fairUseTreatment": "freeze/slowmo"
+    }
+  ],
+  "clipReuseAudit": [
+    {
+      "clipOrMoment": "1st Q Transition Hit-Ahead Pass",
+      "whereItAppears": "00:00-00:21, 00:44-00:53",
+      "verdict": "trim",
+      "reason": "Repeated raw loops without analytical treatment or freeze edits."
+    },
+    {
+      "clipOrMoment": "4th Q Baseline Bounce Pass to Mitchell",
+      "whereItAppears": "00:22-00:43, 00:53-01:03",
+      "verdict": "needs alternate angle",
+      "reason": "Final section reuses identical raw clip instead of key freeze frames."
+    }
+  ],
+  "sourceDiversityAudit": {
+    "individualGameHighlightCountEstimate": 2,
+    "sourceOrGameRepetitionProblems": []
+  },
+  "sourceQualityAudit": [
+    {
+      "time": "00:00-01:03",
+      "quality": "high",
+      "problem": "none",
+      "replacementNeeded": false
+    }
+  ],
+  "interviewUsageAudit": [],
+  "labelAccuracyAudit": [],
+  "recommendedRepairOrder": [
+    "Insert freeze frame at 00:02 release point on the first transition pass.",
+    "Insert freeze frame at 00:34 on help defender draw for the second play.",
+    "Revamp comparison section (00:43-01:03) using synchronized freeze/slow-mo points rather than full raw play loops."
+  ]
+}

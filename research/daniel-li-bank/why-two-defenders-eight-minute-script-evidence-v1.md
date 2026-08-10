@@ -196,6 +196,13 @@ That is a more precise definition of vision. It is not just seeing every player.
 **Evidence:** synthesis restricted to Chicago Q3 `1:56`, action `362`, with its official event receipt above.
 **Visual grammar:** hold the fronted-post frame and the ball-in-flight frame, then pay off with Boston’s finish. No arrows yet.
 
+### Paragraph 23B — VO
+
+The important detail is that the answer changes with the defender. On one possession, Clark bends the help with a bounce pass. Here, the defender removes that route by fronting Boston, so Clark sends the ball above it. The read is the same. The delivery is not.
+
+**Evidence:** comparison of the verified Atlanta Q4 `1:21`, action `579`, bounce pass to Aliyah Boston and Chicago Q3 `1:56`, action `362`, lob over the front to Boston. Official sources: <https://www.youtube.com/watch?v=LFC6S3BV5iE> and <https://videos.nba.com/wnba/pbp/media/2024/06/23/1022400096/362/f97d57e5-b8cc-078f-f56d-7d3ad910fb31_1280x720.mp4>.
+**Visual grammar:** use the fresh Atlanta low-angle replay once, then the Chicago fronted-post freeze, slow lob route, and finish. No split screen or drawings.
+
 ---
 
 ## Section 8 — Solve it before the defense is set (7:00–8:00)

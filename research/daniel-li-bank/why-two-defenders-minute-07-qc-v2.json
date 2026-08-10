@@ -1,0 +1,113 @@
+{
+  "overallVerdict": "Repetitive structure lacking visual analysis tools. Repeated Chicago footage lacks freeze-frames or zoom overlays, and comparison clips are poorly timed and low quality.",
+  "topProblems": [
+    {
+      "severity": "critical",
+      "time": "00:38-00:48",
+      "problem": "VO mismatch during comparison; VO mentions 'bends the help with a bounce pass' after the Atlanta bounce pass clip has already ended.",
+      "fix": "Re-time Atlanta bounce pass clip to match VO at 00:41-00:43 before cutting back to Chicago lob."
+    },
+    {
+      "severity": "major",
+      "time": "00:28-00:34",
+      "problem": "Low-resolution, low-bitrate cropped clip inserted abruptly during high-level breakdown.",
+      "fix": "Replace cropped 480p footage with official 1080p source broadcast."
+    },
+    {
+      "severity": "major",
+      "time": "00:00-00:27",
+      "problem": "Raw play repetition without analytical graphics, freeze frames, or spot-shadow highlights.",
+      "fix": "Add freeze frame at 00:04 when post entry is blocked, and slow-mo on the lob trajectory."
+    }
+  ],
+  "timelineFixes": [
+    {
+      "time": "00:00-00:07",
+      "severity": "major",
+      "whatIsOnScreen": "Chicago vs Indiana live broadcast view of post setup.",
+      "voAlignment": "matched",
+      "problem": "Static raw broadcast video without visual breakdown elements.",
+      "exactFix": "Freeze frame at 00:04 when defender fronts Boston, zoom slightly on defender's body position.",
+      "fairUseTreatment": "freeze frame and zoom"
+    },
+    {
+      "time": "00:08-00:17",
+      "severity": "ok",
+      "whatIsOnScreen": "Clark lifts lob pass over fronting defender to Boston for layup.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "Add 50% slow-motion on pass release to emphasize arc.",
+      "fairUseTreatment": "slowmo"
+    },
+    {
+      "time": "00:18-00:27",
+      "severity": "minor",
+      "whatIsOnScreen": "Replay zoom of Chicago lob pass finish.",
+      "voAlignment": "matched",
+      "problem": "Repetitive full-speed playback without breakdown annotation.",
+      "exactFix": "Trim 3 seconds and freeze at apex of lob pass trajectory.",
+      "fairUseTreatment": "freeze and replay"
+    },
+    {
+      "time": "00:28-00:34",
+      "severity": "critical",
+      "whatIsOnScreen": "Low quality cropped clips of Portland/Atlanta games.",
+      "voAlignment": "partially matched",
+      "problem": "Pixelated, low bitrate, awkward aspect ratio crop.",
+      "exactFix": "Replace with clean 1080p broadcast feed showing alternate pass angles.",
+      "fairUseTreatment": "replace source"
+    },
+    {
+      "time": "00:35-00:42",
+      "severity": "major",
+      "whatIsOnScreen": "Cut back to Chicago clip, then Atlanta bounce pass clip.",
+      "voAlignment": "mismatched",
+      "problem": "Atlanta bounce pass play finishes before VO mentions the bounce pass.",
+      "exactFix": "Shift Atlanta bounce pass clip to start at 00:41 exactly on VO cue.",
+      "fairUseTreatment": "re-time clip"
+    },
+    {
+      "time": "00:43-00:52",
+      "severity": "minor",
+      "whatIsOnScreen": "Chicago clip repeated third time to close video.",
+      "voAlignment": "matched",
+      "problem": "Unmodified clip repetition creates viewer fatigue.",
+      "exactFix": "Use tight baseline alternate angle zoom of Clark's release.",
+      "fairUseTreatment": "alternate angle"
+    }
+  ],
+  "clipReuseAudit": [
+    {
+      "clipOrMoment": "Chicago Q3 1:56 lob pass",
+      "whereItAppears": "00:00-00:27, 00:35-00:37, 00:43-00:52",
+      "verdict": "trim",
+      "reason": "Repeated three times in 52 seconds without adding new graphical overlays or alternate angles."
+    }
+  ],
+  "sourceDiversityAudit": {
+    "individualGameHighlightCountEstimate": 3,
+    "sourceOrGameRepetitionProblems": [
+      {
+        "time": "00:00-00:52",
+        "problem": "Over-reliance on Chicago clip across 80% of runtime.",
+        "fix": "Balance breakdown with clearer side-by-side comparison frames."
+      }
+    ]
+  },
+  "sourceQualityAudit": [
+    {
+      "time": "00:28-00:31",
+      "quality": "low",
+      "problem": "Pixelated, compressed, screen-recorded crop.",
+      "replacementNeeded": true
+    }
+  ],
+  "interviewUsageAudit": [],
+  "labelAccuracyAudit": [],
+  "recommendedRepairOrder": [
+    "Replace low-quality 00:28 clip with 1080p HD source.",
+    "Re-time Atlanta bounce pass segment at 00:38 to align with 00:41 VO line.",
+    "Insert freeze-frame and slow-motion treatments on Chicago lob pass sequence.",
+    "Replace final repetition at 00:43 with close-up alternate angle."
+  ]
+}
