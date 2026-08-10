@@ -1,0 +1,19 @@
+{
+  "cues": [
+    {
+      "time": "00:00-00:16.64",
+      "vo": "Clark rejects the spread pick-and-roll and the low defender rotates toward her drive.",
+      "expected": "Connecticut possession moves live before freezing after the low defender commits, then resumes slowly into a held route frame."
+    },
+    {
+      "time": "00:16.64-00:34.24",
+      "vo": "Hull's route opens behind the low defender and Clark delivers into that space.",
+      "expected": "Start on the open route, slow the pass release, then complete Hull's reverse layup exactly once."
+    },
+    {
+      "time": "00:34.24-00:53.44",
+      "vo": "Clark's range and passing become one skill; she reads the last defender.",
+      "expected": "Fresh Connecticut deep-three payoff, held range frame, then held third-defender frame. No full possession replay."
+    }
+  ]
+}
