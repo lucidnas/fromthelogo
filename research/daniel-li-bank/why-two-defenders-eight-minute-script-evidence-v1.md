@@ -2,7 +2,7 @@
 
 **Format:** calm, continuous Daniel Li-style basketball video essay  
 **Target narration:** 8:30–9:30 at a natural 145–155 WPM  
-**Editorial thesis:** Caitlin Clark forces a defense to solve two connected problems on the same possession: where to pick her up because of her range, and how to protect the space created by that first response.  
+**Editorial thesis:** Caitlin Clark's range begins the problem, but the larger issue is the attention she attracts whenever the ball is in her hands and how her passing turns that attention into open space.  
 **Visual doctrine:** full-width 16:9 official footage whenever available; moving footage before every freeze; clean freeze frames and slow motion only; no arrows, circles, labels, broadcast audio, decorative cards, or repeated full-play loops in this pass.
 
 > Evidence rule: every basketball assertion below is tied to a possession already approved by the selected-play manifests and verified possession audit. “Guard twice” is the essay’s framing, not a claim that every featured play contains a formal two-player trap.
@@ -13,17 +13,17 @@
 
 ### Paragraph 1 — VO
 
-Caitlin Clark's range changes the floor before she even uses a screen. Against most guards, the big defender can wait near the paint and protect the rim. Against Clark, that defender has to meet her much farther from the basket, because this is a comfortable shot for her.
+Caitlin Clark's range is the first thing every defense has to account for. But the deeper problem is not simply where a defender picks her up. Against Connecticut, the nearest defender is still retreating when Clark recognizes the gap and rises from nearly thirty feet.
 
 **Evidence:** Connecticut Sun at Indiana Fever, 2026-07-22, Q1 6:05, action 55; Clark makes a 29.99-foot three. Official Fever source: <https://www.youtube.com/watch?v=yFs4tjhvJ58>.  
 **Visual grammar:** play official 16:9 footage live once through the pickup; slow the approach as the defender meets Clark well above the paint; freeze only after both Clark and the defender are clearly visible; resume from the identical frame through the release and make. Master-source timing from the approved edit plan: live `28.200–30.900`, slow `30.900–31.550` at `0.40x`, freeze `31.550`, resume `31.550–34.930` with the first `0.70s` at `0.55x`.
 
 ### Paragraph 2 — VO
 
-That creates a basic problem. Stay back, and Clark can rise into a three. Step up, and the space behind the help defender opens for the teammate Clark is already looking for.
+Phoenix gives her a different look, but the result is the same. Clark only needs a sliver of space to rise from thirty-one feet. That is why the defense's attention follows her whenever the ball is in her hands, whether she is preparing to shoot or carrying the action into the next read.
 
-**Evidence:** same Connecticut possession, 2026-07-22, Q1 6:05, action 55, used only to establish the verified range pressure; the “space behind” consequence is paid off immediately by the verified Atlanta possession in paragraph 3. Sources: <https://www.youtube.com/watch?v=yFs4tjhvJ58> and <https://www.youtube.com/watch?v=LFC6S3BV5iE>.  
-**Visual grammar:** finish the Connecticut make without replaying the possession; cut on the made basket to the opening movement of Atlanta’s Q4 action. Keep narration continuous and source audio muted.
+**Evidence:** Indiana Fever vs Phoenix Mercury, 2026-06-24, Q1 6:35, action 39; Clark makes a visually verified 31.24-foot step-back three. Official Fever source: <https://www.youtube.com/watch?v=lo7foKnQ1Ao>.  
+**Visual grammar:** play the Phoenix possession live into the shooting pocket, hold the verified distance frame once, then resume through the make in slow motion. Keep narration continuous and source audio muted.
 
 ### Paragraph 3 — VO
 

@@ -2,9 +2,9 @@
 
 ## Script
 
-Caitlin Clark's range changes the floor before she even uses a screen. Against most guards, the big defender can wait near the paint and protect the rim. Against Clark, that defender has to meet her much farther from the basket, because this is a comfortable shot for her.
+Caitlin Clark's range is the first thing every defense has to account for. But the deeper problem is not simply where a defender picks her up. Against Connecticut, the nearest defender is still retreating when Clark recognizes the gap and rises from nearly thirty feet.
 
-That creates a basic problem. Stay back, and Clark can rise into a three. Step up, and the space behind the help defender opens for the teammate Clark is already looking for.
+Phoenix gives her a different look, but the result is the same. Clark only needs a sliver of space to rise from thirty-one feet. That is why the defense's attention follows her whenever the ball is in her hands, whether she is preparing to shoot or carrying the action into the next read.
 
 Watch this possession against Atlanta. Indiana flows into a drag screen in semi-transition. Clark's defender is trailing the play, so Atlanta's big steps high to keep Clark from turning the corner into a pull-up three.
 

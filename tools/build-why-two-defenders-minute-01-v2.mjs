@@ -92,7 +92,7 @@ const html = `<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Why Two Defenders — Minute 01 v2</title><script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}.composition{position:relative;width:1920px;height:1080px;overflow:hidden}.footage{position:absolute;inset:0;width:1920px;height:1080px;object-fit:cover;object-position:center center}.edge{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 90px rgba(0,0,0,.22)}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}.composition{position:relative;width:1920px;height:1080px;overflow:hidden}.footage{position:absolute;inset:0;width:1920px;height:1080px;object-fit:cover;object-position:center center;filter:saturate(1.14) contrast(1.06) brightness(1.035)}.edge{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 90px rgba(0,0,0,.22)}
 </style></head>
 <body><main id="why-two-defenders-minute-01-v2" class="composition" data-composition-id="why-two-defenders-minute-01-v2" data-start="0" data-duration="${total.toFixed(3)}" data-width="1920" data-height="1080">
 <div id="background-fill" class="clip" ${attrs(0, total, -1)} style="position:absolute;inset:0;background:#050608"></div>
