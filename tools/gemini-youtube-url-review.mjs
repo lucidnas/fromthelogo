@@ -79,15 +79,28 @@ const body = {
 };
 
 const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
-const response = await fetch(endpoint, {
-  method: "POST",
-  headers: {
-    "content-type": "application/json",
-    "x-goog-api-key": apiKey(),
-  },
-  body: JSON.stringify(body),
-});
-const raw = await response.text();
+const key = apiKey();
+let response;
+let raw = "";
+const maxAttempts = Number(args["max-attempts"] || 4);
+for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-goog-api-key": key,
+    },
+    body: JSON.stringify(body),
+  });
+  raw = await response.text();
+  if (response.status !== 429 || attempt === maxAttempts) break;
+  const retryAfter = Number(response.headers.get("retry-after"));
+  const waitSeconds = Number.isFinite(retryAfter) && retryAfter > 0
+    ? Math.min(60, retryAfter)
+    : Math.min(60, 12 * attempt);
+  console.error(`Gemini quota throttled; retrying in ${waitSeconds}s (${attempt}/${maxAttempts})`);
+  await new Promise((resolveWait) => setTimeout(resolveWait, waitSeconds * 1000));
+}
 let envelope;
 try {
   envelope = JSON.parse(raw);
