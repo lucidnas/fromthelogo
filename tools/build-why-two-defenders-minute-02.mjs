@@ -42,6 +42,10 @@ function freeze(id, src, start, span, cls = "") {
   return `<img id="${id}" class="clip footage freeze ${cls}" ${attrs(start, span)} src="assets/${src}.jpg" alt="">`;
 }
 
+function comparison(id, start, span) {
+  return `<div id="${id}" class="clip comparison" ${attrs(start, span)}><img src="assets/atlRead.jpg" alt="Atlanta coverage"><img src="assets/minLoad.jpg" alt="Minnesota coverage"></div>`;
+}
+
 fs.mkdirSync(path.join(ROOT, "assets"), { recursive: true });
 for (const [name, source] of Object.entries(SOURCES)) link(source, path.join(ROOT, "assets", `${name}.mp4`));
 for (const [name, source] of Object.entries(STILLS)) link(source, path.join(ROOT, "assets", `${name}.jpg`));
@@ -69,15 +73,14 @@ const visuals = [
   video("min-payoff-slow", "minPayoffSlow", starts[2] + 4.0, 5.0, 0),
   video("min-finish", "min", starts[2] + 9.0, voiceDurations[2] - 9.0, 3.95, "crop-min"),
 
-  // Compare the two structures without restarting either full possession.
-  video("atl-comparison", "atl", starts[3], 4.2, 19.0, "crop-atl"),
-  video("min-comparison", "min", starts[3] + 4.2, voiceDurations[3] - 4.2, 1.35, "crop-min"),
+  // Compare both structures at the same time. Static evidence replaces another replay loop.
+  comparison("coverage-comparison", starts[3], voiceDurations[3]),
 ];
 
 const audios = voiceFiles.map((_, i) => `<audio id="voice-${i}" class="clip" ${attrs(starts[i], voiceDurations[i], 10 + i)} src="assets/vo-${i}.mp3" data-volume="1"></audio>`).join("\n");
 
 const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Why Two Defenders — Minute 02</title><script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script><style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}.composition{position:relative;width:1920px;height:1080px;overflow:hidden}.footage{position:absolute;inset:0;width:1920px;height:1080px;object-fit:cover;filter:saturate(1.08) contrast(1.035) brightness(1.02)}.crop-atl{object-position:51% 50%}.crop-min{object-position:50% 50%}.edge{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 90px rgba(0,0,0,.22)}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050608}.composition{position:relative;width:1920px;height:1080px;overflow:hidden}.footage{position:absolute;inset:0;width:1920px;height:1080px;object-fit:cover;filter:saturate(1.08) contrast(1.035) brightness(1.02)}.crop-atl{object-position:51% 50%}.crop-min{object-position:50% 50%}.comparison{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#050608}.comparison img{width:100%;height:1080px;object-fit:cover;filter:saturate(1.08) contrast(1.035) brightness(1.02)}.comparison img:first-child{object-position:56% 50%}.comparison img:last-child{object-position:53% 50%}.edge{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 90px rgba(0,0,0,.22)}
 </style></head><body><main id="why-two-defenders-minute-02" class="composition" data-composition-id="why-two-defenders-minute-02" data-start="0" data-duration="${total.toFixed(3)}" data-width="1920" data-height="1080"><div class="clip" ${attrs(0,total,-1)} style="position:absolute;inset:0;background:#050608"></div>${visuals.join("\n")}${audios}<div class="clip edge" ${attrs(0,total,20)}></div></main><script>window.__timelines=window.__timelines||{};window.__timelines["why-two-defenders-minute-02"]=gsap.timeline({paused:true});</script></body></html>`;
 
 fs.writeFileSync(path.join(ROOT, "index.html"), html);

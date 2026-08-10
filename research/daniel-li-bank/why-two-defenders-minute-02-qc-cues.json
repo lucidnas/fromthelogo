@@ -1,0 +1,24 @@
+{
+  "cues": [
+    {
+      "time": "00:00-00:12.48",
+      "vo": "The final pass looks simple because Clark has already made the difficult read.",
+      "expected": "Atlanta decision frame followed by only the pass and finish portion of the replay."
+    },
+    {
+      "time": "00:12.48-00:24.96",
+      "vo": "Minnesota tried to shrink that same space in a different way.",
+      "expected": "Minnesota possession establishes live, freezes when the second defender loads toward Clark, then resumes slowly without restarting."
+    },
+    {
+      "time": "00:24.96-00:39.60",
+      "vo": "Both defenders are looking at Clark and Boston settles into the space behind them.",
+      "expected": "Freeze on Boston's open window, slow pass release, then one uninterrupted finish."
+    },
+    {
+      "time": "00:39.60-00:49.92",
+      "vo": "The Atlanta coverage and Minnesota coverage look different, but the geometry is the same.",
+      "expected": "Short comparison excerpts only; no full-possession restart."
+    }
+  ]
+}
