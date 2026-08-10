@@ -22,6 +22,16 @@ Gemini acts as the senior possession analyst and editor. It watches the selected
 
 Then we fact-check the Gemini read against official data before VO.
 
+## Temporal and Roster Grounding
+
+- Default visual model: `gemini-3.1-pro-preview` through Gemini CLI only.
+- Every analysis prompt states today's date and the historical game date.
+- Every selected play must carry the game ID, game date, both teams, official play-by-play event, and a game-specific roster/gamebook receipt before Gemini may name defenders or map jersey numbers.
+- Current rosters are not evidence for historical games. Model memory is never evidence for player identity.
+- If the official roster receipt is missing, illegible, or conflicts with the pixels, Gemini must use role-level language such as `on-ball defender`, `screen defender`, or `low helper`, retain the visible jersey number only as uncertain visual evidence, and leave the name unknown.
+- Raw-video review is only the semantic pass. Generate timestamp-labeled frame sheets at 4 FPS, resample candidate windows at 10 FPS, and inspect the exact source frame before committing freeze or slow-motion timestamps.
+- Store both the Gemini interpretation and the official identity receipt in the possession manifest so later scripts cannot silently reintroduce an unverified name.
+
 ## Editorial Rule
 
 Caitlin Clark is the product.
