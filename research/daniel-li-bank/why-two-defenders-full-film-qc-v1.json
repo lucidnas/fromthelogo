@@ -1,0 +1,265 @@
+{
+  "overallVerdict": "Solid structural narrative and tactical breakdowns; needs freeze-frame analytical pauses and removal of duplicate play restarts to match FTL standards.",
+  "topProblems": [
+    {
+      "severity": "major",
+      "time": "00:26-00:53",
+      "problem": "Atlanta play loops into a close-up slow motion without a freeze-frame cue or spotlight overlay.",
+      "fix": "Insert a freeze frame at 00:34 on the high-show defender before resuming slow motion."
+    },
+    {
+      "severity": "minor",
+      "time": "01:33-01:43",
+      "problem": "Split-screen comparison between ATL and MIN lacks visual labels or highlight indicators.",
+      "fix": "Add subtle freeze-frame pauses on both screens at the moment second defenders load."
+    },
+    {
+      "severity": "minor",
+      "time": "03:05-03:27",
+      "problem": "Montage transitions quickly between three different game sources without explicit visual anchors.",
+      "fix": "Hold a 1-second freeze at each pickup location to emphasize distance differences."
+    },
+    {
+      "severity": "major",
+      "time": "04:13-04:33",
+      "problem": "Vertical crop ratio on Portland clip creates unnecessary black pillar-bars on 16:9 frame.",
+      "fix": "Re-frame vertical clip into a clean 3:4 or padded blur container."
+    }
+  ],
+  "timelineFixes": [
+    {
+      "time": "00:00-00:15",
+      "whatIsOnScreen": "Connecticut deep shot followed by Phoenix pick-and-roll screen.",
+      "voAlignment": "matched",
+      "problem": "Transitions cleanly but lacks freeze frame on defender drop depth.",
+      "exactFix": "Add a 1-second freeze at 00:06 when defender stays near paint.",
+      "fairUseTreatment": "freeze"
+    },
+    {
+      "time": "00:15-00:25",
+      "whatIsOnScreen": "Phoenix pick-and-roll pass opening for teammate.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "None required.",
+      "fairUseTreatment": "none"
+    },
+    {
+      "time": "00:26-00:38",
+      "whatIsOnScreen": "Atlanta drag screen transition drive by Clark.",
+      "voAlignment": "matched",
+      "problem": "Pacing is slightly fast before the pass release.",
+      "exactFix": "Slow down pass release by 20% at 00:33.",
+      "fairUseTreatment": "slowmo"
+    },
+    {
+      "time": "00:38-00:53",
+      "whatIsOnScreen": "Low-angle replay of Atlanta pass to Boston.",
+      "voAlignment": "partially matched",
+      "problem": "Replay restarts full motion without analytical highlight.",
+      "exactFix": "Freeze frame on Boston's open lane entry at 00:46.",
+      "fairUseTreatment": "freeze"
+    },
+    {
+      "time": "00:54-01:05",
+      "whatIsOnScreen": "Close-up pass delivery replay against Atlanta.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "None required.",
+      "fairUseTreatment": "slowmo"
+    },
+    {
+      "time": "01:06-01:23",
+      "whatIsOnScreen": "Minnesota defender loads at nail against Clark drive.",
+      "voAlignment": "matched",
+      "problem": "Nail load moment is subtle and easily missed.",
+      "exactFix": "Insert a 0.8-second freeze at 01:14 as nail help steps over.",
+      "fairUseTreatment": "freeze"
+    },
+    {
+      "time": "01:24-01:33",
+      "whatIsOnScreen": "Boston finish under the rim off Minnesota pass.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "None required.",
+      "fairUseTreatment": "none"
+    },
+    {
+      "time": "01:33-01:43",
+      "whatIsOnScreen": "Split-screen side-by-side of ATL and MIN coverages.",
+      "voAlignment": "matched",
+      "problem": "Both clips run fluidly making direct geometry comparison difficult.",
+      "exactFix": "Freeze both panels simultaneously for 1 second at the help step.",
+      "fairUseTreatment": "freeze"
+    },
+    {
+      "time": "01:44-02:00",
+      "whatIsOnScreen": "Connecticut pick-and-roll rejection and drive by Clark.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "None required.",
+      "fairUseTreatment": "none"
+    },
+    {
+      "time": "02:01-02:17",
+      "whatIsOnScreen": "Hull reverse layup off Clark interior pass.",
+      "voAlignment": "matched",
+      "problem": "Finish play is clean; minor speed adjustment helps emphasis.",
+      "exactFix": "Slow layup gather at 02:08.",
+      "fairUseTreatment": "slowmo"
+    },
+    {
+      "time": "02:18-02:37",
+      "whatIsOnScreen": "Montage recap of deep range pulling defensive line.",
+      "voAlignment": "matched",
+      "problem": "Quick clip edits feel slightly rushed.",
+      "exactFix": "Hold last frame of Connecticut shot for 0.5s before transition.",
+      "fairUseTreatment": "freeze"
+    },
+    {
+      "time": "02:38-02:54",
+      "whatIsOnScreen": "Portland transition pull-up 3-pointer from 29 feet.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "None required.",
+      "fairUseTreatment": "none"
+    },
+    {
+      "time": "02:55-03:04",
+      "whatIsOnScreen": "Replay of Portland deep pull-up jumper.",
+      "voAlignment": "matched",
+      "problem": "Replay needs clear indication of distance.",
+      "exactFix": "Pause at gather point at 02:58.",
+      "fairUseTreatment": "freeze"
+    },
+    {
+      "time": "03:05-03:27",
+      "whatIsOnScreen": "Montage comparing pickup points across CON, ATL, PDX.",
+      "voAlignment": "matched",
+      "problem": "Rapid source switching without pauses.",
+      "exactFix": "Add short freeze at each pickup point.",
+      "fairUseTreatment": "freeze"
+    },
+    {
+      "time": "03:28-03:45",
+      "whatIsOnScreen": "Portland Q1 end-of-quarter drive right and behind-back counter.",
+      "voAlignment": "matched",
+      "problem": "Counter move happens quickly.",
+      "exactFix": "Slow motion during behind-the-back dribble at 03:42.",
+      "fairUseTreatment": "slowmo"
+    },
+    {
+      "time": "03:46-04:12",
+      "whatIsOnScreen": "Leftward gather and shot make with contact plus reaction.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "None required.",
+      "fairUseTreatment": "none"
+    },
+    {
+      "time": "04:13-04:33",
+      "whatIsOnScreen": "Vertical framing of Portland play (Mitchell baseline cut).",
+      "voAlignment": "matched",
+      "problem": "Unpadded vertical footage leaves raw black bars on sides.",
+      "exactFix": "Apply standard 3:4 framed container with blurred background.",
+      "fairUseTreatment": "crop"
+    },
+    {
+      "time": "04:34-05:01",
+      "whatIsOnScreen": "Comparison to Atlanta bounce pass timing.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "None required.",
+      "fairUseTreatment": "none"
+    },
+    {
+      "time": "05:02-05:24",
+      "whatIsOnScreen": "Chicago possession with post defender fronting Boston.",
+      "voAlignment": "matched",
+      "problem": "Fronting position needs visual emphasis.",
+      "exactFix": "Freeze frame at 05:05 showing fronted post position.",
+      "fairUseTreatment": "freeze"
+    },
+    {
+      "time": "05:25-05:54",
+      "whatIsOnScreen": "One-handed lob pass over front and layup finish.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "None required.",
+      "fairUseTreatment": "none"
+    },
+    {
+      "time": "05:55-06:23",
+      "whatIsOnScreen": "Minnesota transition full-court hit-ahead pass.",
+      "voAlignment": "matched",
+      "problem": "Ball flight is long and fast.",
+      "exactFix": "Slow motion during ball flight from 06:00 to 06:03.",
+      "fairUseTreatment": "slowmo"
+    },
+    {
+      "time": "06:24-06:38",
+      "whatIsOnScreen": "Minnesota late-game drive right and bounce pass to Mitchell.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "None required.",
+      "fairUseTreatment": "none"
+    },
+    {
+      "time": "06:39-06:57",
+      "whatIsOnScreen": "Side-by-side comparison of full-court vs short bounce pass.",
+      "voAlignment": "matched",
+      "problem": "Comparison panel sync is slightly off.",
+      "exactFix": "Align pass release frames on both panels simultaneously at 06:43.",
+      "fairUseTreatment": "freeze"
+    },
+    {
+      "time": "06:58-07:24",
+      "whatIsOnScreen": "Portland final possession assist to Timpson for triple-double.",
+      "voAlignment": "matched",
+      "problem": "works",
+      "exactFix": "None required.",
+      "fairUseTreatment": "none"
+    },
+    {
+      "time": "07:25-08:01",
+      "whatIsOnScreen": "Final synthesis montage of all analyzed actions.",
+      "voAlignment": "matched",
+      "problem": "Fast montage ending lacks clear hold on final celebration.",
+      "exactFix": "Extend final reaction freeze frame at 07:58 for 1.5 seconds.",
+      "fairUseTreatment": "freeze"
+    }
+  ],
+  "clipReuseAudit": [
+    {
+      "clipOrMoment": "Atlanta drag screen bounce pass",
+      "whereItAppears": "00:26, 00:54, 01:33, 04:33",
+      "verdict": "keep",
+      "reason": "Each appearance serves a distinct analytical comparison purpose."
+    },
+    {
+      "clipOrMoment": "Portland deep 3-pointer",
+      "whereItAppears": "02:38, 03:05",
+      "verdict": "keep",
+      "reason": "First appearance is live play; second is multi-game range comparison."
+    }
+  ],
+  "sourceDiversityAudit": {
+    "individualGameHighlightCountEstimate": 6,
+    "sourceOrGameRepetitionProblems": []
+  },
+  "sourceQualityAudit": [
+    {
+      "time": "04:13-04:33",
+      "quality": "acceptable",
+      "problem": "Vertical short clip unpadded in 16:9 canvas.",
+      "replacementNeeded": false
+    }
+  ],
+  "interviewUsageAudit": [],
+  "labelAccuracyAudit": [],
+  "recommendedRepairOrder": [
+    "Apply 3:4 padded background treatment to vertical clip at 04:13-04:33.",
+    "Add analytical freeze frames on help defenders at 00:06, 01:14, and 05:05.",
+    "Synchronize split-screen freeze points at 01:33 and 06:39.",
+    "Adjust slow motion timing on key pass releases at 00:33 and 06:00."
+  ]
+}
