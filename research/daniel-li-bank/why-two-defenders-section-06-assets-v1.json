@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "section": 6,
+  "sectionTitle": "Passing before the opening is obvious",
+  "sourceOfTruth": "/Users/abdul/code/fromthelogo/research/daniel-li-bank/why-two-defenders-eight-minute-script-evidence-v1.md",
+  "rules": {
+    "sourceAudio": false,
+    "music": false,
+    "arrows": false,
+    "circles": false,
+    "localCompositionRender": false,
+    "movingActionBeforeFreeze": true,
+    "resumeFromIdenticalSourceFrame": true
+  },
+  "assetsRoot": "/Volumes/SSK SSD/ftl/videos/why-two-defenders-still-doesnt-work/section-06-assets/production",
+  "possessions": [
+    {
+      "paragraphs": [18, 19, 20],
+      "gameId": "1022600215",
+      "gameDate": "2026-07-31",
+      "opponent": "Portland Fire",
+      "actionNumber": 215,
+      "period": 2,
+      "gameClock": "6:21",
+      "officialEvent": "Kelsey Mitchell cutting layup, Caitlin Clark assist 2",
+      "officialSourceUrl": "https://www.youtube.com/shorts/-emBYtRIIn8",
+      "officialLandscapeGameUrl": "https://www.youtube.com/watch?v=zFlelIoxYB4",
+      "sourcePath": "/Volumes/SSK SSD/ftl/videos/caitlin-clark-eight-minute-genius/assets/sources/portland-dime-mitchell.mp4",
+      "sourceDimensions": "608x1080",
+      "sourceDurationSeconds": 8.730703,
+      "verification": {
+        "status": "verified_exact_play",
+        "confidence": "high",
+        "visibleSequence": "Clark drives, nearby defenders turn and step toward the ball, Mitchell cuts behind the movement, Clark releases the bounce pass, and Mitchell catches in stride and finishes.",
+        "claimBoundary": "Body orientation and movement are visible. Do not claim exact eye-lines.",
+        "landscapeSearchResult": "rejected",
+        "landscapeRejectionReason": "The official 16:9 Portland montage jumps from a prior possession to the inbound after this basket; it does not show Clark's pass. The earlier 46-48 second locator was a mismatch."
+      },
+      "preparedAssets": [
+        {
+          "path": "/Volumes/SSK SSD/ftl/videos/why-two-defenders-still-doesnt-work/section-06-assets/production/pdx-action215-live-payoff-muted.mp4",
+          "type": "muted source cutdown",
+          "sourceIn": 0.0,
+          "sourceOut": 4.85,
+          "durationSeconds": 4.838,
+          "dimensions": "608x1080",
+          "sha256": "4b09bfe0d022dece03708eeb978a293d3ca52b68b4ec3be229fd161c81061469"
+        },
+        {
+          "path": "/Volumes/SSK SSD/ftl/videos/why-two-defenders-still-doesnt-work/section-06-assets/production/pdx-action215-release-slow-055x-muted.mp4",
+          "type": "muted slow segment",
+          "sourceIn": 1.65,
+          "sourceOut": 2.65,
+          "speed": 0.55,
+          "durationSeconds": 1.8018,
+          "dimensions": "608x1080",
+          "sha256": "852b0e00997776ae9ec5ece2c40eafcdaa0550e4fbc33ab7e2dd9c0e83bc2a7f"
+        },
+        {
+          "path": "/Volumes/SSK SSD/ftl/videos/why-two-defenders-still-doesnt-work/section-06-assets/production/pdx-action215-freeze-release.jpg",
+          "type": "freeze still",
+          "sourceTime": 1.65,
+          "purpose": "Clark has driven into the gap; the nearest defender is stepping toward her and Mitchell's route is still developing.",
+          "sha256": "4e3d63ad4a7bb6ecebdab5b2f2614a91ada6797af4b177e76f78ada73b48f9b8"
+        },
+        {
+          "path": "/Volumes/SSK SSD/ftl/videos/why-two-defenders-still-doesnt-work/section-06-assets/production/pdx-action215-freeze-precatch.jpg",
+          "type": "freeze still",
+          "sourceTime": 2.4,
+          "purpose": "The pass and Mitchell's route are converging immediately before the catch.",
+          "sha256": "8e3d0b14d93286c28ecf80c82c163cc4bf0c1790b9db85edbfa961023578d0af"
+        }
+      ],
+      "freezeResumePlan": [
+        {"playSourceFrom": 0.0, "playSourceTo": 1.65, "mode": "live"},
+        {"freezeSourceAt": 1.65, "suggestedHoldSeconds": 1.2, "resumeSourceAt": 1.65},
+        {"playSourceFrom": 1.65, "playSourceTo": 2.65, "mode": "slow", "speed": 0.55},
+        {"playSourceFrom": 2.65, "playSourceTo": 4.85, "mode": "live payoff"},
+        {"freezeSourceAt": 2.4, "suggestedHoldSeconds": 1.0, "placement": "after the completed payoff as a comparison still; do not replay the possession"}
+      ]
+    },
+    {
+      "paragraphs": [20],
+      "gameId": "1022500011",
+      "gameDate": "2025-05-20",
+      "opponent": "Atlanta Dream",
+      "actionNumber": 579,
+      "period": 4,
+      "gameClock": "1:21",
+      "officialEvent": "Aliyah Boston cutting layup, Caitlin Clark assist 11",
+      "officialSourceUrl": "https://www.youtube.com/watch?v=LFC6S3BV5iE",
+      "sourcePath": "/Volumes/SSK SSD/ftl/workflows/clip-first-clark-celebration/examples/why-two-defenders-still-doesnt-work/sources/clip-4-20-4-54-LFC6S3BV5iE.mp4",
+      "sourceDimensions": "1920x1080",
+      "sourceMasterOffsetSeconds": 260.0,
+      "verification": {
+        "status": "verified_exact_play_and_replay",
+        "confidence": "high",
+        "officialUploadLiveTime": {"start": 277.0, "end": 283.5},
+        "officialUploadReplayTime": {"start": 284.0, "end": 289.5},
+        "visibleSequence": "Indiana flows into a drag screen; Atlanta's big meets Clark high; Clark delivers the bounce pass to Boston's roll for the layup. The low courtside replay supplies a fresh angle.",
+        "claimBoundary": "Use the replay as synthesis support only; do not repeat the full live possession in paragraph 20."
+      },
+      "preparedAssets": [
+        {
+          "path": "/Volumes/SSK SSD/ftl/videos/why-two-defenders-still-doesnt-work/section-06-assets/production/atl-action579-live-muted-16x9.mp4",
+          "type": "muted landscape source cutdown",
+          "sourceIn": 17.0,
+          "sourceOut": 23.5,
+          "officialUploadIn": 277.0,
+          "officialUploadOut": 283.5,
+          "durationSeconds": 6.506,
+          "dimensions": "1920x1080",
+          "sha256": "9075d9ba447b3c61e482b11463deaabd4afb03a413c44436a5d7220653fea21e"
+        },
+        {
+          "path": "/Volumes/SSK SSD/ftl/videos/why-two-defenders-still-doesnt-work/section-06-assets/production/atl-action579-replay-muted-16x9.mp4",
+          "type": "muted landscape replay cutdown",
+          "sourceIn": 24.0,
+          "sourceOut": 29.5,
+          "officialUploadIn": 284.0,
+          "officialUploadOut": 289.5,
+          "durationSeconds": 5.5055,
+          "dimensions": "1920x1080",
+          "sha256": "5c8c869d15a3d09169fd15c9c8b2fcc49de56a0f65941ea0718bb8787295f6f6"
+        }
+      ],
+      "freezeResumePlan": [
+        {"playPreparedAsset": "atl-action579-replay-muted-16x9.mp4", "from": 0.0, "to": 5.5, "mode": "fresh alternate angle", "freeze": false}
+      ]
+    }
+  ],
+  "qc": {
+    "allVideoAssetsMuted": true,
+    "allVideoAssetsVideoOnly": true,
+    "noCompositionRendered": true,
+    "rejectedAssets": [
+      {
+        "source": "https://www.youtube.com/watch?v=zFlelIoxYB4",
+        "claimedTime": "46-48 seconds",
+        "reason": "Mismatch: footage shows the post-score inbound/reaction rather than Clark's action-215 drive and pass."
+      }
+    ]
+  }
+}
