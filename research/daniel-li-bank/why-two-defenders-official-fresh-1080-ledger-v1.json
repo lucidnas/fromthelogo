@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-08-11",
+  "rendered": false,
+  "sourceRoot": "/Volumes/SSK SSD/ftl/videos/clip-first-why-two-defenders-still-doesnt-work/sources/official-fresh-1080",
+  "globalLocks": {
+    "portlandBlitz": {"source": "wnba-portland-O67thOWwNtU.mp4", "start": 517.0, "end": 523.0, "classification": "true top-of-key blitz"},
+    "atlantaCoverage": {"source": "wnba-atlanta-mq51GBAphgQ.mp4", "start": 542.0, "end": 551.0, "classification": "high show/contain", "not": "blitz"},
+    "motionBeforeFreeze": true,
+    "resumeFromIdenticalFrame": true,
+    "deriveOnlyFromOfficialMasters": true
+  },
+  "sources": [
+    {"id":"CON","file":"wnba-connecticut-oiCPbf-oeL8.mp4","width":1920,"height":1080,"duration":691.838549},
+    {"id":"PHX","file":"wnba-phoenix-pkoK5BgqMvM.mp4","width":1920,"height":1080,"duration":664.206803},
+    {"id":"ATL","file":"wnba-atlanta-mq51GBAphgQ.mp4","width":1920,"height":1080,"duration":593.75746},
+    {"id":"MIN24","file":"wnba-minnesota-2024-3HzdeY31KNI.mp4","width":1920,"height":1080,"duration":486.38839},
+    {"id":"PDX","file":"wnba-portland-O67thOWwNtU.mp4","width":1920,"height":1080,"duration":703.239546},
+    {"id":"CHI","file":"wnba-chicago-E_sVLtTODRk.mp4","width":1920,"height":1080,"duration":569.701587},
+    {"id":"MIN26","file":"wnba-minnesota-BDhTIFx4qk4.mp4","width":1920,"height":1080,"duration":627.356735}
+  ],
+  "chunks": [
+    {"chunk":1,"beats":[
+      {"play":"Connecticut 29.99-foot three","sourceId":"CON","start":139.0,"end":146.0,"treatment":["live pickup","slow approach","freeze geometry","resume make"]},
+      {"play":"Phoenix 31.24-foot step-back","sourceId":"PHX","start":100.0,"end":107.0,"treatment":["live gather","freeze pocket","slow release","payoff"]},
+      {"play":"Atlanta drag screen to Boston","sourceId":"ATL","start":542.0,"end":551.0,"coverage":"high show/contain","not":"blitz"}
+    ]},
+    {"chunk":2,"beats":[
+      {"play":"Minnesota loaded nail help","sourceId":"MIN24","start":102.0,"end":111.0,"coverage":"loaded nail/help","not":"trap"},
+      {"play":"Atlanta held comparison","sourceId":"ATL","start":542.0,"end":551.0,"coverage":"high show/contain"},
+      {"play":"Portland formal blitz comparator","sourceId":"PDX","start":517.0,"end":523.0,"coverage":"true top-of-key blitz","optional":true}
+    ]},
+    {"chunk":3,"beats":[
+      {"play":"Connecticut rejected spread PNR","sourceId":"CON","start":410.0,"end":420.0,"coverage":"low defender rotation"},
+      {"play":"Connecticut range callback","sourceId":"CON","start":139.0,"end":146.0,"use":"payoff fragment only"},
+      {"play":"Atlanta geometry hold","sourceId":"ATL","start":542.0,"end":551.0,"use":"held frame only"},
+      {"play":"Minnesota geometry hold","sourceId":"MIN24","start":102.0,"end":111.0,"use":"held frame only"}
+    ]},
+    {"chunk":4,"beats":[
+      {"play":"Portland 28.6-foot transition three","sourceId":"PDX","start":435.0,"end":441.0},
+      {"play":"Connecticut make callback","sourceId":"CON","start":139.0,"end":146.0,"use":"payoff fragment only"},
+      {"play":"Atlanta coverage hold","sourceId":"ATL","start":542.0,"end":551.0,"coverage":"high show/contain"},
+      {"play":"Portland two-defender receipt","sourceId":"PDX","start":517.0,"end":523.0,"coverage":"true top-of-key blitz"}
+    ]},
+    {"chunk":5,"beats":[
+      {"play":"Portland horn three and foul","sourceId":"PDX","start":230.0,"end":241.0,"distanceFeet":22.97}
+    ]},
+    {"chunk":6,"beats":[
+      {"play":"Portland Clark-to-Mitchell cut","sourceId":"PDX","start":403.0,"end":408.0},
+      {"play":"Atlanta bounce-route comparison","sourceId":"ATL","start":542.0,"end":551.0,"coverage":"high show/contain","use":"short fragment only"}
+    ]},
+    {"chunk":7,"beats":[
+      {"play":"Chicago lob over front","sourceId":"CHI","start":387.0,"end":393.0},
+      {"play":"Atlanta bounce-route comparison","sourceId":"ATL","start":542.0,"end":551.0,"use":"short fragment only"}
+    ]},
+    {"chunk":8,"beats":[
+      {"play":"Minnesota full-court hit-ahead","sourceId":"MIN26","start":116.0,"end":120.5,"limitation":"official landscape edit omits part of release/ball flight; do not fabricate freeze"},
+      {"play":"Minnesota baseline bounce pass","sourceId":"MIN26","start":545.0,"end":553.0}
+    ]},
+    {"chunk":9,"beats":[
+      {"play":"Portland triple-double clincher","sourceId":"PDX","start":679.8,"end":687.2,"note":"replaces stale impossible 1121–1127 timestamp"},
+      {"play":"Connecticut synthesis","sourceId":"CON","start":143.0,"end":146.0,"use":"under two seconds"},
+      {"play":"Atlanta synthesis","sourceId":"ATL","start":545.0,"end":549.0,"use":"under two seconds"},
+      {"play":"Portland cut synthesis","sourceId":"PDX","start":403.0,"end":408.0,"use":"under two seconds"},
+      {"play":"Minnesota reverse synthesis","sourceId":"MIN26","start":547.0,"end":553.0,"use":"under two seconds"}
+    ]}
+  ],
+  "replacementGroups": [
+    {"chunks":[1],"current":["conDeep","conSlow","phxDeep","phxSlow","atlRoll","atlSlow"],"replaceWith":["CON:139-146","PHX:100-107","ATL:542-551"],"reason":"derived/repeated cut stacks"},
+    {"chunks":[2],"current":["min","minTurnSlow","minPayoffSlow"],"replaceWith":["MIN24:102-111"],"reason":"1280x720"},
+    {"chunks":[3],"current":["con","conSetupSlow","conDriveSlow","conPassSlow","conFinishSlow"],"replaceWith":["CON:410-420"],"reason":"1280x720 derivatives"},
+    {"chunks":[4],"current":["minBackdoor"],"replaceWith":["PDX:517-523"],"reason":"unrelated reused play; Portland interval is true blitz"},
+    {"chunks":[5],"current":["buzzer","initialSlow","counterSlow","releaseSlow"],"replaceWith":["PDX:230-241"],"reason":"rebuild from one official master"},
+    {"chunks":[6],"current":["portland","portlandSlow"],"replaceWith":["PDX:403-408"],"reason":"608x1080 vertical"},
+    {"chunks":[7],"current":["live","slow","proof","finish","pdxSlow"],"replaceWith":["CHI:387-393","ATL:542-551"],"reason":"1280x720 derivatives plus 608x1080 unrelated callback"},
+    {"chunks":[8],"current":["aMaster","aLive","aSlow","aPayoff"],"replaceWith":["MIN26:116-120.5"],"reason":"upscaled/pillarboxed 608x1080 source"},
+    {"chunks":[8],"current":["bMaster","bLive","bSlow","bPayoff"],"replaceWith":["MIN26:545-553"],"reason":"vertical/sub-1080-derived stack"},
+    {"chunks":[9],"current":["clincherMaster","clincherLive","clincherSlow","clincherPayoff"],"replaceWith":["PDX:679.8-687.2"],"reason":"upscaled 720x1280 source"},
+    {"chunks":[9],"current":["pdxCut","pdxSlow","minHit","minBackdoor","minBackdoorPayoff"],"replaceWith":["PDX:403-408","MIN26:116-120.5","MIN26:545-553"],"reason":"vertical and reused weak assets"}
+  ]
+}
