@@ -20,6 +20,7 @@ function parse(argv) {
     const token = argv[i];
     const next = () => argv[++i] ?? fail(`${token} requires a value`);
     if (token === "--master") args.master = path.resolve(next());
+    else if (token === "--opening-master") args.openingMaster = path.resolve(next());
     else if (token === "--replacement") args.replacement = path.resolve(next());
     else if (token === "--replacement-script") args.replacementScript = path.resolve(next());
     else if (token === "--edl-source") args.edlSource = path.resolve(next());
@@ -28,6 +29,9 @@ function parse(argv) {
     else if (token === "--window-in") args.windowIn = Number(next());
     else if (token === "--window-out") args.windowOut = Number(next());
     else if (token === "--replacement-duration") args.replacementDuration = Number(next());
+    else if (token === "--master-media-start") args.masterMediaStart = Number(next());
+    else if (token === "--tail-program-in") args.tailProgramIn = Number(next());
+    else if (token === "--tail-media-start") args.tailMediaStart = Number(next());
     else if (token === "--composition-id") args.compositionId = next();
     else fail(`unknown argument ${token}`);
   }
@@ -35,11 +39,17 @@ function parse(argv) {
     if (args[key] === undefined) fail(`--${key.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)} is required`);
   }
   if (!fs.existsSync(args.master)) fail(`master does not exist: ${args.master}`);
+  if (args.openingMaster && !fs.existsSync(args.openingMaster)) fail(`opening master does not exist: ${args.openingMaster}`);
   if (!fs.existsSync(args.replacement)) fail(`replacement does not exist: ${args.replacement}`);
   if (args.replacementScript && !fs.existsSync(args.replacementScript)) fail(`replacement script does not exist: ${args.replacementScript}`);
   if (args.edlSource && !fs.existsSync(args.edlSource)) fail(`EDL source does not exist: ${args.edlSource}`);
   if (!(args.windowIn >= 0 && args.windowOut > args.windowIn && args.duration >= args.windowOut)) fail("invalid timing window");
   if (!(args.replacementDuration > 0 && args.replacementDuration <= args.windowOut - args.windowIn)) fail("replacement audio must fit inside the replacement window");
+  args.masterMediaStart ??= 0;
+  args.tailProgramIn ??= args.windowOut;
+  args.tailMediaStart ??= args.windowOut;
+  if (!(args.tailProgramIn >= args.windowIn && args.tailProgramIn <= args.duration)) fail("invalid tail program start");
+  if (!(args.tailMediaStart >= args.masterMediaStart)) fail("invalid tail media start");
   args.compositionId ??= "audio-window-replacement";
   return args;
 }
@@ -53,9 +63,17 @@ const args = parse(process.argv.slice(2));
 const assets = path.join(args.outDir, "assets");
 fs.mkdirSync(assets, { recursive: true });
 link(args.master, path.join(assets, "master.mp4"));
+if (args.openingMaster) link(args.openingMaster, path.join(assets, "opening-master.mp4"));
 link(args.replacement, path.join(assets, "replacement.mp3"));
 
-const tailDuration = args.duration - args.windowOut;
+const tailDuration = args.duration - args.tailProgramIn;
+const picture = args.openingMaster
+  ? `<video id="approved-opening-picture" class="clip" src="assets/opening-master.mp4" muted preload="auto"
+        data-start="0" data-duration="${args.windowIn}" data-media-start="0" data-track-index="1"></video>
+      <video id="approved-tail-picture" class="clip" src="assets/master.mp4" muted preload="auto"
+        data-start="${args.windowIn}" data-duration="${args.duration - args.windowIn}" data-media-start="${args.masterMediaStart}" data-track-index="1"></video>`
+  : `<video id="approved-picture" class="clip" src="assets/master.mp4" muted preload="auto"
+        data-start="0" data-duration="${args.duration}" data-media-start="0" data-track-index="1"></video>`;
 const html = `<!doctype html>
 <html lang="en">
   <head>
@@ -70,14 +88,13 @@ const html = `<!doctype html>
   </head>
   <body>
     <div id="root" data-composition-id="${args.compositionId}" data-no-timeline data-start="0" data-duration="${args.duration}" data-width="1920" data-height="1080">
-      <video id="approved-picture" class="clip" src="assets/master.mp4" muted preload="auto"
-        data-start="0" data-duration="${args.duration}" data-media-start="0" data-track-index="1"></video>
-      <audio id="approved-opening-audio" class="clip" src="assets/master.mp4" preload="auto"
+      ${picture}
+      <audio id="approved-opening-audio" class="clip" src="assets/${args.openingMaster ? "opening-master" : "master"}.mp4" preload="auto"
         data-start="0" data-duration="${args.windowIn}" data-media-start="0" data-track-index="10"></audio>
       <audio id="replacement-narration" class="clip" src="assets/replacement.mp3" preload="auto"
         data-start="${args.windowIn}" data-duration="${args.replacementDuration}" data-media-start="0" data-track-index="10"></audio>
       <audio id="approved-tail-audio" class="clip" src="assets/master.mp4" preload="auto"
-        data-start="${args.windowOut}" data-duration="${tailDuration}" data-media-start="${args.windowOut}" data-track-index="10"></audio>
+        data-start="${args.tailProgramIn}" data-duration="${tailDuration}" data-media-start="${args.tailMediaStart}" data-track-index="10"></audio>
     </div>
   </body>
 </html>
@@ -111,6 +128,7 @@ if (args.edlSource) {
   originalOpening.id = "B01";
   originalOpening.program.out = args.windowIn;
   originalOpening.narration = `Preserve the approved opening and original audio through ${args.windowIn.toFixed(3)} seconds.`;
+  originalOpening.source.path = args.openingMaster ?? args.master;
   originalOpening.source.out = args.windowIn;
   originalOpening.treatment.playback = [{ in: 0, out: args.windowIn, speed: 1 }];
   originalOpening.pictureOperations = [{
@@ -131,7 +149,7 @@ if (args.edlSource) {
     editorialRole: "claim-evidence",
     narration: replacementNarration,
     visualOnly: false,
-    source: { asset: "approved-master", path: args.master, in: args.windowIn, out: args.windowOut },
+    source: { asset: "approved-master", path: args.master, in: args.masterMediaStart, out: args.masterMediaStart + (args.tailProgramIn - args.windowIn) },
     visibleAction: "Seven previously possession-validated Caitlin Clark plays remain in the approved picture while four concise claims introduce and connect their evidence.",
     caitlinRole: "Primary creator whose scoring gravity and passing reads generate the demonstrated advantages.",
     purpose: "Begin the claim-to-play rhythm immediately after Minute 1 without changing approved picture.",
@@ -145,7 +163,7 @@ if (args.edlSource) {
     pictureOperations: [{
       id: "B02-P01",
       programRelative: { in: 0, out: args.windowOut - args.windowIn },
-      source: { in: args.windowIn, out: args.windowOut },
+      source: { in: args.masterMediaStart, out: args.masterMediaStart + (args.tailProgramIn - args.windowIn) },
       speed: 1,
       kind: "claim-evidence-sequence",
       visibleDetail: "Approved Minute 2 possession sequence; no picture substitution or reordering.",
@@ -164,10 +182,17 @@ if (args.edlSource) {
       : originalOpening.truthEvidence,
     qcChecks: ["Each claim precedes its evidence", "All seven approved possessions remain visible", "No original narration remains in the replacement window"],
   };
-  const tailBeats = sourceEdl.beats.slice(1).map((beat, index) => ({ ...beat, id: `B${String(index + 3).padStart(2, "0")}` }));
+  const sourceTailIn = sourceEdl.beats[1]?.program?.in ?? args.tailMediaStart;
+  const tailShift = args.tailProgramIn - sourceTailIn;
+  const tailBeats = sourceEdl.beats.slice(1).map((beat, index) => ({
+    ...beat,
+    id: `B${String(index + 3).padStart(2, "0")}`,
+    program: { in: beat.program.in + tailShift, out: beat.program.out + tailShift },
+  }));
   const edl = {
     ...sourceEdl,
     project: `${args.compositionId}`,
+    duration: args.duration,
     revision: Number(sourceEdl.revision ?? 1) + 1,
     status: "truth-approved",
     scriptPath: args.replacementScript ?? sourceEdl.scriptPath,
