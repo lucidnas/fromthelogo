@@ -651,7 +651,10 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
         # Title (first #textbox) — select-all then type. The Studio auto-save
         # ("Saving…") overlay can fail the click actionability check, so fall
         # back to a force click / focus (visible field, just guarded).
-        tb = page.locator("#textbox").first
+        # Scope the editable fields to their current Studio components. Using
+        # generic #textbox indices can append the description into the title
+        # when YouTube inserts another hidden textbox ahead of Description.
+        tb = page.locator("#title-textarea #textbox").first
         tb.wait_for(state="visible", timeout=30000)
         try:
             tb.click(timeout=8000)
@@ -663,7 +666,7 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
 
         # Description (second #textbox)
         if desc:
-            db = page.locator("#textbox").nth(1)
+            db = page.locator("#description-textarea #textbox").first
             try:
                 db.click(timeout=8000)
             except Exception:
@@ -871,6 +874,49 @@ def _find_video(page, title):
                     pass
                 return t, vid, tab
     return None, None, None
+
+
+def edit_metadata(match_title, new_title, desc=""):
+    """Repair title/description on an existing Studio draft."""
+    with sync_playwright() as p:
+        c = ctx(p, headed=True)
+        page = live_page(c)
+        chan = _channel_id(page)
+        opened = False
+        for tab in ("shorts", "videos"):
+            _rows_on_tab(page, chan, tab)
+            rows = page.locator("ytcp-video-row")
+            for i in range(min(rows.count(), 100)):
+                r = rows.nth(i)
+                try: current = r.locator("#video-title").inner_text().strip()
+                except Exception: continue
+                if match_title.lower() not in current.lower(): continue
+                edit = r.get_by_role("button", name="Edit draft")
+                (edit.first if edit.count() else r.locator("#video-title").first).click(timeout=6000)
+                page.wait_for_timeout(3500)
+                opened = True
+                break
+            if opened: break
+        if not opened:
+            sys.exit(f"draft not found by title '{match_title}'")
+        tb = page.locator("#title-textarea #textbox").first
+        tb.click(timeout=8000); page.keyboard.press("Meta+a"); page.keyboard.type(new_title, delay=8)
+        if desc:
+            db = page.locator("#description-textarea #textbox").first
+            db.click(timeout=8000); page.keyboard.press("Meta+a"); page.keyboard.type(desc, delay=5)
+        page.wait_for_timeout(2500)
+        shot(page, "metadata-repaired")
+        try: page.locator('ytcp-button#close-button, [aria-label="Close"], tp-yt-iron-icon#close-icon').first.click(timeout=6000)
+        except Exception: page.keyboard.press("Escape")
+        page.wait_for_timeout(1500)
+        for label in ("Save as draft", "Save draft", "Save"):
+            try:
+                btn = page.get_by_role("button", name=label, exact=False).first
+                if btn.is_visible(): btn.click(timeout=3000); break
+            except Exception: pass
+        page.wait_for_timeout(2500)
+        print(f"metadata updated: {new_title}")
+        c.close()
 
 
 def publish(title, visibility="public", when=None, confirm=False):
@@ -1241,6 +1287,10 @@ if __name__ == "__main__":
     u.add_argument("--headed", action="store_true")
     v = sub.add_parser("verify")
     v.add_argument("--title", required=True)
+    em = sub.add_parser("edit-metadata")
+    em.add_argument("--match-title", required=True)
+    em.add_argument("--title", required=True)
+    em.add_argument("--desc", default="")
     sub.add_parser("list")
     sub.add_parser("drain-queue")
     sub.add_parser("post-next")
@@ -1287,6 +1337,8 @@ if __name__ == "__main__":
         upload(a.file, a.title, a.desc, a.headed, tags=tag_list, auto=a.auto, kind=a.kind)
     elif a.cmd == "verify":
         verify(a.title)
+    elif a.cmd == "edit-metadata":
+        edit_metadata(a.match_title, a.title, a.desc)
     elif a.cmd == "list":
         list_()
     elif a.cmd == "drain-queue":
