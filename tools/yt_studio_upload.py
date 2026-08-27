@@ -21,8 +21,15 @@ import argparse, json, os, subprocess, sys, time
 
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
-PROFILE_DIR = "/Volumes/SSK SSD/fromthelogo-cache/yt-uploader-profile"
-SHOTS_DIR = "/Volumes/SSK SSD/fromthelogo-cache/yt-uploader-shots"
+SSD_ROOT = "/Volumes/SSK SSD"
+FALLBACK_CACHE_ROOT = os.path.expanduser("~/Library/Caches/FromTheLogo")
+CACHE_ROOT = (
+    os.path.join(SSD_ROOT, "fromthelogo-cache")
+    if os.path.isdir(SSD_ROOT)
+    else FALLBACK_CACHE_ROOT
+)
+PROFILE_DIR = os.path.join(CACHE_ROOT, "yt-uploader-profile")
+SHOTS_DIR = os.path.join(CACHE_ROOT, "yt-uploader-shots")
 STUDIO = "https://studio.youtube.com"
 # From The Logo (@fromthelogo22) is a BRAND channel owned by the Tales account
 # talesfromthenba@gmail.com. The clone profile also has nas2663@gmail.com and an
@@ -32,14 +39,20 @@ STUDIO = "https://studio.youtube.com"
 # selected; the guard in upload() aborts if it still isn't FTL. NEVER AYM.
 FTL_CHANNEL = "UCvWdLRqA7R2Gggisxn4Xkhg"
 FTL_ACCOUNT = "talesfromthenba@gmail.com"
-STUDIO_HOME = f"{STUDIO}/channel/{FTL_CHANNEL}?authuser={FTL_ACCOUNT}"
+# Studio can ignore authuser on a manager-owned Brand channel and reopen the
+# last active identity (for this profile, Tales From Hollywood). The explicit
+# channel selector keeps every entry point pinned to From The Logo.
+STUDIO_HOME = (
+    f"{STUDIO}/channel/{FTL_CHANNEL}"
+    f"?c={FTL_CHANNEL}&authuser=talesfromthenba%40gmail.com"
+)
 CHROME_PROFILE = "Profile 3"  # Tales — holds the FTL brand channel
 YTDLP = "/opt/homebrew/bin/yt-dlp"
 
 
-CLONE_DIR = "/Volumes/SSK SSD/fromthelogo-cache/yt-uploader-chrome-clone"
+CLONE_DIR = os.path.join(CACHE_ROOT, "yt-uploader-chrome-clone")
 CHROME_SRC = os.path.expanduser("~/Library/Application Support/Google/Chrome")
-STATE_FILE = "/Volumes/SSK SSD/fromthelogo-cache/yt-uploader-profile/auth.json"
+STATE_FILE = os.path.join(PROFILE_DIR, "auth.json")
 
 
 def save_state():
@@ -158,11 +171,22 @@ def ctx(p, headed=False):
     SAME warm session. Otherwise: saved storage_state, then the persistent clone."""
     os.makedirs(SHOTS_DIR, exist_ok=True)
     try:
-        b = p.chromium.connect_over_cdp(CDP_URL, timeout=3000)
+        # 20s: connect_over_cdp enumerates every open target, so a keep-open with
+        # several accumulated tabs can take >3s — too short a timeout falls through
+        # to a launch that then collides with the keep-open's profile lock.
+        b = p.chromium.connect_over_cdp(CDP_URL, timeout=20000)
         if b.contexts:
             return _CdpCtx(b, b.contexts[0])
-    except Exception:
-        pass
+    except Exception as exc:
+        raise RuntimeError(
+            f"The required Tales window at {CDP_URL} is unavailable; refusing to launch another browser"
+        ) from exc
+    raise RuntimeError(
+        f"The required Tales window at {CDP_URL} has no active context; refusing to launch another browser"
+    )
+    # Deliberately unreachable: FTL publishing must never create another window.
+    # The warm Tales clone is the only authorized browser identity.
+    """
     if os.path.isfile(STATE_FILE):
         b = p.chromium.launch(
             channel="chrome", headless=not headed,
@@ -177,6 +201,18 @@ def ctx(p, headed=False):
         PROFILE_DIR, headless=not headed,
         viewport={"width": 1440, "height": 900},
         args=["--disable-blink-features=AutomationControlled"])
+    """
+
+
+def live_page(context):
+    """Return a usable tab from the shared Tales window, ignoring stale targets."""
+    for candidate in reversed(context.pages):
+        try:
+            if not candidate.is_closed():
+                return candidate
+        except Exception:
+            continue
+    return context.new_page()
 
 
 def shot(page, name):
@@ -300,13 +336,32 @@ def _switch_channel(page, hint):
     page.wait_for_timeout(5000)
 
 
+def switch_ftl_in_warm_window():
+    """Switch the already-open Tales CDP window to the From The Logo brand channel."""
+    with sync_playwright() as p:
+        c = ctx(p, headed=True)
+        page = live_page(c)
+        page.goto("https://www.youtube.com/", wait_until="domcontentloaded")
+        page.wait_for_timeout(3000)
+        if not _on_channel(page, "From The Logo"):
+            _switch_channel(page, "From The Logo")
+        page.goto(STUDIO_HOME, wait_until="domcontentloaded")
+        page.wait_for_timeout(5000)
+        shot(page, "warm-ftl-active")
+        body = page.locator("body").inner_text(timeout=8000)
+        if FTL_CHANNEL not in page.url or "From The Logo" not in body:
+            raise RuntimeError(f"Tales window did not reach From The Logo Studio: {page.url}")
+        print("FTL/Tales active in existing :9337 window")
+        c.close()
+
+
 QUEUE_DIR = "/Volumes/SSK SSD/fromthelogo-cache/upload-queue"
 QUEUE_DONE = "/Volumes/SSK SSD/fromthelogo-cache/upload-queue/uploaded"
 QUEUE_LOG = "/Volumes/SSK SSD/fromthelogo-cache/upload-queue/drain.log"
 
 # Daily backlog: approved videos in LIBRARY_DIR (FIFO by mtime). The hourly
 # scheduler posts ONE per run as a DRAFT and moves it to posted/.
-LIBRARY_DIR = "/Volumes/SSK SSD/fromthelogo-cache/video-library"
+LIBRARY_DIR = "/Volumes/SSK SSD/fromthelogo-cache/video-library/upload-ready"
 POSTED_DIR = "/Volumes/SSK SSD/fromthelogo-cache/video-library/posted"
 POST_LOG = "/Volumes/SSK SSD/fromthelogo-cache/video-library/post.log"
 
@@ -493,7 +548,7 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
         title, desc, tags = auto_meta(file, kind)
     with sync_playwright() as p:
         c = ctx(p, headed)
-        page = c.pages[0] if c.pages else c.new_page()
+        page = live_page(c)
         # Only navigate if we're NOT already on the FTL Studio tab — reusing the
         # keep-open's warm Studio page avoids a full reload just to drop in a file.
         if FTL_CHANNEL not in page.url:
@@ -523,17 +578,27 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
             sys.exit("NEEDS_VERIFY: Google 'Verify it's you' prompt — run `verify-identity` and clear it.")
 
         # Open the upload dialog: Create -> Upload videos
-        page.locator('[aria-label="Create"]').first.click(timeout=15000)
-        page.wait_for_timeout(1200)
-        page.get_by_text("Upload videos", exact=False).first.click(timeout=8000)
-        page.wait_for_timeout(4000)
+        select_files = page.get_by_role("button", name="Select files")
+        dialog_ready = any(select_files.nth(i).is_visible() for i in range(select_files.count()))
+        if not dialog_ready:
+            page.locator('[aria-label="Create"]').first.click(timeout=15000)
+            page.wait_for_timeout(1200)
+            # Studio keeps hidden copies of old menu items in the DOM; target only
+            # the currently visible upload entry so a stale menu cannot intercept.
+            visible_upload = page.locator('tp-yt-paper-item:visible').filter(has_text="Upload videos")
+            if visible_upload.count():
+                visible_upload.first.click(timeout=8000)
+            else:
+                shot(page, "upload-menu-missing")
+                sys.exit("Upload videos menu item was not visible; stopped before selecting a file.")
+            page.wait_for_timeout(4000)
         shot(page, "upload-dialog")
 
         # Over a CDP-attached (keep-open) browser, Playwright caps file transfer
         # at 50MB. YouTube re-encodes on upload anyway, so feed a lightly
         # compressed <50MB copy when the render is bigger.
         upload_file = file
-        if os.path.getsize(file) > 48 * 1024 * 1024:
+        if os.path.getsize(file) > 48 * 1024 * 1024 and os.environ.get("YT_UPLOAD_NO_COMPRESS") != "1":
             tmp = os.path.join(SHOTS_DIR, "_upl_" + os.path.basename(file))
             subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", file,
                             "-c:v", "libx264", "-crf", "24", "-preset", "fast",
@@ -543,16 +608,39 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
                 upload_file = tmp
                 print(f"compressed for upload: {os.path.getsize(tmp)//1024//1024}MB")
 
-        # Feed the file via the file-chooser event (visible "Select files"),
-        # with the direct hidden-input as fallback.
-        try:
-            with page.expect_file_chooser(timeout=15000) as fc:
-                page.get_by_role("button", name="Select files").first.click(timeout=8000)
-            fc.value.set_files(upload_file)
-        except Exception:
-            inp = page.locator("input[type=file]").first
+        # A CDP-attached Chrome is already running on this Mac and can read the
+        # SSD path itself.  Hand it the path directly instead of streaming the
+        # video over Playwright's CDP transport (large transfers can terminate
+        # the warm Tales window).  Non-CDP contexts keep the normal chooser.
+        if isinstance(c, _CdpCtx):
+            # Studio retains stale hidden upload inputs on video-edit pages.
+            # Scope file injection to the currently open uploads dialog so CDP
+            # cannot hand the file to an obsolete input that never starts an upload.
+            inp = page.locator("ytcp-uploads-dialog input[type=file]").first
             inp.wait_for(state="attached", timeout=15000)
-            inp.set_input_files(upload_file)
+            session = page.context.new_cdp_session(page)
+            result = session.send("Runtime.evaluate", {
+                "expression": "document.querySelector('ytcp-uploads-dialog input[type=file]')",
+                "objectGroup": "ftl-upload",
+            })
+            object_id = result.get("result", {}).get("objectId")
+            if not object_id:
+                raise RuntimeError("CDP upload input was not found")
+            described = session.send("DOM.describeNode", {"objectId": object_id})
+            session.send("DOM.setFileInputFiles", {
+                "backendNodeId": described["node"]["backendNodeId"],
+                "files": [upload_file],
+            })
+            print("file handed to local Chrome by path")
+        else:
+            try:
+                with page.expect_file_chooser(timeout=15000) as fc:
+                    page.get_by_role("button", name="Select files").first.click(timeout=8000)
+                fc.value.set_files(upload_file)
+            except Exception:
+                inp = page.locator("input[type=file]").first
+                inp.wait_for(state="attached", timeout=15000)
+                inp.set_input_files(upload_file)
         print("file handed to uploader:", os.path.basename(file))
         page.wait_for_timeout(8000)
         shot(page, "after-file")
@@ -635,6 +723,20 @@ def upload(file, title, desc="", headed=False, tags=None, auto=False, kind=None)
             if any(k in low for k in ("upload complete", "checks complete",
                                       "finished processing", "processing hd")):
                 done = True; break
+            # Current Shorts wizard may replace ytcp-uploads-dialog with the
+            # publish wizard before exposing a textual upload percentage. Once
+            # Studio explicitly says "Saved as draft" and a video link exists,
+            # the draft entity is committed even while checks continue.
+            try:
+                saved_draft = page.get_by_text("Saved as draft", exact=False).count() > 0
+                has_video_link = page.get_by_text("Video link", exact=False).count() > 0
+            except Exception:
+                saved_draft = has_video_link = False
+            # "Saved as draft" appears as soon as Studio creates the video row,
+            # including while a large upload is only partially transferred. Do
+            # not close the window early when an explicit percentage is visible.
+            if saved_draft and has_video_link and not pct and "uploading" not in low:
+                done = True; break
             if "processing" in low and "uploading" not in low:
                 done = True; break
             if pct and pct.group(1) == "100":
@@ -679,21 +781,46 @@ CONTENT_TABS = {"videos": "upload", "shorts": "short"}
 
 
 def _channel_id(page):
-    page.goto(STUDIO, wait_until="domcontentloaded")
+    page.goto(STUDIO_HOME, wait_until="domcontentloaded")
     page.wait_for_timeout(3000)
     url = page.url
-    if "/channel/" not in url:
-        sys.exit("cannot resolve channel — run login first")
-    return url.split("/channel/")[1].split("/")[0]
+    if FTL_CHANNEL not in url:
+        shot(page, "wrong-channel")
+        sys.exit(f"wrong channel after direct FTL navigation: {url}")
+    try:
+        body = page.locator("body").inner_text(timeout=5000)
+    except Exception:
+        body = ""
+    if "From The Logo" not in body:
+        shot(page, "wrong-channel")
+        sys.exit("direct channel URL did not visibly identify From The Logo")
+    return FTL_CHANNEL
 
 
 def _rows_on_tab(page, chan, tab):
     slug = CONTENT_TABS[tab]
     page.goto(f"{STUDIO}/channel/{chan}/videos/{slug}", wait_until="domcontentloaded")
     page.wait_for_timeout(5000)
+    if page.locator("ytcp-video-row").count() == 0:
+        try:
+            page.get_by_text("Content", exact=True).first.click(timeout=6000)
+            page.wait_for_timeout(4000)
+        except Exception:
+            pass
+    # The 2026 Content redesign may ignore the legacy /videos/short route and
+    # reopen the Videos tab. Select the visible top-level tab explicitly.
+    label = "Shorts" if tab == "shorts" else "Videos"
+    try:
+        page.get_by_text(label, exact=True).first.click(timeout=6000)
+        page.wait_for_timeout(4000)
+    except Exception:
+        pass
     rows = page.locator("ytcp-video-row")
     out = []
-    for i in range(min(rows.count(), 20)):
+    # Studio may place drafts below the first 20 rows even when the Date column
+    # appears newest-first. Inspect every row currently materialized so verify
+    # does not miss a freshly uploaded draft.
+    for i in range(min(rows.count(), 100)):
         r = rows.nth(i)
         try:
             t = r.locator("#video-title").inner_text().strip()
@@ -755,21 +882,43 @@ def publish(title, visibility="public", when=None, confirm=False):
         "PUBLIC" if visibility == "public" else "UNLISTED" if visibility == "unlisted" else "PRIVATE")
     with sync_playwright() as p:
         c = ctx(p, headed=True)
-        page = c.pages[0] if c.pages else c.new_page()
+        page = live_page(c)
         chan = _channel_id(page)
         opened = None
         for tab in ("videos", "shorts"):
             page.goto(f"{STUDIO}/channel/{chan}/videos/{CONTENT_TABS[tab]}", wait_until="domcontentloaded")
             page.wait_for_timeout(5000)
+            if page.locator("ytcp-video-row").count() == 0:
+                try:
+                    page.get_by_text("Content", exact=True).first.click(timeout=6000)
+                    page.wait_for_timeout(4000)
+                except Exception:
+                    pass
+            # The current Studio redesign may reopen Dashboard/Videos even
+            # when the legacy Shorts route is requested. Select the visible
+            # top-level tab explicitly before locating draft rows.
+            label = "Shorts" if tab == "shorts" else "Videos"
+            try:
+                page.get_by_text(label, exact=True).first.click(timeout=6000)
+                page.wait_for_timeout(4000)
+            except Exception:
+                pass
             rows = page.locator("ytcp-video-row")
-            for i in range(min(rows.count(), 25)):
+            for i in range(min(rows.count(), 100)):
                 r = rows.nth(i)
                 try:
                     t = r.locator("#video-title").inner_text().strip()
                 except Exception:
                     continue
                 if title.lower() in t.lower():
-                    r.locator("#video-title").first.click(timeout=6000)
+                    # Draft rows in the current Studio redesign expose an
+                    # explicit Edit draft button while #video-title may be an
+                    # inert anchor with no href. Prefer the real draft action.
+                    edit_draft = r.get_by_role("button", name="Edit draft")
+                    if edit_draft.count() and edit_draft.first.is_visible():
+                        edit_draft.first.click(timeout=6000)
+                    else:
+                        r.locator("#video-title").first.click(timeout=6000)
                     page.wait_for_timeout(5000)
                     opened = (t, tab)
                     break
@@ -780,11 +929,22 @@ def publish(title, visibility="public", when=None, confirm=False):
         print(f"target: '{opened[0]}' [{opened[1]}]")
         shot(page, "wizard-open")
 
+        # Studio disables Publish until the required ad-suitability self-rating
+        # is completed. Uploads can therefore look configured for Public while
+        # remaining drafts unless this step is handled first.
+        # Monetized Shorts now expose the same required self-rating step.  If it
+        # is left unanswered Studio disables Publish with "form fields have
+        # errors", so rate both Videos and Shorts before Visibility.
+        try:
+            rate_ad_suitability(page)
+        except Exception as e:
+            print("ad-suitability warn:", str(e)[:80])
+
         # Jump straight to the Visibility step via its stepper tab (Next is
         # blocked on Ad-suitability by the self-rating; the top tabs let you skip).
         for how in (lambda: page.get_by_role("tab", name="Visibility").first.click(timeout=6000),
                     lambda: page.get_by_text("Visibility", exact=True).last.click(timeout=6000),
-                    lambda: page.locator('#step-badge-3, [test-id="STEP_VISIBILITY"]').first.click(timeout=6000)):
+                    lambda: page.locator('#step-badge-4, [test-id="STEP_VISIBILITY"]').first.click(timeout=6000)):
             try:
                 how(); page.wait_for_timeout(3000)
                 if page.locator(vis_radio).count():
@@ -811,16 +971,190 @@ def publish(title, visibility="public", when=None, confirm=False):
         if not confirm:
             print("DRY RUN — visibility selected but NOT published. Re-run with --confirm to publish.")
             c.close(); return
-        page.locator("#done-button, ytcp-button#done-button").first.click(timeout=8000)
+        done = page.locator("#done-button, ytcp-button#done-button")
+        if done.count() and done.first.is_visible():
+            done.first.click(timeout=8000)
+        else:
+            save = page.get_by_role("button", name="Save", exact=True)
+            if not save.count():
+                shot(page, "publish-action-miss")
+                sys.exit("visibility selected but no Publish/Save action was found")
+            save.first.click(timeout=8000)
         page.wait_for_timeout(5000); shot(page, "published")
         print(f"PUBLISHED '{opened[0]}' -> {visibility}" + (f" @ {when}" if when else ""))
+        c.close()
+
+
+import datetime as _dt
+
+SCHED_LEDGER = "/Volumes/SSK SSD/fromthelogo-cache/schedule-ledger.json"
+
+
+def _fmt_time(dt):
+    """12-hour clock the way Studio's time field wants it, e.g. '1:00 PM'."""
+    return f"{dt.hour % 12 or 12}:{dt.minute:02d} {'AM' if dt.hour < 12 else 'PM'}"
+
+
+def _ledger_next():
+    """Next open hour = the last-scheduled slot + 1h (channel-tz), from the ledger."""
+    import json
+    try:
+        last = _dt.datetime.fromisoformat(json.load(open(SCHED_LEDGER))["last_slot"])
+        return last + _dt.timedelta(hours=1)
+    except Exception:
+        return None
+
+
+def _ledger_set(dt):
+    import json
+    json.dump({"last_slot": dt.isoformat(timespec="minutes")}, open(SCHED_LEDGER, "w"))
+    nxt = dt + _dt.timedelta(hours=1)
+    print(f"ledger updated — next open slot: {nxt:%b %d} {_fmt_time(nxt)}")
+
+
+def _pick_calendar_date(page, target):
+    """Open the date-picker and click target's day; step forward months if needed.
+    Target the VISIBLE trigger — the Schedule panel renders a second hidden one."""
+    page.locator('#datepicker-trigger:visible').first.click(timeout=5000)
+    page.wait_for_timeout(1500)
+    day = str(target.day)
+    for _ in range(4):
+        try:
+            page.locator('ytcp-date-picker').get_by_text(day, exact=True).first.click(timeout=2000)
+            return True
+        except Exception:
+            try:
+                page.locator('ytcp-date-picker [aria-label*="Next"], ytcp-date-picker #next-month').first.click(timeout=1500)
+                page.wait_for_timeout(700)
+            except Exception:
+                return False
+    return False
+
+
+def schedule(title, at=None, confirm=False):
+    """Schedule a DRAFT to go PUBLIC at the next open hour (or an explicit --at).
+    Next slot = last scheduled slot + 1h, tracked in SCHED_LEDGER. Times are in the
+    CHANNEL timezone (what Studio shows). Completes the ad-suitability self-rating
+    first (it disables the Schedule button otherwise). DRY-RUN by default; --confirm
+    actually applies it and advances the ledger. This is the 'add + next slot' flow."""
+    if at:
+        target = _dt.datetime.strptime(at, "%Y-%m-%d %H:%M")
+    else:
+        target = _ledger_next()
+        if not target:
+            sys.exit("no schedule ledger yet — seed it once with --at 'YYYY-MM-DD HH:MM'")
+    tstr = _fmt_time(target)
+    print(f"target slot: {target:%b %d, %Y} {tstr}")
+    with sync_playwright() as p:
+        c = ctx(p, headed=True)
+        page = c.pages[0] if c.pages else c.new_page()
+        chan = _channel_id(page)
+        opened = None
+        for tab in ("shorts", "videos"):
+            page.goto(f"{STUDIO}/channel/{chan}/videos/{CONTENT_TABS[tab]}", wait_until="domcontentloaded")
+            page.wait_for_timeout(5500)
+            if page.locator("ytcp-video-row").count() == 0:
+                try:
+                    page.get_by_text("Content", exact=True).first.click(timeout=6000)
+                    page.wait_for_timeout(4000)
+                except Exception:
+                    pass
+            label = "Shorts" if tab == "shorts" else "Videos"
+            try:
+                page.get_by_text(label, exact=True).first.click(timeout=6000)
+                page.wait_for_timeout(4000)
+            except Exception:
+                pass
+            rows = page.locator("ytcp-video-row")
+            for i in range(min(rows.count(), 100)):
+                try:
+                    t = rows.nth(i).locator("#video-title").inner_text().strip()
+                except Exception:
+                    continue
+                if title.lower() in t.lower():
+                    rows.nth(i).locator("#video-title").first.click(timeout=8000)
+                    page.wait_for_timeout(6000)
+                    opened = (t, tab)
+                    break
+            if opened:
+                break
+        if not opened:
+            sys.exit(f"draft not found by title '{title}'")
+        print(f"target: '{opened[0]}' [{opened[1]}]")
+        # ad-suitability self-rating — the blocker that disables Schedule (best-effort)
+        try:
+            rate_ad_suitability(page)
+        except Exception as e:
+            print("ad-suitability warn:", str(e)[:60])
+        # jump to the Visibility step
+        for how in (lambda: page.get_by_role("tab", name="Visibility").first.click(timeout=6000),
+                    lambda: page.get_by_text("Visibility", exact=True).last.click(timeout=6000)):
+            try:
+                how(); page.wait_for_timeout(3000)
+                if page.get_by_text("Save or publish", exact=False).count():
+                    break
+            except Exception:
+                continue
+        # switch to Schedule mode
+        try:
+            page.get_by_text("Schedule", exact=True).first.click(timeout=5000)
+            page.wait_for_timeout(2000)
+        except Exception as e:
+            print("schedule-section warn:", str(e)[:50])
+        # set date (calendar) + time
+        if not _pick_calendar_date(page, target):
+            shot(page, "sched-date-miss")
+            sys.exit("could not pick the target date in the calendar (see sched-date-miss shot)")
+        page.wait_for_timeout(1000)
+        tf = page.locator('tp-yt-paper-input#textbox input:visible').first
+        tf.click(); tf.press("Meta+a"); tf.type(tstr, delay=40); tf.press("Enter")
+        page.wait_for_timeout(1500)
+        got = page.locator('#datepicker-trigger:visible').first.inner_text(timeout=3000).strip()
+        scheduled_time = tf.input_value()
+        print(f"set -> {got} {scheduled_time}")
+        shot(page, "schedule-set")
+        if not confirm:
+            print("DRY RUN — schedule filled but NOT applied. Re-run with --confirm.")
+            c.close(); return
+        # Studio now opens the video's Details page for existing uploads. In
+        # that surface the schedule editor is a side panel with its own Done
+        # button, followed by the page-level Save button. Older wizard dialogs
+        # still expose #done-button, so retain that as the fallback.
+        panel_done = page.get_by_role("button", name="Done", exact=True)
+        if panel_done.count() and panel_done.first.is_visible():
+            panel_done.first.click(timeout=8000)
+            page.wait_for_timeout(1200)
+            save = page.get_by_role("button", name="Save", exact=True)
+            if not save.count():
+                shot(page, "schedule-save-miss")
+                sys.exit("schedule panel closed but the page Save button was not found")
+            save.first.click(timeout=10000)
+        else:
+            page.locator("#done-button, ytcp-button#done-button").first.click(timeout=8000)
+        page.wait_for_timeout(2500)
+        # A copyright/content-ID check can insert an "Issue found" confirmation
+        # after Schedule is clicked.  The caller has already supplied --confirm,
+        # so accept that final confirmation instead of reporting a false success
+        # while the video remains a draft.
+        issue = page.get_by_text("Issue found", exact=True)
+        if issue.count():
+            publish_anyway = page.get_by_role("button", name="Publish", exact=True)
+            if not publish_anyway.count():
+                shot(page, "schedule-issue-no-publish")
+                sys.exit("content issue confirmation appeared without a Publish action")
+            publish_anyway.first.click(timeout=8000)
+            print("content issue acknowledged: Publish")
+        page.wait_for_timeout(6000)
+        shot(page, "scheduled")
+        print(f"SCHEDULED '{opened[0]}' -> {got} {scheduled_time}")
+        _ledger_set(target)
         c.close()
 
 
 def verify(title, headed=True):
     with sync_playwright() as p:
         c = ctx(p, headed=headed)
-        page = c.pages[0] if c.pages else c.new_page()
+        page = live_page(c)
         rows, page = _content_rows(page)
         shot(page, "content-list")
         hit = [(tab, t, v) for tab, t, v in rows if title.lower() in t.lower()]
@@ -850,6 +1184,38 @@ def list_(headed=True):
         c.close()
 
 
+def set_thumbnail(video_id, file, headed=False):
+    """Attach a custom thumbnail to an existing draft; never changes visibility."""
+    assert os.path.isfile(file), f"missing thumbnail: {file}"
+    with sync_playwright() as p:
+        c = ctx(p, headed=headed)
+        page = c.pages[0] if c.pages else c.new_page()
+        page.goto(f"{STUDIO}/video/{video_id}/edit", wait_until="domcontentloaded")
+        page.wait_for_timeout(5000)
+        if "accounts.google.com" in page.url or "studio.youtube.com" not in page.url:
+            shot(page, "thumbnail-needs-login")
+            sys.exit("Thumbnail update is not authenticated; stopped without saving.")
+        # YouTube Studio now keeps the thumbnail picker behind a hidden
+        # #file-loader input and no longer exposes the old "Upload file"
+        # button on existing-video edit pages. Set that input directly; retain
+        # the generic input fallback for older Studio layouts.
+        thumbnail_input = page.locator('input#file-loader[type="file"]')
+        if thumbnail_input.count() == 1:
+            thumbnail_input.set_input_files(file)
+        else:
+            fallback_input = page.locator('input[type="file"]')
+            fallback_input.first.set_input_files(file)
+        page.wait_for_timeout(5000)
+        save = page.get_by_role("button", name="Save")
+        save.wait_for(state="visible", timeout=30000)
+        if save.is_enabled():
+            save.click(timeout=10000)
+        page.wait_for_timeout(5000)
+        shot(page, "thumbnail-saved")
+        print(f"thumbnail attached to {video_id}: {os.path.basename(file)}")
+        c.close()
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -858,6 +1224,7 @@ if __name__ == "__main__":
     ic.add_argument("--chrome-profile", default=CHROME_PROFILE)
     ic.add_argument("--channel", default="logo")
     cp = sub.add_parser("clone-profile")
+    sub.add_parser("switch-ftl", help="switch the existing :9337 Tales window to From The Logo")
     cp.add_argument("--chrome-profile", default=CHROME_PROFILE)
     sub.add_parser("save-state")
     sub.add_parser("verify-identity")
@@ -877,11 +1244,19 @@ if __name__ == "__main__":
     sub.add_parser("list")
     sub.add_parser("drain-queue")
     sub.add_parser("post-next")
+    th = sub.add_parser("set-thumbnail")
+    th.add_argument("--video-id", required=True)
+    th.add_argument("--file", required=True)
+    th.add_argument("--headed", action="store_true")
     pub = sub.add_parser("publish")
     pub.add_argument("--title", required=True)
     pub.add_argument("--visibility", choices=["public", "unlisted", "private"], default="public")
     pub.add_argument("--when", default=None, help='schedule "YYYY-MM-DD HH:MM" (public at that time)')
     pub.add_argument("--confirm", action="store_true", help="actually publish (default is dry-run)")
+    sch = sub.add_parser("schedule", help="schedule a draft into the next open hour (or --at)")
+    sch.add_argument("--title", required=True)
+    sch.add_argument("--at", default=None, help='explicit "YYYY-MM-DD HH:MM" (channel tz); omit to use next open hour')
+    sch.add_argument("--confirm", action="store_true", help="actually schedule (default is dry-run)")
     a = ap.parse_args()
     if a.cmd == "login":
         login()
@@ -889,6 +1264,8 @@ if __name__ == "__main__":
         import_cookies(a.chrome_profile, a.channel)
     elif a.cmd == "clone-profile":
         clone_profile(a.chrome_profile)
+    elif a.cmd == "switch-ftl":
+        switch_ftl_in_warm_window()
     elif a.cmd == "save-state":
         save_state()
     elif a.cmd == "verify-identity":
@@ -916,5 +1293,9 @@ if __name__ == "__main__":
         drain_queue()
     elif a.cmd == "post-next":
         post_next()
+    elif a.cmd == "set-thumbnail":
+        set_thumbnail(a.video_id, a.file, a.headed)
     elif a.cmd == "publish":
         publish(a.title, a.visibility, a.when, a.confirm)
+    elif a.cmd == "schedule":
+        schedule(a.title, a.at, a.confirm)
