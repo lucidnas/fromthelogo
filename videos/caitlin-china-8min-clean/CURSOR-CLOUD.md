@@ -8,6 +8,18 @@ Required cloud inputs:
 - `FTL_PRODUCTION_DIR` pointing to that directory.
 - A reachable source video, supplied with `FTL_SOURCE_VIDEO` when the manifest's local SSD path is unavailable.
 
+Preferred source transfer:
+
+```bash
+gh release download ftl-caitlin-china-assets-v1 \
+  --repo lucidnas/fromthelogo \
+  --pattern FIBA-4mhTX8ETAeY.mp4 \
+  --dir assets/source
+echo 'ff4bc48c38a2a6f980758b23157503c7d93d5db138840bfaf255c03248efbc61  assets/source/FIBA-4mhTX8ETAeY.mp4' | sha256sum --check
+```
+
+Set `FTL_SOURCE_VIDEO=assets/source/FIBA-4mhTX8ETAeY.mp4` after verification.
+
 Run `./render-cloud.sh` after assets are present. The final artifact is `renders/caitlin-clark-vs-china-8min-hyperframes.mp4`.
 
 Cursor authentication is configured for the FTL account. All narration regeneration, media processing, alignment, HyperFrames rendering, and QC must run in Cursor Cloud. Do not render or encode locally.
@@ -22,3 +34,5 @@ Revision requirements:
 - Render two otherwise identical comparison masters: one with all labels authored by HyperFrames and one with no text layer at all.
 - Do not use FFmpeg `drawtext`, ASS, subtitles, or any other baked text filter.
 - Let the runtime land naturally near eight minutes. Do not force an exact 480 seconds by speeding up narration.
+
+Publish completed work to a separate GitHub prerelease named `ftl-caitlin-china-results-v1`. Attach the labeled master, the text-free master, and a JSON QC manifest containing duration, resolution, codecs, file sizes, SHA-256 hashes, silence findings, and A/V-sync findings. Never overwrite or attach results to the source-assets release.
