@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+import fs from "node:fs";
+import path from "node:path";
+const root=path.dirname(new URL(import.meta.url).pathname);
+const {schedule}=JSON.parse(fs.readFileSync(path.join(root,"assets/timeline.json"),"utf8"));
+const esc=s=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+const intro=schedule[0],outro=schedule.at(-1),plays=schedule.filter(x=>x.kind==="play");
+const overlays=[];
+overlays.push(`<section id="opening-title" class="clip hero" data-start="0" data-duration="${intro.duration.toFixed(3)}" data-track-index="2"><div class="eyebrow">FROM THE LOGO FILM ROOM</div><h1>CAITLIN CONTROLLED CHINA</h1><p>14 PTS&nbsp;&nbsp;•&nbsp;&nbsp;11 AST&nbsp;&nbsp;•&nbsp;&nbsp;0 TURNOVERS</p></section>`);
+for(const p of plays){
+ const meta=`Q${p.period} &nbsp; ${p.gameClock} &nbsp; • &nbsp; ${p.type==='assist'?'ASSIST':'BUCKET'}`;
+ overlays.push(`<section id="play-${p.playNumber}-label" class="clip lower" data-start="${p.start.toFixed(3)}" data-duration="${p.duration.toFixed(3)}" data-track-index="2"><div class="number">${String(p.playNumber).padStart(2,"0")}</div><div><strong>${esc(p.label)}</strong><span>${meta}</span></div></section>`);
+ overlays.push(`<section id="play-${p.playNumber}-freeze" class="clip freeze" data-start="${p.freezeStart.toFixed(3)}" data-duration="${p.freezeDuration.toFixed(3)}" data-track-index="3"><b>FREEZE THE READ</b><span>${esc(p.read)}</span></section>`);
+ overlays.push(`<div id="play-${p.playNumber}-slow" class="clip slow" data-start="${p.slowStart.toFixed(3)}" data-duration="${p.slowDuration.toFixed(3)}" data-track-index="3">PLAY IN SLOW MOTION</div>`);
+}
+overlays.push(`<section id="closing-title" class="clip outro" data-start="${outro.start.toFixed(3)}" data-duration="${outro.duration.toFixed(3)}" data-track-index="2"><p>THE BIGGER THE STAGE</p><h2>THE BRIGHTER CAITLIN SHINES</h2><span>PLAYER OF THE GAME&nbsp;&nbsp;•&nbsp;&nbsp;USA DEBUT RECORD</span></section>`);
+const html=`<!doctype html><html lang="en" data-resolution="landscape"><head><meta charset="UTF-8"><meta name="viewport" content="width=1920,height=1080"><script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script><style>
+*{box-sizing:border-box}html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#000;font-family:Arial,Helvetica,sans-serif}.clip{position:absolute}.base{inset:0;width:1920px;height:1080px;object-fit:cover}.hero,.outro{left:58px;right:58px;bottom:70px;padding:34px 42px;background:rgba(7,8,10,.82);border-left:8px solid #f6c945;color:#fff}.eyebrow{color:#f6c945;font-weight:900;font-size:28px;letter-spacing:3px}.hero h1{font-size:74px;line-height:1;margin:14px 0}.hero p{font-size:42px;font-weight:800;margin:0}.lower{left:58px;right:58px;bottom:54px;height:158px;background:rgba(7,8,10,.84);color:#fff;display:flex;align-items:center;padding:22px 34px;border-bottom:6px solid #f6c945}.number{font-size:65px;font-weight:900;color:#f6c945;margin-right:30px}.lower strong{display:block;color:#f6c945;font-size:48px;line-height:1}.lower span{display:block;font-size:29px;font-weight:800;margin-top:14px}.freeze{left:70px;top:75px;max-width:1080px;background:rgba(7,8,10,.82);border-left:7px solid #f6c945;padding:26px 34px;color:#fff}.freeze b{display:block;color:#f6c945;font-size:53px}.freeze span{display:block;font-size:35px;margin-top:10px}.slow{right:68px;top:70px;background:rgba(7,8,10,.82);border:3px solid #f6c945;color:#f6c945;font-size:31px;font-weight:900;padding:16px 22px}.outro{text-align:center}.outro p{font-size:42px;font-weight:800;margin:0}.outro h2{font-size:67px;color:#f6c945;margin:12px 0}.outro span{font-size:31px;font-weight:800}
+</style></head><body><div id="root" data-composition-id="main" data-start="0" data-duration="480" data-width="1920" data-height="1080"><video id="clean-picture" class="clip base" src="assets/clean-base-8min.mp4" data-start="0" data-duration="480" data-track-index="0" muted playsinline></video><audio id="clean-audio" src="assets/clean-base-8min.mp4" data-start="0" data-duration="480" data-track-index="10"></audio>${overlays.join("\n")}</div><script>window.__timelines=window.__timelines||{};window.__timelines.main=gsap.timeline({paused:true});</script></body></html>`;
+fs.writeFileSync(path.join(root,"index.html"),html);
+console.log(path.join(root,"index.html"));

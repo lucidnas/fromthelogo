@@ -1,0 +1,17 @@
+{"schemaVersion":2,"sourceUrl":"https://www.youtube.com/watch?v=4mhTX8ETAeY","chronologicalOrderLocked":true,"plays":[
+{"playNumber":1,"label":"FIRST READ","period":1,"gameClock":"5:18","type":"assist","sourceIn":1,"sourceOut":11,"freezeFrame":5.5,"read":"China shades toward Clark"},
+{"playNumber":2,"label":"BEAT THE SHIFT","period":1,"gameClock":"4:41","type":"assist","sourceIn":12,"sourceOut":20,"freezeFrame":16,"read":"The defense moves before the lane closes"},
+{"playNumber":3,"label":"ONE-TOUCH THREE","period":1,"gameClock":"3:45","type":"assist","sourceIn":22,"sourceOut":32,"freezeFrame":29.5,"read":"The swing reaches Clark before China recovers"},
+{"playNumber":4,"label":"GIVE IT BACK","period":1,"gameClock":"2:17","type":"assist","sourceIn":35,"sourceOut":42,"freezeFrame":38.5,"read":"Boston's defender steps toward Clark"},
+{"playNumber":5,"label":"PUNISH THE LEAN","period":1,"gameClock":"1:53","type":"made-shot","sourceIn":44,"sourceOut":53,"freezeFrame":49.5,"read":"Two screens open Clark's driving shoulder"},
+{"playNumber":6,"label":"PICK UP HIGHER","period":2,"gameClock":"9:53","type":"made-shot","sourceIn":74,"sourceOut":82,"freezeFrame":77.5,"read":"China stays below Clark's range"},
+{"playNumber":7,"label":"HELP ARRIVES LATE","period":2,"gameClock":"1:57","type":"assist","sourceIn":89,"sourceOut":102,"freezeFrame":99.5,"read":"Help collapses toward Clark"},
+{"playNumber":8,"label":"ASSIST NO. 6","period":2,"gameClock":"0:12.5","type":"assist","sourceIn":103,"sourceOut":116,"freezeFrame":112.5,"read":"Stewart pops after screening for Clark"},
+{"playNumber":9,"label":"BEAT THEM DOWNCOURT","period":3,"gameClock":"2:46","type":"assist","sourceIn":153,"sourceOut":161,"freezeFrame":157,"read":"Boston runs before China forms its defense"},
+{"playNumber":10,"label":"PRESSURE FAILED","period":4,"gameClock":"8:30","type":"assist","sourceIn":215,"sourceOut":230,"freezeFrame":228,"read":"Pressure follows the ball to Clark"},
+{"playNumber":11,"label":"SPACE BEHIND HELP","period":4,"gameClock":"6:23","type":"made-shot","sourceIn":239,"sourceOut":251,"freezeFrame":249,"read":"The first reaction creates space behind it"},
+{"playNumber":12,"label":"MOVE. RELOCATE. HIT.","period":4,"gameClock":"5:11","type":"made-shot","sourceIn":254,"sourceOut":268,"freezeFrame":266,"read":"Clark relocates after moving the ball"},
+{"playNumber":13,"label":"ASSIST NO. 9","period":4,"gameClock":"3:22","type":"assist","sourceIn":271,"sourceOut":281,"freezeFrame":278,"read":"Clark's paint touch holds the helper"},
+{"playNumber":14,"label":"DOUBLE-DOUBLE","period":4,"gameClock":"1:12","type":"assist","sourceIn":285,"sourceOut":295,"freezeFrame":292,"read":"Clark waits for the edge to open"},
+{"playNumber":15,"label":"ASSIST NO. 11","period":4,"gameClock":"0:53.9","type":"assist","sourceIn":300,"sourceOut":312,"freezeFrame":309.5,"read":"Clark looks ahead immediately after the block"}
+]}
