@@ -14,6 +14,7 @@ const apiKey = process.env.ELEVENLABS_API_KEY;
 const voiceId = process.env.ELEVENLABS_VOICE_ID;
 const modelId = process.env.ELEVENLABS_MODEL_ID ?? "eleven_multilingual_v2";
 const outputFormat = process.env.ELEVENLABS_OUTPUT_FORMAT ?? "mp3_44100_128";
+const voiceSpeed = Number(process.env.ELEVENLABS_VOICE_SPEED ?? "0.96");
 
 if (!apiKey) throw new Error("ELEVENLABS_API_KEY is not set");
 if (!voiceId) throw new Error("ELEVENLABS_VOICE_ID is not set");
@@ -22,7 +23,8 @@ const outDir = path.dirname(outputPath);
 fs.mkdirSync(outDir, { recursive: true });
 
 const stamp = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
-const workDir = path.join(outDir, `vo-johnny-pause-work-${stamp}`);
+const workLabel = process.env.ELEVENLABS_WORK_LABEL ?? "vo-work";
+const workDir = path.join(outDir, `${workLabel}-${stamp}`);
 fs.mkdirSync(workDir, { recursive: true });
 
 const rawScript = fs.readFileSync(scriptPath, "utf8").replace(/\r\n/g, "\n").trim();
@@ -69,9 +71,10 @@ async function synthesize(text, filePath) {
       text,
       model_id: modelId,
       voice_settings: {
-        stability: 0.42,
+        stability: 0.48,
         similarity_boost: 0.78,
-        style: 0.18,
+        style: 0.1,
+        speed: voiceSpeed,
         use_speaker_boost: true,
       },
     }),

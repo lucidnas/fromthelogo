@@ -2,25 +2,23 @@
 
 Cursor Cloud Agents clone the Git repository, so the composition, manifest-driven clean-base builder, and render command live here. FFmpeg performs only source cuts, five-second freeze preprocessing, slow motion, and the final 480-second conform. It adds no text. HyperFrames owns all labels in `index.html`.
 
-Required cloud inputs:
-
-- A prepared production directory containing `selected-play-manifest-v2.json` and the 17 approved narration chunks.
-- `FTL_PRODUCTION_DIR` pointing to that directory.
-- A reachable source video, supplied with `FTL_SOURCE_VIDEO` when the manifest's local SSD path is unavailable.
+Required cloud input: the complete, checksummed `caitlin-china-render-bundle-v2.tar.gz`. It contains the canonical EDL, both official sources, final Josh master/chunks, alignment, music, script, and truth evidence.
 
 Preferred source transfer:
 
 ```bash
+mkdir -p /tmp/ftl-caitlin-china-production
 gh release download ftl-caitlin-china-assets-v1 \
   --repo lucidnas/fromthelogo \
-  --pattern FIBA-4mhTX8ETAeY.mp4 \
-  --dir assets/source
-echo 'ff4bc48c38a2a6f980758b23157503c7d93d5db138840bfaf255c03248efbc61  assets/source/FIBA-4mhTX8ETAeY.mp4' | sha256sum --check
+  --pattern caitlin-china-render-bundle-v2.tar.gz \
+  --dir /tmp/ftl-caitlin-download
+echo 'e8c568917226b533a51e559d1663c395efc1a45571bbe69e72a62d250ff43d3b  /tmp/ftl-caitlin-download/caitlin-china-render-bundle-v2.tar.gz' | sha256sum --check
+tar -xzf /tmp/ftl-caitlin-download/caitlin-china-render-bundle-v2.tar.gz -C /tmp/ftl-caitlin-china-production
+(cd /tmp/ftl-caitlin-china-production && sha256sum --check ASSET-CHECKSUMS.sha256)
+export FTL_PRODUCTION_DIR=/tmp/ftl-caitlin-china-production
 ```
 
-Set `FTL_SOURCE_VIDEO=assets/source/FIBA-4mhTX8ETAeY.mp4` after verification.
-
-Run `./render-cloud.sh` after assets are present. The final artifact is `renders/caitlin-clark-vs-china-8min-hyperframes.mp4`.
+Run `./render-cloud.sh` after assets are present, followed by `bash publish-results.sh`. Outputs are the clean master, HyperFrames-labeled master, and QC manifest.
 
 Cursor authentication is configured for the FTL account. Cursor Cloud is a render worker only, matching the existing Modal render-job pattern. It must consume the supplied, final, checksummed narration and timing package; it must not generate, rewrite, transform, or editorially revise voiceover. All video assembly, HyperFrames rendering, and encoded QC run in Cursor Cloud. Do not render or encode video locally.
 
