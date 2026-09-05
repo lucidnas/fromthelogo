@@ -14,7 +14,8 @@ test -f "$FTL_PRODUCTION_DIR/sources/official/postgame/USA-Basketball-mWNTPDreG1
 node build-clean-base.mjs
 node generate-composition.mjs
 npm run check
-npm run render -- --quality high --output renders/caitlin-clark-vs-china-8min-hyperframes.mp4
+# 3 workers on this 4-vCPU / 15 GB VM: one core left for encode/OS, enough RAM for 3 Chromes.
+npm run render -- --quality high --workers 3 --output renders/caitlin-clark-vs-china-8min-hyperframes.mp4
 node cloud-qc.mjs
 mkdir -p artifacts
 cp renders/caitlin-clark-vs-china-8min-clean.mp4 artifacts/
