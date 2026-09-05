@@ -26,7 +26,8 @@ for (const [beatIndex,beat] of edl.beats.entries()) {
     const duration = operation.programRelative.out-operation.programRelative.in;
     const file=path.join(segments,`${String(beatIndex).padStart(2,"0")}-${String(opIndex).padStart(2,"0")}.mp4`);
     if(operation.speed===0){
-      run(["-y","-hide_banner","-loglevel","error","-ss",String(operation.source.in),"-i",source,"-frames:v","1","-vf",`${common},tpad=stop_mode=clone:stop_duration=${duration.toFixed(3)}`,"-t",duration.toFixed(3),"-an","-c:v","libx264","-preset","veryfast","-crf","18","-pix_fmt","yuv420p",file]);
+      // Keep one source frame with trim (an output -frames:v cap would also cap tpad's clones).
+      run(["-y","-hide_banner","-loglevel","error","-ss",String(operation.source.in),"-i",source,"-vf",`trim=end_frame=1,setpts=PTS-STARTPTS,${common},tpad=stop_mode=clone:stop_duration=${duration.toFixed(3)}`,"-t",duration.toFixed(3),"-an","-c:v","libx264","-preset","veryfast","-crf","18","-pix_fmt","yuv420p",file]);
     } else {
       run(["-y","-hide_banner","-loglevel","error","-ss",String(operation.source.in),"-to",String(operation.source.out),"-i",source,"-an","-vf",`${common},setpts=(PTS-STARTPTS)/${operation.speed}`,"-t",duration.toFixed(3),"-c:v","libx264","-preset","veryfast","-crf","18","-pix_fmt","yuv420p",file]);
     }
