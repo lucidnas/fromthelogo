@@ -22,12 +22,14 @@ Set `FTL_SOURCE_VIDEO=assets/source/FIBA-4mhTX8ETAeY.mp4` after verification.
 
 Run `./render-cloud.sh` after assets are present. The final artifact is `renders/caitlin-clark-vs-china-8min-hyperframes.mp4`.
 
-Cursor authentication is configured for the FTL account. All narration regeneration, media processing, alignment, HyperFrames rendering, and QC must run in Cursor Cloud. Do not render or encode locally.
+Cursor authentication is configured for the FTL account. Cursor Cloud is a render worker only, matching the existing Modal render-job pattern. It must consume the supplied, final, checksummed narration and timing package; it must not generate, rewrite, transform, or editorially revise voiceover. All video assembly, HyperFrames rendering, and encoded QC run in Cursor Cloud. Do not render or encode video locally.
 
 Revision requirements:
 
-- Regenerate the approved FTL Josh Australian voice at natural speed. Never apply global `atempo` or other time compression to narration.
-- Derive the edit timeline from the regenerated chunk durations.
+- Use the bundled approved FTL Josh Australian narration exactly as supplied.
+- Verify every narration chunk against the bundle checksum manifest before rendering.
+- Derive the edit timeline from the supplied measured chunk durations.
+- Never apply global `atempo`, time compression, pitch adjustment, or other transformation to narration.
 - Remove unintended dead silence. Use only 0.3–0.6 second spoken transitions; carry ducked native game audio through longer visual intervals.
 - Keep the longer decision freeze before each scoring or assisted play, followed by the relevant action in slow motion.
 - Do not speak editing cues such as “freeze it,” “pause here,” or “watch this.” The narration states the basketball read directly.

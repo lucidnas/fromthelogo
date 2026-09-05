@@ -3,6 +3,10 @@ set -euo pipefail
 
 : "${FTL_PRODUCTION_DIR:?Set FTL_PRODUCTION_DIR to the prepared production directory}"
 
+test -f "$FTL_PRODUCTION_DIR/ASSET-CHECKSUMS.sha256"
+(cd "$FTL_PRODUCTION_DIR" && sha256sum --check ASSET-CHECKSUMS.sha256)
+test -f "$FTL_PRODUCTION_DIR/audio/vo-master.mp3"
+
 node build-clean-base.mjs
 node generate-composition.mjs
 npm run check
