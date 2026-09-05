@@ -18,7 +18,30 @@ tar -xzf /tmp/ftl-caitlin-download/caitlin-china-render-bundle-v2.tar.gz -C /tmp
 export FTL_PRODUCTION_DIR=/tmp/ftl-caitlin-china-production
 ```
 
-Run `./render-cloud.sh` after assets are present, followed by `bash publish-results.sh`. Outputs are the clean master, HyperFrames-labeled master, and QC manifest.
+For this project, the reusable one-command launcher downloads and verifies the
+release bundle, chooses a safe worker count from available CPU and memory, runs
+the render, and publishes the results:
+
+```bash
+tools/ftl-cursor-cloud-render.sh \
+  --project-dir videos/caitlin-china-8min-clean \
+  --asset-repo lucidnas/fromthelogo \
+  --asset-tag ftl-caitlin-china-assets-v1 \
+  --asset-name caitlin-china-render-bundle-v2.tar.gz \
+  --asset-sha256 e8c568917226b533a51e559d1663c395efc1a45571bbe69e72a62d250ff43d3b \
+  --workers auto \
+  --publish
+```
+
+Use `--workers N` to override automatic selection. Auto reserves one CPU,
+budgets roughly 3 GiB of available RAM per Chromium capture worker, and caps at
+four workers to avoid memory pressure on typical Cursor Cloud machines. The
+launcher reuses installed tools and installs missing Ubuntu packages at runtime;
+set `FTL_INSTALL_MISSING=0` to make missing dependencies a hard failure.
+
+The lower-level path remains `./render-cloud.sh` after assets are present,
+followed by `bash publish-results.sh`. Outputs are the clean master,
+HyperFrames-labeled master, and QC manifest.
 
 Cursor authentication is configured for the FTL account. Cursor Cloud is a render worker only, matching the existing Modal render-job pattern. It must consume the supplied, final, checksummed narration and timing package; it must not generate, rewrite, transform, or editorially revise voiceover. All video assembly, HyperFrames rendering, and encoded QC run in Cursor Cloud. Do not render or encode video locally.
 

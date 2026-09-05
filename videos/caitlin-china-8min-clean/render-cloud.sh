@@ -2,6 +2,12 @@
 set -euo pipefail
 
 : "${FTL_PRODUCTION_DIR:?Set FTL_PRODUCTION_DIR to the prepared production directory}"
+: "${HYPERFRAMES_WORKERS:=1}"
+
+[[ "$HYPERFRAMES_WORKERS" =~ ^[1-9][0-9]*$ ]] || {
+  echo "HYPERFRAMES_WORKERS must be a positive integer" >&2
+  exit 2
+}
 
 test -f "$FTL_PRODUCTION_DIR/ASSET-CHECKSUMS.sha256"
 (cd "$FTL_PRODUCTION_DIR" && sha256sum --check ASSET-CHECKSUMS.sha256)
@@ -12,7 +18,7 @@ test -f "$FTL_PRODUCTION_DIR/sources/official/postgame/USA-Basketball-mWNTPDreG1
 node build-clean-base.mjs
 node generate-composition.mjs
 npm run check
-npm run render -- --quality high --output renders/caitlin-clark-vs-china-8min-hyperframes.mp4
+npm run render -- --quality high --workers "$HYPERFRAMES_WORKERS" --output renders/caitlin-clark-vs-china-8min-hyperframes.mp4
 node cloud-qc.mjs
 mkdir -p artifacts
 cp renders/caitlin-clark-vs-china-8min-clean.mp4 artifacts/
