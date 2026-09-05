@@ -36,3 +36,5 @@ Revision requirements:
 - Let the runtime land naturally near eight minutes. Do not force an exact 480 seconds by speeding up narration.
 
 Publish completed work to a separate GitHub prerelease named `ftl-caitlin-china-results-v1`. Attach the labeled master, the text-free master, and a JSON QC manifest containing duration, resolution, codecs, file sizes, SHA-256 hashes, silence findings, and A/V-sync findings. Never overwrite or attach results to the source-assets release.
+
+Also copy both full-resolution MP4 masters and the QC manifest into the Cloud Agent's `artifacts/` directory so Cursor uploads them as native Cursor artifacts. Verify they appear in the agent artifact listing and record the Cursor artifact paths and `sizeBytes` in the QC manifest. GitHub Release assets remain the durable canonical copies; Cursor artifacts are an explicit size-and-download-path test and must not be the only copies.
