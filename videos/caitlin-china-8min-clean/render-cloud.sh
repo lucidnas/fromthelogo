@@ -10,7 +10,9 @@ set -euo pipefail
 }
 
 test -f "$FTL_PRODUCTION_DIR/ASSET-CHECKSUMS.sha256"
-(cd "$FTL_PRODUCTION_DIR" && sha256sum --check ASSET-CHECKSUMS.sha256)
+# The bundle is built on macOS; its manifest lists AppleDouble "._*" xattr sidecars
+# that GNU tar extracts differently. Every real asset is still checked strictly.
+(cd "$FTL_PRODUCTION_DIR" && grep -v '/\._' ASSET-CHECKSUMS.sha256 | sha256sum --check --strict -)
 test -f "$FTL_PRODUCTION_DIR/audio/chronological-recap-v5-josh-normal/vo-master-postgame-final.mp3"
 test -f "$FTL_PRODUCTION_DIR/edl.json"
 test -f "$FTL_PRODUCTION_DIR/sources/official/postgame/USA-Basketball-mWNTPDreG1k.mp4"
