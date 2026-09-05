@@ -21,14 +21,34 @@ function framesFor(seconds){return Math.round(seconds*30);}
 const common="scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=30";
 const encode=["-an","-c:v","libx264","-preset","veryfast","-crf","18","-r","30","-g","30","-keyint_min","30","-pix_fmt","yuv420p"];
 const outputs=[]; const schedule=[];
+function renderStageProgression(operation,duration,file){
+  const clips=operation.sourceAssets.map((item)=>path.join(production,item.path));
+  for(const clip of clips) if(!fs.existsSync(clip)) throw new Error(`Missing stage-progression asset: ${clip}`);
+  const items=operation.sourceAssets;
+  const filters=items.map((item,index)=>`[${index}:v]trim=start=${item.in}:end=${item.out},setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=increase,crop=640:360,fps=30,tpad=stop_mode=clone:stop_duration=${duration}[p${index}]`);
+  filters.push(`[p0][p1][p2]hstack=inputs=3,scale=1920:1080,setsar=1,trim=duration=${duration}[v]`);
+  const args=["-y","-hide_banner","-loglevel","error"];
+  for(const clip of clips) args.push("-i",clip);
+  run([...args,"-filter_complex",filters.join(";"),"-map","[v]","-frames:v",String(framesFor(duration)),...encode,file]);
+}
+function renderAwardGrid(operation,duration,file){
+  const images=operation.sourceAssets.map((item)=>path.join(production,item.path));
+  for(const image of images) if(!fs.existsSync(image)) throw new Error(`Missing award image: ${image}`);
+  const filter=`color=c=#07101f:s=1920x1080:d=${duration}[bg];[0:v]scale=850:850:force_original_aspect_ratio=decrease,pad=850:850:(ow-iw)/2:(oh-ih)/2:color=#111827[a];[1:v]scale=850:850:force_original_aspect_ratio=decrease,pad=850:850:(ow-iw)/2:(oh-ih)/2:color=#111827[b];[bg][a]overlay=70:115[tmp];[tmp][b]overlay=1000:115,trim=duration=${duration},fps=30,setsar=1[v]`;
+  run(["-y","-hide_banner","-loglevel","error","-loop","1","-i",images[0],"-loop","1","-i",images[1],"-filter_complex",filter,"-map","[v]","-frames:v",String(framesFor(duration)),...encode,file]);
+}
 for (const [beatIndex,beat] of edl.beats.entries()) {
   const beatParts=[];
   for (const [opIndex,operation] of beat.pictureOperations.entries()) {
     const source = beat.source.asset === "official-postgame" || operation.kind === "closing-receipt" || operation.kind === "transition" ? press : game;
     const duration = operation.programRelative.out-operation.programRelative.in;
     const file=path.join(segments,`${String(beatIndex).padStart(2,"0")}-${String(opIndex).padStart(2,"0")}.mp4`);
+    if(operation.kind==="stage-progression-grid"){
+      renderStageProgression(operation,duration,file);
+    } else if(operation.treatmentType==="award-grid"){
+      renderAwardGrid(operation,duration,file);
     // tpad first so a later -frames:v cap cannot collapse cloned freeze/hold frames.
-    if(operation.speed===0){
+    } else if(operation.speed===0){
       run(["-y","-hide_banner","-loglevel","error","-ss",String(operation.source.in),"-i",source,"-vf",`trim=end_frame=1,setpts=PTS-STARTPTS,${common},tpad=stop_mode=clone:stop_duration=${duration.toFixed(3)}`,"-frames:v",String(framesFor(duration)),...encode,file]);
     } else {
       run(["-y","-hide_banner","-loglevel","error","-ss",String(operation.source.in),"-to",String(operation.source.out),"-i",source,"-vf",`${common},setpts=(PTS-STARTPTS)/${operation.speed},tpad=stop_mode=clone:stop_duration=${duration.toFixed(3)}`,"-frames:v",String(framesFor(duration)),...encode,file]);

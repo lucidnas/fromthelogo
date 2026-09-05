@@ -6,7 +6,8 @@ usage() {
 Usage: tools/ftl-cursor-cloud-render.sh \
   --project-dir videos/<render-project> \
   --asset-repo owner/repo --asset-tag TAG --asset-name BUNDLE.tar.gz \
-  --asset-sha256 SHA256 [--workers auto|N] [--publish]
+  --asset-sha256 SHA256 [--workers auto|N] [--render-script FILE] \
+  [--publish-script FILE] [--publish]
 
 Runs an FTL render project entirely on a Cursor Cloud machine. The project must
 provide render-cloud.sh and, when --publish is used, publish-results.sh.
@@ -20,6 +21,8 @@ ASSET_NAME=""
 ASSET_SHA256=""
 WORKERS="auto"
 PUBLISH=0
+RENDER_SCRIPT="render-cloud.sh"
+PUBLISH_SCRIPT="publish-results.sh"
 
 while (($#)); do
   case "$1" in
@@ -29,6 +32,8 @@ while (($#)); do
     --asset-name) ASSET_NAME="$2"; shift 2 ;;
     --asset-sha256) ASSET_SHA256="$2"; shift 2 ;;
     --workers) WORKERS="$2"; shift 2 ;;
+    --render-script) RENDER_SCRIPT="$2"; shift 2 ;;
+    --publish-script) PUBLISH_SCRIPT="$2"; shift 2 ;;
     --publish) PUBLISH=1; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown argument: $1" >&2; usage >&2; exit 2 ;;
@@ -43,8 +48,8 @@ for value in PROJECT_DIR ASSET_REPO ASSET_TAG ASSET_NAME ASSET_SHA256; do
   fi
 done
 
-if [[ ! -x "$PROJECT_DIR/render-cloud.sh" ]]; then
-  echo "Missing executable $PROJECT_DIR/render-cloud.sh" >&2
+if [[ ! -x "$PROJECT_DIR/$RENDER_SCRIPT" ]]; then
+  echo "Missing executable $PROJECT_DIR/$RENDER_SCRIPT" >&2
   exit 1
 fi
 
@@ -110,8 +115,7 @@ export FTL_PRODUCTION_DIR="$PRODUCTION_DIR"
 export HYPERFRAMES_WORKERS="$WORKERS"
 echo "Cursor Cloud render: project=$PROJECT_DIR workers=$HYPERFRAMES_WORKERS production=$FTL_PRODUCTION_DIR"
 
-(cd "$PROJECT_DIR" && ./render-cloud.sh)
+(cd "$PROJECT_DIR" && "./$RENDER_SCRIPT")
 if ((PUBLISH)); then
-  (cd "$PROJECT_DIR" && bash publish-results.sh)
+  (cd "$PROJECT_DIR" && bash "$PUBLISH_SCRIPT")
 fi
-
