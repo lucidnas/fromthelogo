@@ -26,7 +26,8 @@ const avSyncFinding=streamGap<=0.1?"Automated duration/stream check passed; vide
 const comparisonFinding=cleanOnly?"N/A: clean-only QC; not paired with the revision-3 HyperFrames comparison master.":durationDelta<=0.05?"PASS: labeled and clean masters have matching durations.":"FAIL: duration mismatch.";
 const expectedFinding=expectedGap<=0.1?`PASS: video stream lands within 0.1s of the canonical ${expected}s timeline.`:`FAIL: a video stream is ${expectedGap.toFixed(3)}s away from the canonical ${expected}s timeline.`;
 const maxGop=Math.max(...artifacts.map(item=>item.maxKeyframeInterval??0));
-const frameFinding=artifacts.every(item=>item.frameCount===14460)?"PASS: 14,460 frames.":`FAIL: expected 14,460 frames; got ${artifacts.map(item=>item.frameCount).join(" / ")}.`;
+const expectedFrames=Math.round(expected*30);
+const frameFinding=artifacts.every(item=>item.frameCount===expectedFrames)?`PASS: ${expectedFrames.toLocaleString("en-US")} frames.`:`FAIL: expected ${expectedFrames.toLocaleString("en-US")} frames; got ${artifacts.map(item=>item.frameCount).join(" / ")}.`;
 const gopFinding=maxGop<=1.05?`PASS: densest keyframe interval is ${maxGop.toFixed(3)}s (GOP 30 / 1.00s target).`:`FAIL: sparse keyframes; max interval ${maxGop.toFixed(3)}s exceeds 1.05s.`;
 const output={schemaVersion:"1.1",generatedAt:new Date().toISOString(),mode:cleanOnly?"clean-only":"comparison",revision:process.env.FTL_QC_REVISION||null,expectedDuration:expected,artifacts,durationDelta,streamGap,expectedGap,maxGop,avSyncFinding,comparisonFinding,expectedFinding,frameFinding,gopFinding,cursorArtifacts:files.concat(manifestName).map(name=>({path:`artifacts/${name}`,sizeBytes:name.endsWith(".json")?null:artifacts.find(item=>item.name===name)?.sizeBytes??null}))};
 const manifest=path.join(renderDir,manifestName);
