@@ -46,7 +46,7 @@ const pictureRaw=path.join(work,"picture-raw.mp4");
 const picture=path.join(work,"picture.mp4");
 run(["-y","-hide_banner","-loglevel","error","-f","concat","-safe","0","-i",pictureList,"-c","copy",pictureRaw]);
 run(["-y","-hide_banner","-loglevel","error","-i",pictureRaw,"-vf",`fps=30,tpad=stop_mode=clone:stop_duration=${edl.duration}`,"-frames:v",String(framesFor(edl.duration)),...encode,picture]);
-const clean=path.join(root,"renders/caitlin-clark-vs-china-8min-clean.mp4");
+const clean=process.env.FTL_CLEAN_OUTPUT||path.join(root,"renders/caitlin-clark-vs-china-8min-clean.mp4");
 run(["-y","-hide_banner","-loglevel","error","-i",picture,"-i",vo,"-i",press,"-stream_loop","-1","-i",music,"-filter_complex",`[1:a]aresample=48000,loudnorm=I=-16:TP=-1.5:LRA=11[vo];[2:a]atrim=start=35.48:end=41.92,asetpts=PTS-STARTPTS[p1];[2:a]atrim=start=120.36:end=138.18,asetpts=PTS-STARTPTS[p2];[2:a]atrim=start=145.72:end=167.14,asetpts=PTS-STARTPTS[p3];[p1][p2][p3]concat=n=3:v=0:a=1,adelay=396860|396860,loudnorm=I=-16:TP=-1.5:LRA=11[press];[3:a]atrim=0:${edl.duration},volume=0.06[music];[vo][press][music]amix=inputs=3:duration=longest:normalize=0,alimiter=limit=0.95[a]`,"-map","0:v","-map","[a]","-t",String(edl.duration),"-c:v","libx264","-preset","veryfast","-crf","18","-r","30","-g","30","-keyint_min","30","-pix_fmt","yuv420p","-c:a","aac","-ar","48000","-b:a","192k","-movflags","+faststart",clean]);
 fs.copyFileSync(clean,path.join(assets,"clean-base-8min.mp4"));
 fs.writeFileSync(path.join(assets,"timeline.json"),`${JSON.stringify({duration:edl.duration,schedule},null,2)}\n`);
