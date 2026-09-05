@@ -31,7 +31,7 @@ const gopFinding=maxGop<=1.05?`PASS: densest keyframe interval is ${maxGop.toFix
 const output={schemaVersion:"1.1",generatedAt:new Date().toISOString(),mode:cleanOnly?"clean-only":"comparison",revision:process.env.FTL_QC_REVISION||null,expectedDuration:expected,artifacts,durationDelta,streamGap,expectedGap,maxGop,avSyncFinding,comparisonFinding,expectedFinding,frameFinding,gopFinding,cursorArtifacts:files.concat(manifestName).map(name=>({path:`artifacts/${name}`,sizeBytes:name.endsWith(".json")?null:artifacts.find(item=>item.name===name)?.sizeBytes??null}))};
 const manifest=path.join(renderDir,manifestName);
 fs.writeFileSync(manifest,`${JSON.stringify(output,null,2)}\n`);
-output.cursorArtifacts.find(item=>item.path.endsWith("qc-manifest.json")).sizeBytes=fs.statSync(manifest).size;
+output.cursorArtifacts.find(item=>item.path.endsWith(manifestName)).sizeBytes=fs.statSync(manifest).size;
 fs.writeFileSync(manifest,`${JSON.stringify(output,null,2)}\n`);
 console.log(manifest);
 if([avSyncFinding,comparisonFinding,expectedFinding,frameFinding,gopFinding].some(finding=>finding.startsWith("FAIL"))){
