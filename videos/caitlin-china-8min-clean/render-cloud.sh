@@ -21,6 +21,13 @@ node build-clean-base.mjs
 node generate-composition.mjs
 npm run check
 npm run render -- --quality high --workers "$HYPERFRAMES_WORKERS" --output renders/caitlin-clark-vs-china-8min-hyperframes.mp4
+# HyperFrames high encode defaults to keyint 250 (8.33s). Conform labeled video to GOP 30; copy audio.
+labeled="renders/caitlin-clark-vs-china-8min-hyperframes.mp4"
+ffmpeg -y -hide_banner -loglevel error -i "$labeled" \
+  -c:v libx264 -preset veryfast -crf 15 -r 30 -g 30 -keyint_min 30 -pix_fmt yuv420p \
+  -c:a copy -movflags +faststart -frames:v 14460 \
+  "${labeled}.gop30.mp4"
+mv "${labeled}.gop30.mp4" "$labeled"
 node cloud-qc.mjs
 mkdir -p artifacts
 cp renders/caitlin-clark-vs-china-8min-clean.mp4 artifacts/
