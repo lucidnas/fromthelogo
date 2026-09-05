@@ -1,343 +1,639 @@
 {
-  "duration": 480,
-  "factor": 1.1884880952380952,
+  "duration": 481.99,
   "schedule": [
     {
-      "kind": "intro",
-      "rawDuration": 74.08,
-      "rawStart": 0,
+      "id": "B00-INTRO",
       "start": 0,
-      "duration": 62.331293259743774,
-      "freezeStart": null,
-      "freezeDuration": null,
-      "slowStart": null,
-      "slowDuration": null
+      "duration": 64.66,
+      "editorialRole": "opening-promise",
+      "treatment": {
+        "playback": [],
+        "holds": [],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: 14 PTS • 11 AST • 0 TO"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 1,
-      "label": "FIRST READ",
-      "period": 1,
-      "gameClock": "5:18",
-      "type": "assist",
-      "read": "China shades toward Clark",
-      "rawDuration": 25.76,
-      "freezeRawStart": 4.5,
-      "freezeRawDuration": 5,
-      "slowRawStart": 9.5,
-      "slowRawDuration": 14.285714285714286,
-      "rawStart": 74.08,
-      "start": 62.331293259743774,
-      "duration": 21.674596576282394,
-      "freezeStart": 66.11761641942043,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 70.3246421523945,
-      "slowDuration": 12.020073522783049
+      "id": "B01-PLAY-01",
+      "start": 64.66,
+      "duration": 23.86,
+      "editorialRole": "playmaking-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 10,
+            "speed": 1
+          },
+          {
+            "in": 15,
+            "out": 17.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 10,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: FIRST READ",
+          "labeled-version only: Q1 5:18"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 2,
-      "label": "BEAT THE SHIFT",
-      "period": 1,
-      "gameClock": "4:41",
-      "type": "assist",
-      "read": "The defense is moving before the lane closes",
-      "rawDuration": 25.12,
-      "freezeRawStart": 4,
-      "freezeRawDuration": 5,
-      "slowRawStart": 9,
-      "slowRawDuration": 11.428571428571429,
-      "rawStart": 99.84,
-      "start": 84.00588983602617,
-      "duration": 21.136097282461712,
-      "freezeStart": 87.37151042240542,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 91.5785361553795,
-      "slowDuration": 9.616058818226438
+      "id": "B02-PLAY-02",
+      "start": 88.52,
+      "duration": 20.340000000000003,
+      "editorialRole": "playmaking-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 8,
+            "speed": 1
+          },
+          {
+            "in": 13,
+            "out": 15.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 8,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: BEAT THE SHIFT",
+          "labeled-version only: Q1 4:41"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 3,
-      "label": "ONE-TOUCH THREE",
-      "period": 1,
-      "gameClock": "3:45",
-      "type": "assist",
-      "read": "The swing reaches Clark before China recovers",
-      "rawDuration": 26.785714285714285,
-      "freezeRawStart": 7.5,
-      "freezeRawDuration": 5,
-      "slowRawStart": 12.5,
-      "slowRawDuration": 14.285714285714286,
-      "rawStart": 124.96000000000001,
-      "start": 105.14198711848789,
-      "duration": 22.537637855218215,
-      "freezeStart": 111.45252571794899,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 115.65955145092306,
-      "slowDuration": 12.020073522783049
+      "id": "B03-PLAY-03",
+      "start": 108.86,
+      "duration": 22.980000000000004,
+      "editorialRole": "playmaking-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 10,
+            "speed": 1
+          },
+          {
+            "in": 15,
+            "out": 17.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 10,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: ONE-TOUCH THREE",
+          "labeled-version only: Q1 3:45"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 4,
-      "label": "GIVE IT BACK",
-      "period": 1,
-      "gameClock": "2:17",
-      "type": "assist",
-      "read": "Boston's defender steps toward Clark",
-      "rawDuration": 24.56,
-      "freezeRawStart": 3.5,
-      "freezeRawDuration": 5,
-      "slowRawStart": 8.5,
-      "slowRawDuration": 10,
-      "rawStart": 151.74571428571429,
-      "start": 127.6796249737061,
-      "duration": 20.664910400368615,
-      "freezeStart": 130.62454298678793,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 134.831568719762,
-      "slowDuration": 8.414051465948134
+      "id": "B04-PLAY-04",
+      "start": 131.84,
+      "duration": 21.299999999999983,
+      "editorialRole": "playmaking-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 7,
+            "speed": 1
+          },
+          {
+            "in": 12,
+            "out": 14.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 7,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: GIVE IT BACK",
+          "labeled-version only: Q1 2:17"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 5,
-      "label": "PUNISH THE LEAN",
-      "period": 1,
-      "gameClock": "1:53",
-      "type": "made-shot",
-      "read": "Two screens open Clark's driving shoulder",
-      "rawDuration": 23.84,
-      "freezeRawStart": 5.5,
-      "freezeRawDuration": 5,
-      "slowRawStart": 10.5,
-      "slowRawDuration": 12.857142857142858,
-      "rawStart": 176.3057142857143,
-      "start": 148.34453537407472,
-      "duration": 20.05909869482035,
-      "freezeStart": 152.97226368034617,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 157.17928941332025,
-      "slowDuration": 10.818066170504745
+      "id": "B05-PLAY-05",
+      "start": 153.14,
+      "duration": 20.420000000000016,
+      "editorialRole": "scoring-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 9,
+            "speed": 1
+          },
+          {
+            "in": 14,
+            "out": 16.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 9,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: PUNISH THE LEAN",
+          "labeled-version only: Q1 1:53"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 6,
-      "label": "PICK UP HIGHER",
-      "period": 2,
-      "gameClock": "9:53",
-      "type": "made-shot",
-      "read": "China stays below Clark's range",
-      "rawDuration": 22.64,
-      "freezeRawStart": 3.5,
-      "freezeRawDuration": 5,
-      "slowRawStart": 8.5,
-      "slowRawDuration": 11.428571428571429,
-      "rawStart": 200.1457142857143,
-      "start": 168.40363406889506,
-      "duration": 19.049412518906575,
-      "freezeStart": 171.34855208197692,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 175.555577814951,
-      "slowDuration": 9.616058818226438
+      "id": "B06-PLAY-06",
+      "start": 173.56,
+      "duration": 19.859999999999985,
+      "editorialRole": "scoring-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 8,
+            "speed": 1
+          },
+          {
+            "in": 13,
+            "out": 15.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 8,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: PICK UP HIGHER",
+          "labeled-version only: Q2 9:53"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 7,
-      "label": "HELP ARRIVES LATE",
-      "period": 2,
-      "gameClock": "1:57",
-      "type": "assist",
-      "read": "Help collapses toward Clark",
-      "rawDuration": 34.07142857142857,
-      "freezeRawStart": 10.5,
-      "freezeRawDuration": 5,
-      "slowRawStart": 15.5,
-      "slowRawDuration": 18.571428571428573,
-      "rawStart": 222.78571428571428,
-      "start": 187.45304658780162,
-      "duration": 28.66787535183757,
-      "freezeStart": 196.28780062704718,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 200.49482636002125,
-      "slowDuration": 15.626095579617964
+      "id": "B07-PLAY-07",
+      "start": 193.42,
+      "duration": 22.26000000000002,
+      "editorialRole": "playmaking-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 13,
+            "speed": 1
+          },
+          {
+            "in": 18,
+            "out": 20.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 13,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: HELP ARRIVES LATE",
+          "labeled-version only: Q2 1:57"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 8,
-      "label": "ASSIST NO. 6",
-      "period": 2,
-      "gameClock": "0:12.5",
-      "type": "assist",
-      "read": "Stewart pops after screening for Clark",
-      "rawDuration": 33.07142857142857,
-      "freezeRawStart": 9.5,
-      "freezeRawDuration": 5,
-      "slowRawStart": 14.5,
-      "slowRawDuration": 18.571428571428573,
-      "rawStart": 256.85714285714283,
-      "start": 216.12092193963917,
-      "duration": 27.826470205242757,
-      "freezeStart": 224.11427083228992,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 228.321296565264,
-      "slowDuration": 15.626095579617964
+      "id": "B08-PLAY-08",
+      "start": 215.68,
+      "duration": 22.340000000000003,
+      "editorialRole": "playmaking-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 13,
+            "speed": 1
+          },
+          {
+            "in": 18,
+            "out": 20.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 13,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: ASSIST NO. 6",
+          "labeled-version only: Q2 0:12.5"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 9,
-      "label": "BEAT THEM DOWNCOURT",
-      "period": 3,
-      "gameClock": "2:46",
-      "type": "assist",
-      "read": "Boston runs before China forms its defense",
-      "rawDuration": 26.16,
-      "freezeRawStart": 4,
-      "freezeRawDuration": 5,
-      "slowRawStart": 9,
-      "slowRawDuration": 11.428571428571429,
-      "rawStart": 289.9285714285714,
-      "start": 243.94739214488195,
-      "duration": 22.011158634920317,
-      "freezeStart": 247.31301273126118,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 251.52003846423526,
-      "slowDuration": 9.616058818226438
+      "id": "B09-PLAY-09",
+      "start": 238.02,
+      "duration": 25.140000000000015,
+      "editorialRole": "playmaking-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 8,
+            "speed": 1
+          },
+          {
+            "in": 13,
+            "out": 15.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 8,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: BEAT THEM DOWNCOURT",
+          "labeled-version only: Q3 2:46"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 10,
-      "label": "PRESSURE FAILED",
-      "period": 4,
-      "gameClock": "8:30",
-      "type": "assist",
-      "read": "Pressure follows the ball to Clark",
-      "rawDuration": 39.42857142857143,
-      "freezeRawStart": 13,
-      "freezeRawDuration": 5,
-      "slowRawStart": 18,
-      "slowRawDuration": 21.42857142857143,
-      "rawStart": 316.0885714285714,
-      "start": 265.9585507798023,
-      "duration": 33.17540292288121,
-      "freezeStart": 276.89681768553487,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 281.1038434185089,
-      "slowDuration": 18.030110284174572
+      "id": "B10-PLAY-10",
+      "start": 263.16,
+      "duration": 21.69999999999999,
+      "editorialRole": "playmaking-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 15,
+            "speed": 1
+          },
+          {
+            "in": 19.392,
+            "out": 21.7,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 15,
+            "duration": 4.392
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: PRESSURE FAILED",
+          "labeled-version only: Q4 8:30"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 11,
-      "label": "SPACE BEHIND HELP",
-      "period": 4,
-      "gameClock": "6:23",
-      "type": "made-shot",
-      "read": "The first reaction creates space behind it",
-      "rawDuration": 32.14285714285714,
-      "freezeRawStart": 10,
-      "freezeRawDuration": 5,
-      "slowRawStart": 15,
-      "slowRawDuration": 17.142857142857142,
-      "rawStart": 355.51714285714286,
-      "start": 299.13395370268347,
-      "duration": 27.045165426261857,
-      "freezeStart": 307.5480051686316,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 311.7550309016057,
-      "slowDuration": 14.424088227339658
+      "id": "B11-PLAY-11",
+      "start": 284.86,
+      "duration": 22.74000000000001,
+      "editorialRole": "scoring-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 12,
+            "speed": 1
+          },
+          {
+            "in": 17,
+            "out": 19.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 12,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: SPACE BEHIND HELP",
+          "labeled-version only: Q4 6:23"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 12,
-      "label": "MOVE. RELOCATE. HIT.",
-      "period": 4,
-      "gameClock": "5:11",
-      "type": "made-shot",
-      "read": "Clark relocates after moving the ball",
-      "rawDuration": 37,
-      "freezeRawStart": 12,
-      "freezeRawDuration": 5,
-      "slowRawStart": 17,
-      "slowRawDuration": 20,
-      "rawStart": 387.65999999999997,
-      "start": 326.17911912894533,
-      "duration": 31.131990424008094,
-      "freezeStart": 336.2759808880831,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 340.48300662105714,
-      "slowDuration": 16.828102931896268
+      "id": "B12-PLAY-12",
+      "start": 307.6,
+      "duration": 22.099999999999966,
+      "editorialRole": "scoring-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 14,
+            "speed": 1
+          },
+          {
+            "in": 19,
+            "out": 21.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 14,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: MOVE. RELOCATE. HIT.",
+          "labeled-version only: Q4 5:11"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 13,
-      "label": "ASSIST NO. 9",
-      "period": 4,
-      "gameClock": "3:22",
-      "type": "assist",
-      "read": "Clark's paint touch freezes the helper",
-      "rawDuration": 26.285714285714285,
-      "freezeRawStart": 7,
-      "freezeRawDuration": 5,
-      "slowRawStart": 12,
-      "slowRawDuration": 14.285714285714286,
-      "rawStart": 424.65999999999997,
-      "start": 357.31110955295344,
-      "duration": 22.116935281920806,
-      "freezeStart": 363.2009455791171,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 367.4079713120912,
-      "slowDuration": 12.020073522783049
+      "id": "B13-PLAY-13",
+      "start": 329.7,
+      "duration": 19.460000000000036,
+      "editorialRole": "playmaking-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 10,
+            "speed": 1
+          },
+          {
+            "in": 15,
+            "out": 17.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 10,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: ASSIST NO. 9",
+          "labeled-version only: Q4 3:22"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 14,
-      "label": "DOUBLE-DOUBLE",
-      "period": 4,
-      "gameClock": "1:12",
-      "type": "assist",
-      "read": "Clark waits for the edge to open",
-      "rawDuration": 26.285714285714285,
-      "freezeRawStart": 7,
-      "freezeRawDuration": 5,
-      "slowRawStart": 12,
-      "slowRawDuration": 14.285714285714286,
-      "rawStart": 450.94571428571425,
-      "start": 379.42804483487424,
-      "duration": 22.116935281920806,
-      "freezeStart": 385.3178808610379,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 389.524906594012,
-      "slowDuration": 12.020073522783049
+      "id": "B14-PLAY-14",
+      "start": 349.16,
+      "duration": 22.25999999999999,
+      "editorialRole": "playmaking-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 10,
+            "speed": 1
+          },
+          {
+            "in": 15,
+            "out": 17.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 10,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: DOUBLE-DOUBLE",
+          "labeled-version only: Q4 1:12"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "play",
-      "playNumber": 15,
-      "label": "ASSIST NO. 11",
-      "period": 4,
-      "gameClock": "0:53.9",
-      "type": "assist",
-      "read": "Clark looks ahead immediately after the block",
-      "rawDuration": 31.642857142857142,
-      "freezeRawStart": 9.5,
-      "freezeRawDuration": 5,
-      "slowRawStart": 14.5,
-      "slowRawDuration": 17.142857142857142,
-      "rawStart": 477.2314285714285,
-      "start": 401.54498011679505,
-      "duration": 26.624462852964452,
-      "freezeStart": 409.53832900944576,
-      "freezeDuration": 4.207025732974067,
-      "slowStart": 413.7453547424198,
-      "slowDuration": 14.424088227339658
+      "id": "B15-PLAY-15",
+      "start": 371.42,
+      "duration": 20.80000000000001,
+      "editorialRole": "playmaking-analysis",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 12,
+            "speed": 1
+          },
+          {
+            "in": 17,
+            "out": 19.308,
+            "speed": 0.65
+          }
+        ],
+        "holds": [
+          {
+            "at": 12,
+            "duration": 5
+          }
+        ],
+        "cropPan": "Full broadcast frame",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: ASSIST NO. 11",
+          "labeled-version only: Q4 0:53.9"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
     },
     {
-      "kind": "outro",
-      "rawDuration": 61.6,
-      "rawStart": 508.8742857142857,
-      "start": 428.1694429697595,
-      "duration": 51.830557030240506,
-      "freezeStart": null,
-      "freezeDuration": null,
-      "slowStart": null,
-      "slowDuration": null
+      "id": "B16-PRESS-BRIDGE",
+      "start": 392.22,
+      "duration": 4.639999999999986,
+      "editorialRole": "transition",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 4.64,
+            "speed": 1
+          }
+        ],
+        "holds": [],
+        "cropPan": "Full official frame",
+        "color": "source natural",
+        "graphics": [],
+        "captions": [],
+        "transitionOut": "cut"
+      }
+    },
+    {
+      "id": "B17-COACH-RECEIPT",
+      "start": 396.86,
+      "duration": 6.439999999999998,
+      "editorialRole": "receipt",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 6.44,
+            "speed": 1
+          }
+        ],
+        "holds": [],
+        "cropPan": "Full official frame",
+        "color": "source natural",
+        "graphics": [
+          "labeled-version only: speaker identification"
+        ],
+        "captions": [],
+        "transitionOut": "explicit editorial jump"
+      }
+    },
+    {
+      "id": "B18-CAITLIN-BIG-STAGE",
+      "start": 403.3,
+      "duration": 17.819999999999993,
+      "editorialRole": "receipt",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 17.82,
+            "speed": 1
+          }
+        ],
+        "holds": [],
+        "cropPan": "Full official frame",
+        "color": "source natural",
+        "graphics": [
+          "labeled-version only: speaker identification"
+        ],
+        "captions": [],
+        "transitionOut": "explicit editorial jump"
+      }
+    },
+    {
+      "id": "B19-CAITLIN-PLAYMAKING",
+      "start": 421.12,
+      "duration": 21.420000000000016,
+      "editorialRole": "receipt",
+      "treatment": {
+        "playback": [
+          {
+            "in": 0,
+            "out": 21.42,
+            "speed": 1
+          }
+        ],
+        "holds": [],
+        "cropPan": "Full official frame",
+        "color": "source natural",
+        "graphics": [
+          "labeled-version only: speaker identification"
+        ],
+        "captions": [],
+        "transitionOut": "cut"
+      }
+    },
+    {
+      "id": "B20-OUTRO",
+      "start": 442.54,
+      "duration": 39.44999999999999,
+      "editorialRole": "closing-proof",
+      "treatment": {
+        "playback": [],
+        "holds": [],
+        "cropPan": "Full source frames",
+        "color": "FTL premium grade",
+        "graphics": [
+          "labeled-version only: Player of the Game closing card"
+        ],
+        "captions": [],
+        "transitionOut": "fade"
+      }
     }
   ]
 }
